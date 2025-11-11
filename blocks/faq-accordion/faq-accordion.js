@@ -1,5 +1,26 @@
 import { moveInstrumentation } from '../../scripts/scripts.js';
 
+function createFaqAccordionItem(item) {
+  const faqAccordionItem = document.createElement('div');
+  faqAccordionItem.classList.add('faq-accordion-item');
+  moveInstrumentation(item, faqAccordionItem);
+  return faqAccordionItem;
+}
+
+function createQuestion(item) {
+  const question = document.createElement('div');
+  question.classList.add('faq-accordion-label');
+  moveInstrumentation(item.children[0], question);
+  return question;
+}
+
+function createAnswer(item) {
+  const answer = document.createElement('div');
+  answer.classList.add('faq-accordion-body');
+  moveInstrumentation(item.children[1], answer);
+  return answer;
+}
+
 export default function decorate(block) {
   block.id = 'faqs';
 
@@ -12,23 +33,13 @@ export default function decorate(block) {
 
   const visibleCount = 3;
 
-  items.forEach((item, index) => {
-    moveInstrumentation(item, item);
-    item.classList.add('faq-accordion-item');
-
-    const question = item.children[0];
-    const answer = item.children[1];
-
-    question.classList.add('faq-accordion-label');
-    answer.classList.add('faq-accordion-body');
-
-    // Hide content by default
-    answer.style.maxHeight = '0px';
-    answer.style.overflow = 'hidden';
-
-    if (index < visibleCount) item.classList.add('visible');
-
-    block.appendChild(item);
+  items.forEach((item) => {
+    const faqAccordionItem = createFaqAccordionItem(item);
+    const question = createQuestion(item);
+    const answer = createAnswer(item);
+    faqAccordionItem.appendChild(question);
+    faqAccordionItem.appendChild(answer);
+    block.appendChild(faqAccordionItem);
   });
 
   // Add toggle button
