@@ -48,6 +48,18 @@
       "title": "FAQ Accordion Item",
       "fields": [
         {
+          "component": "richtext",
+          "valueType": "string",
+          "name": "col_head",
+          "label": "Accordion Head"
+        },
+        {
+          "component": "richtext",
+          "valueType": "string",
+          "name": "col1_body",
+          "label": "Accordion Body"
+        },
+        {
           "component": "multiselect",
           "name": "style",
           "label": "Styles",
