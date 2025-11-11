@@ -1,4 +1,4 @@
-import '../accordion/accordion.js';
+import { moveInstrumentation } from '../../scripts/scripts.js';
 
 export default function decorate(block) {
   block.id = 'faqs';
@@ -13,6 +13,7 @@ export default function decorate(block) {
   const visibleCount = 3;
 
   items.forEach((item, index) => {
+    moveInstrumentation(item, item);
     item.classList.add('faq-accordion-item');
 
     const question = item.children[0];
