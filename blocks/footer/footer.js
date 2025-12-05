@@ -16,7 +16,7 @@ export default async function decorate(block) {
   while (fragment.firstElementChild) footer.append(fragment.firstElementChild);
 
   block.append(footer);
-
+/*
   const details = block.querySelectorAll('footer .section.accordion-container:first-of-type details');
   if (window.innerWidth > 768) {
     details.forEach((detail) => {
@@ -24,3 +24,4 @@ export default async function decorate(block) {
     });
   }
 }
+*/
