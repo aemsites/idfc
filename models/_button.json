@@ -22,17 +22,20 @@
         {
           "component": "aem-content",
           "name": "link",
-          "label": "Link"
+          "label": "Button Link",
+          "description": "The URL the button links to"
         },
         {
           "component": "text",
           "name": "linkText",
-          "label": "Text"
+          "label": "Button Text",
+          "description": "The text displayed on the button"
         },
         {
           "component": "text",
           "name": "linkTitle",
-          "label": "Title"
+          "label": "Alt Text / Title",
+          "description": "Accessibility text shown on hover"
         },
         {
           "component": "select",
@@ -50,6 +53,50 @@
             {
               "name": "secondary",
               "value": "secondary"
+            }
+          ]
+        },
+        {
+          "component": "select",
+          "name": "classes",
+          "label": "Button Color",
+          "description": "Select button color (Primary buttons only)",
+          "condition": {
+            "==": [
+              {
+                "var": "linkType"
+              },
+              "primary"
+            ]
+          },
+          "options": [
+            {
+              "name": "None",
+              "value": ""
+            },
+            {
+              "name": "Red (Brand)",
+              "value": "btn-red"
+            },
+            {
+              "name": "Blue",
+              "value": "btn-blue"
+            },
+            {
+              "name": "Slate",
+              "value": "btn-slate"
+            },
+            {
+              "name": "Dark Maroon",
+              "value": "btn-dark-maroon"
+            },
+            {
+              "name": "Black",
+              "value": "btn-black"
+            },
+            {
+              "name": "White (Outline)",
+              "value": "btn-white"
             }
           ]
         }

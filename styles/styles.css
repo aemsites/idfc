@@ -292,6 +292,142 @@ button.secondary {
   color: var(--text-color);
 }
 
+/* ============================================
+   IDFC PRIMARY BUTTON COLOR VARIANTS
+   ============================================
+   Classes: btn-red, btn-blue, btn-slate, btn-dark-maroon, btn-black, btn-white
+   Usage: <a class="button primary btn-red">Apply Now</a>
+   ============================================ */
+
+/* Base styles for all primary color buttons */
+a.button.primary.btn-red,
+a.button.primary.btn-blue,
+a.button.primary.btn-slate,
+a.button.primary.btn-dark-maroon,
+a.button.primary.btn-black,
+a.button.primary.btn-white {
+  box-sizing: border-box;
+  display: inline-block;
+  max-width: 100%;
+  margin: 12px 0;
+  border-radius: 2.4em;
+  padding: 14px 32px;
+  font-family: var(--body-font-family);
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.25;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: all 0.25s ease;
+}
+
+/* Red Button (Brand) - #9B1E26 */
+a.button.primary.btn-red {
+  background-color: #9b1e26;
+  color: #fff;
+  border: 2px solid #9b1e26;
+  box-shadow: inset 0 0 0 3px #9b1e26, inset 0 0 0 5px #fff;
+}
+
+a.button.primary.btn-red:hover,
+a.button.primary.btn-red:focus {
+  background-color: #fff;
+  color: #9b1e26;
+  border: 2px solid #9b1e26;
+  box-shadow: none;
+  text-decoration: none;
+}
+
+/* Blue Button - #2E7AB8 */
+a.button.primary.btn-blue {
+  background-color: #2e7ab8;
+  color: #fff;
+  border: 2px solid #2e7ab8;
+  box-shadow: inset 0 0 0 3px #2e7ab8, inset 0 0 0 5px #fff;
+}
+
+a.button.primary.btn-blue:hover,
+a.button.primary.btn-blue:focus {
+  background-color: #fff;
+  color: #2e7ab8;
+  border: 2px solid #2e7ab8;
+  box-shadow: none;
+  text-decoration: none;
+}
+
+/* Slate Button - #4A5568 */
+a.button.primary.btn-slate {
+  background-color: #4a5568;
+  color: #fff;
+  border: 2px solid #4a5568;
+  box-shadow: inset 0 0 0 3px #4a5568, inset 0 0 0 5px #fff;
+}
+
+a.button.primary.btn-slate:hover,
+a.button.primary.btn-slate:focus {
+  background-color: #fff;
+  color: #4a5568;
+  border: 2px solid #4a5568;
+  box-shadow: none;
+  text-decoration: none;
+}
+
+/* Dark Maroon Button - #3D1A1F */
+a.button.primary.btn-dark-maroon {
+  background-color: #3d1a1f;
+  color: #fff;
+  border: 2px solid #3d1a1f;
+  box-shadow: inset 0 0 0 3px #3d1a1f, inset 0 0 0 5px #fff;
+}
+
+a.button.primary.btn-dark-maroon:hover,
+a.button.primary.btn-dark-maroon:focus {
+  background-color: #fff;
+  color: #3d1a1f;
+  border: 2px solid #3d1a1f;
+  box-shadow: none;
+  text-decoration: none;
+}
+
+/* Black Button - #000 */
+a.button.primary.btn-black {
+  background-color: #000;
+  color: #fff;
+  border: 2px solid #000;
+  box-shadow: inset 0 0 0 3px #000, inset 0 0 0 5px #fff;
+}
+
+a.button.primary.btn-black:hover,
+a.button.primary.btn-black:focus {
+  background-color: #fff;
+  color: #000;
+  border: 2px solid #000;
+  box-shadow: none;
+  text-decoration: none;
+}
+
+/* White Button (outline - swaps to red on hover) */
+a.button.primary.btn-white {
+  background-color: #fff;
+  color: #9b1e26;
+  border: 2px solid #9b1e26;
+  box-shadow: none;
+}
+
+a.button.primary.btn-white:hover,
+a.button.primary.btn-white:focus {
+  background-color: #9b1e26;
+  color: #fff;
+  border: 2px solid #9b1e26;
+  box-shadow: inset 0 0 0 3px #9b1e26, inset 0 0 0 5px #fff;
+  text-decoration: none;
+}
+
 /* button groups - wraps text (typically superscript) and button together for responsive layouts */
 .button-group {
   display: flex;

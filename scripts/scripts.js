@@ -409,6 +409,57 @@ function decorateButtonGroups(element) {
 }
 
 /**
+ * Decorates primary buttons with color classes.
+ * Handles color classes: btn-red, btn-blue, btn-slate, btn-dark-maroon, btn-black, btn-white
+ * @param {Element} element container element
+ */
+function decorateButtonColors(element) {
+  const colorClasses = [
+    'btn-red',
+    'btn-blue',
+    'btn-slate',
+    'btn-dark-maroon',
+    'btn-black',
+    'btn-white',
+  ];
+
+  element.querySelectorAll('a.button.primary').forEach((button) => {
+    // Check if button already has a color class
+    const hasColorClass = colorClasses.some((c) => button.classList.contains(c));
+    if (hasColorClass) return;
+
+    // Check for color class in data attribute
+    const buttonColor = button.dataset.buttonColor || button.getAttribute('data-button-color');
+    if (buttonColor && colorClasses.includes(buttonColor)) {
+      button.classList.add(buttonColor);
+      return;
+    }
+
+    // Check for color class on parent container
+    const container = button.closest('.button-container');
+    if (container) {
+      colorClasses.forEach((colorClass) => {
+        if (container.classList.contains(colorClass)) {
+          button.classList.add(colorClass);
+          container.classList.remove(colorClass);
+        }
+      });
+    }
+
+    // Check for color class on parent's parent (for Universal Editor patterns)
+    const wrapper = container?.parentElement;
+    if (wrapper) {
+      colorClasses.forEach((colorClass) => {
+        if (wrapper.classList.contains(colorClass)) {
+          button.classList.add(colorClass);
+          wrapper.classList.remove(colorClass);
+        }
+      });
+    }
+  });
+}
+
+/**
  * Check if we're viewing a framework page (either in Universal Editor or directly)
  * Framework pages are template/fragment pages and should display their raw content
  * @returns {boolean} True if viewing a framework page
@@ -883,6 +934,7 @@ export function decorateMain(main) {
   // hopefully forward compatible button decoration
   decorateButtons(main);
   decorateButtonGroups(main);
+  decorateButtonColors(main);
   decorateIcons(main);
   buildAutoBlocks(main);
   decorateSections(main);
