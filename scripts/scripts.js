@@ -411,6 +411,11 @@ function decorateButtonGroups(element) {
 /**
  * Decorates primary buttons with color classes.
  * Handles color classes: btn-red, btn-blue, btn-slate, btn-dark-maroon, btn-black, btn-white
+ *
+ * This function works with the Universal Editor button model that includes a
+ * conditional "classes" field that appears when linkType is "primary".
+ * The classes field value is applied to the button's container or wrapper.
+ *
  * @param {Element} element container element
  */
 function decorateButtonColors(element) {
@@ -428,16 +433,26 @@ function decorateButtonColors(element) {
     const hasColorClass = colorClasses.some((c) => button.classList.contains(c));
     if (hasColorClass) return;
 
-    // Check for color class in data attribute
-    const buttonColor = button.dataset.buttonColor || button.getAttribute('data-button-color');
+    // Check for color class in data attribute on button itself
+    const buttonColor = button.dataset.buttonColor
+      || button.getAttribute('data-button-color')
+      || button.dataset.classes;
     if (buttonColor && colorClasses.includes(buttonColor)) {
       button.classList.add(buttonColor);
       return;
     }
 
-    // Check for color class on parent container
+    // Check for color class on parent container (p.button-container)
     const container = button.closest('.button-container');
     if (container) {
+      // Check container's data-classes attribute (Universal Editor pattern)
+      const containerClasses = container.dataset.classes;
+      if (containerClasses && colorClasses.includes(containerClasses)) {
+        button.classList.add(containerClasses);
+        return;
+      }
+
+      // Check container's classList
       colorClasses.forEach((colorClass) => {
         if (container.classList.contains(colorClass)) {
           button.classList.add(colorClass);
@@ -446,13 +461,32 @@ function decorateButtonColors(element) {
       });
     }
 
-    // Check for color class on parent's parent (for Universal Editor patterns)
+    // Check for color class on parent's parent (for Universal Editor wrapper patterns)
     const wrapper = container?.parentElement;
     if (wrapper) {
+      // Check wrapper's data-classes attribute
+      const wrapperClasses = wrapper.dataset.classes;
+      if (wrapperClasses && colorClasses.includes(wrapperClasses)) {
+        button.classList.add(wrapperClasses);
+        return;
+      }
+
+      // Check wrapper's classList
       colorClasses.forEach((colorClass) => {
         if (wrapper.classList.contains(colorClass)) {
           button.classList.add(colorClass);
           wrapper.classList.remove(colorClass);
+        }
+      });
+    }
+
+    // Check for block-level color class (for button blocks)
+    const blockWrapper = button.closest('.block');
+    if (blockWrapper) {
+      colorClasses.forEach((colorClass) => {
+        if (blockWrapper.classList.contains(colorClass)) {
+          button.classList.add(colorClass);
+          blockWrapper.classList.remove(colorClass);
         }
       });
     }
