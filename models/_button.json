@@ -79,6 +79,10 @@
               "value": "btn-red"
             },
             {
+              "name": "Transparent",
+              "value": "btn-transparent"
+            },
+            {
               "name": "Blue",
               "value": "btn-blue"
             },
@@ -97,10 +101,6 @@
             {
               "name": "White (Outline)",
               "value": "btn-white"
-            },
-            {
-              "name": "Transparent (Outline)",
-              "value": "btn-transparent"
             }
           ]
         }

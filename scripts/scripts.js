@@ -421,12 +421,12 @@ function decorateButtonGroups(element) {
 function decorateButtonColors(element) {
   const colorClasses = [
     'btn-red',
+    'btn-transparent',
     'btn-blue',
     'btn-slate',
     'btn-dark-maroon',
     'btn-black',
     'btn-white',
-    'btn-transparent',
   ];
 
   element.querySelectorAll('a.button.primary').forEach((button) => {
