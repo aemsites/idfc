@@ -178,6 +178,10 @@
           {
             "name": "White (Outline)",
             "value": "btn-white"
+          },
+          {
+            "name": "Transparent (Outline)",
+            "value": "btn-transparent"
           }
         ]
       }

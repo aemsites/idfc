@@ -426,6 +426,7 @@ function decorateButtonColors(element) {
     'btn-dark-maroon',
     'btn-black',
     'btn-white',
+    'btn-transparent',
   ];
 
   element.querySelectorAll('a.button.primary').forEach((button) => {

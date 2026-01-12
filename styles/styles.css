@@ -320,7 +320,8 @@ a.button.primary.btn-blue,
 a.button.primary.btn-slate,
 a.button.primary.btn-dark-maroon,
 a.button.primary.btn-black,
-a.button.primary.btn-white {
+a.button.primary.btn-white,
+a.button.primary.btn-transparent {
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
@@ -443,6 +444,23 @@ a.button.primary.btn-white:focus {
   color: #fff;
   border: 2px solid var(--btn-red);
   box-shadow: inset 0 0 0 3px var(--btn-red), inset 0 0 0 5px #fff;
+  text-decoration: none;
+}
+
+/* Transparent Button (outline - for use on dark backgrounds) */
+a.button.primary.btn-transparent {
+  background-color: transparent;
+  color: #fff;
+  border: 2px solid #fff;
+  box-shadow: inset 0 0 0 3px transparent, inset 0 0 0 5px #fff;
+}
+
+a.button.primary.btn-transparent:hover,
+a.button.primary.btn-transparent:focus {
+  background-color: #fff;
+  color: var(--btn-red);
+  border: 2px solid #fff;
+  box-shadow: none;
   text-decoration: none;
 }
 
