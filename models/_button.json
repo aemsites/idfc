@@ -83,22 +83,6 @@
               "value": "btn-transparent"
             },
             {
-              "name": "Blue",
-              "value": "btn-blue"
-            },
-            {
-              "name": "Slate",
-              "value": "btn-slate"
-            },
-            {
-              "name": "Dark Maroon",
-              "value": "btn-dark-maroon"
-            },
-            {
-              "name": "Black",
-              "value": "btn-black"
-            },
-            {
               "name": "White (Outline)",
               "value": "btn-white"
             }

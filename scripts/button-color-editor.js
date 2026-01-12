@@ -13,10 +13,6 @@ const BUTTON_COLOR_OPTIONS = [
   { name: 'None', value: '' },
   { name: 'Red (Brand)', value: 'btn-red' },
   { name: 'Transparent', value: 'btn-transparent' },
-  { name: 'Blue', value: 'btn-blue' },
-  { name: 'Slate', value: 'btn-slate' },
-  { name: 'Dark Maroon', value: 'btn-dark-maroon' },
-  { name: 'Black', value: 'btn-black' },
   { name: 'White (Outline)', value: 'btn-white' },
 ];
 
@@ -131,12 +127,11 @@ function shouldShowColorOptions(propertiesPanel) {
 
   // Check for the linkType dropdown with "primary" selected
   const typeDropdowns = propertiesPanel.querySelectorAll('select');
-  for (const dropdown of typeDropdowns) {
+  const hasPrimarySelected = Array.from(typeDropdowns).some((dropdown) => {
     const selectedOption = dropdown.options[dropdown.selectedIndex];
-    if (selectedOption && selectedOption.value === 'primary') {
-      return true;
-    }
-  }
+    return selectedOption && selectedOption.value === 'primary';
+  });
+  if (hasPrimarySelected) return true;
 
   // Also check for existing primary class on the button
   const button = findSelectedButton();
