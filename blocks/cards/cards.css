@@ -1252,6 +1252,38 @@
 
 
 /* === SWIPER INTEGRATION STYLES === */
+
+/* PRE-SWIPER INITIALIZATION: Style swipable cards as horizontal row BEFORE Swiper loads
+   This prevents the vertical-to-horizontal layout shift (CLS) */
+.cards[data-swipable="true"]:not(.swiper) {
+  overflow: hidden;
+}
+
+.cards[data-swipable="true"]:not(.swiper) > ul {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  gap: 16px;
+}
+
+.cards[data-swipable="true"]:not(.swiper) > ul > li {
+  flex: 0 0 auto;
+  width: calc(100% - 50px); /* Mobile: almost full width with peek */
+}
+
+@media (width >= 600px) {
+  .cards[data-swipable="true"]:not(.swiper) > ul > li {
+    width: calc(50% - 20px); /* Tablet: 2 cards visible */
+  }
+}
+
+@media (width >= 900px) {
+  .cards[data-swipable="true"]:not(.swiper) > ul > li {
+    width: calc(33.333% - 24px); /* Desktop: 3 cards visible */
+  }
+}
+
+/* POST-SWIPER INITIALIZATION */
 .cards.swiper {
   width: 100%;
   height: auto;
@@ -1492,6 +1524,30 @@
   border-radius: 50%;
 }
 
+/* Pre-swiper state for all-about-card */
+.cards.all-about-card[data-swipable="true"]:not(.swiper) {
+  width: 100%;
+  max-width: 1005px;
+  padding-top: 50px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.cards.all-about-card[data-swipable="true"]:not(.swiper) > ul > li {
+  width: 280px; /* Match swiper slide width */
+  height: 400px;
+  min-height: 400px;
+}
+
+@media (width >= 900px) {
+  .cards.all-about-card[data-swipable="true"]:not(.swiper) > ul > li {
+    width: 311px; /* Desktop slide width */
+    height: 462px;
+    min-height: 462px;
+  }
+}
+
+/* Post-swiper state for all-about-card */
 .cards.all-about-card.swiper {
   width: 100%;
   max-width: 1005px;
