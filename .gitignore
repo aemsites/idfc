@@ -9,3 +9,5 @@ helix-importer-ui
 .idea
 .vscode
 .cursor
+Trace*.json
+*.json
