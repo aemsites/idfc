@@ -2,9 +2,27 @@
 
 /* BASE STYLING (mobile first) */
 
-/* Prevent CLS by containing layout shifts within the cards block */
+/* Prevent CLS by containing layout shifts within cards blocks and their containers */
+.section:has(.cards) {
+  contain: layout style;
+}
+
 .cards {
   contain: layout style;
+}
+
+/* Hide cards until fully decorated to prevent visible layout shifts */
+.cards:not([data-block-status="loaded"]) {
+  visibility: hidden;
+}
+
+/* Reserve space for card sections before content loads */
+.section:has(.cards.all-about-card) {
+  min-height: 550px;
+}
+
+.section:has(.cards.testimonial-card) {
+  min-height: 400px;
 }
 
 .cards > ul {
@@ -1483,7 +1501,7 @@
 }
 
 .cards.all-about-card .swiper-slide {
-  height: auto;
+  height: 400px; /* Fixed height prevents CLS during swiper init */
   min-height: 400px;
   display: flex;
 }
