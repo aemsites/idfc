@@ -1,12 +1,8 @@
 /* Mobile-first base styles */
 
-/* Prevent CLS: contain layout and hide until decorated */
+/* Prevent CLS: contain layout to isolate shifts */
 .hero-container {
   contain: layout style;
-}
-
-.hero:not([data-block-status="loaded"]) {
-  visibility: hidden;
 }
 
 .hero-container .hero-wrapper {
