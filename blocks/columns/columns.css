@@ -1,3 +1,12 @@
+/* Prevent CLS by containing layout shifts */
+.columns-container {
+  contain: layout style;
+}
+
+.columns {
+  contain: layout style;
+}
+
 .columns > div {
   display: flex;
   flex-direction: column;
