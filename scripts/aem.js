@@ -293,6 +293,8 @@ function getMetadata(name, doc = document) {
  * @param {string} [alt] The image alternative text
  * @param {boolean} [eager] Set loading attribute to eager
  * @param {Array} [breakpoints] Breakpoints and corresponding params (eg. width)
+ * @param {number} [imgWidth] Original image width for CLS prevention
+ * @param {number} [imgHeight] Original image height for CLS prevention
  * @returns {Element} The picture element
  */
 function createOptimizedPicture(
@@ -300,6 +302,8 @@ function createOptimizedPicture(
   alt = '',
   eager = false,
   breakpoints = [{ media: '(min-width: 600px)', width: '2000' }, { width: '750' }],
+  imgWidth = null,
+  imgHeight = null,
 ) {
   const url = new URL(src, window.location.href);
   const picture = document.createElement('picture');
@@ -326,6 +330,11 @@ function createOptimizedPicture(
       const img = document.createElement('img');
       img.setAttribute('loading', eager ? 'eager' : 'lazy');
       img.setAttribute('alt', alt);
+      // Set width/height attributes to prevent CLS (Cumulative Layout Shift)
+      if (imgWidth && imgHeight) {
+        img.setAttribute('width', imgWidth);
+        img.setAttribute('height', imgHeight);
+      }
       picture.appendChild(img);
       img.setAttribute('src', `${pathname}?width=${br.width}&format=${ext}&optimize=medium`);
     }

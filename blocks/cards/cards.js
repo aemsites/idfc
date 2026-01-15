@@ -721,9 +721,18 @@ export default async function decorate(block) {
     });
   }
 
-  // Replace images with optimized pictures
+  // Replace images with optimized pictures (preserve dimensions for CLS)
   ul.querySelectorAll('picture > img').forEach((img) => {
-    const optimizedPic = createOptimizedPicture(img.src, img.alt, false, [{ width: '750' }]);
+    const imgWidth = img.getAttribute('width') || img.naturalWidth || null;
+    const imgHeight = img.getAttribute('height') || img.naturalHeight || null;
+    const optimizedPic = createOptimizedPicture(
+      img.src,
+      img.alt,
+      false,
+      [{ width: '750' }],
+      imgWidth,
+      imgHeight,
+    );
     moveInstrumentation(img, optimizedPic.querySelector('img'));
     img.closest('picture').replaceWith(optimizedPic);
   });

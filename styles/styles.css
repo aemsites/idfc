@@ -145,6 +145,18 @@ body.appear {
   display: block;
 }
 
+/* Global image styles for CLS prevention */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/*
+ * Images with width/height attributes will naturally maintain aspect ratio
+ * because browsers use these attributes to calculate intrinsic size.
+ * This ensures the browser reserves the correct space before the image loads.
+ */
+
 header {
   height: var(--nav-height);
 }
