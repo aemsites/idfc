@@ -579,14 +579,6 @@ main>.section:first-of-type {
   contain: layout style; /* Prevent CLS from propagating between sections */
 }
 
-/* Desktop-only: Use content-visibility for off-screen sections (causes mobile CLS issues) */
-@media (width >= 900px) {
-  .section {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 500px;
-  }
-}
-
   > .default-content {
     max-width: var(--grid-container-width);
     margin: 0 auto;

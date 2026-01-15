@@ -30,9 +30,26 @@
   min-height: 600px;
 }
 
-/* Generic cards section fallback */
+/* Generic cards section fallback - larger height for desktop */
 .section.cards-container {
+  min-height: 500px;
+}
+
+@media (width >= 900px) {
+  .section.cards-container {
+    min-height: 650px;
+  }
+}
+
+/* Pre-style cards-wrapper to prevent shift during decoration */
+.cards-wrapper {
   min-height: 400px;
+}
+
+@media (width >= 900px) {
+  .cards-wrapper {
+    min-height: 550px;
+  }
 }
 
 .cards > ul {
@@ -1311,11 +1328,14 @@
   display: flex;
   align-items: stretch;
   cursor: grab;
+  overflow: hidden; /* Prevent horizontal overflow before swiper init */
 }
 
 .cards .swiper-slide {
   height: auto;
   display: flex;
+  flex-shrink: 0; /* Prevent slides from collapsing before swiper init */
+  min-width: 280px; /* Reserve space for each slide */
 }
 
 .cards .swiper-slide .benefit-cards {
