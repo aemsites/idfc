@@ -577,8 +577,15 @@ main>.section:first-of-type {
   padding: var(--top-bottom-spacing) 0;
   display: block;
   contain: layout style; /* Prevent CLS from propagating between sections */
-  content-visibility: auto; /* Allow browser to skip rendering off-screen sections */
-  contain-intrinsic-size: auto 500px; /* Reserve approx height for off-screen sections */
+}
+
+/* Desktop-only: Use content-visibility for off-screen sections (causes mobile CLS issues) */
+@media (width >= 900px) {
+  .section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px;
+  }
+}
 
   > .default-content {
     max-width: var(--grid-container-width);
