@@ -576,6 +576,7 @@ main>.section:first-of-type {
 
   padding: var(--top-bottom-spacing) 0;
   display: block;
+  contain: layout style; /* Prevent CLS from propagating between sections */
 
   > .default-content {
     max-width: var(--grid-container-width);

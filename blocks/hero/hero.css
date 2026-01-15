@@ -1,4 +1,14 @@
 /* Mobile-first base styles */
+
+/* Prevent CLS: contain layout and hide until decorated */
+.hero-container {
+  contain: layout style;
+}
+
+.hero:not([data-block-status="loaded"]) {
+  visibility: hidden;
+}
+
 .hero-container .hero-wrapper {
   max-width: unset;
   padding: 0;
@@ -12,6 +22,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  contain: layout style; /* Isolate layout shifts */
 }
 
 .hero > div {
