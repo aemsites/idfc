@@ -1,6 +1,12 @@
 /* stylelint-disable no-descending-specificity */
 
 /* BASE STYLING (mobile first) */
+
+/* Prevent CLS by containing layout shifts within the cards block */
+.cards {
+  contain: layout style;
+}
+
 .cards > ul {
   list-style: none;
   margin: 0;
@@ -54,6 +60,7 @@
 .cards .benefit-cards .cards-card-image img {
   width: 120px;
   height: auto;
+  aspect-ratio: 1 / 1; /* Prevent CLS by reserving space before image loads */
   vertical-align: middle;
   border-radius: 4px;
   object-fit: cover;
@@ -1532,6 +1539,7 @@
   max-width: 280px;
   height: auto;
   max-height: 350px;
+  aspect-ratio: 1 / 1; /* Prevent CLS by reserving space before image loads */
   border-radius: 12px;
   object-fit: contain;
   position: relative;

@@ -722,9 +722,10 @@ export default async function decorate(block) {
   }
 
   // Replace images with optimized pictures (preserve dimensions for CLS)
+  // Default to 750x750 (square) if no dimensions available - matches our aspect-ratio CSS
   ul.querySelectorAll('picture > img').forEach((img) => {
-    const imgWidth = img.getAttribute('width') || img.naturalWidth || null;
-    const imgHeight = img.getAttribute('height') || img.naturalHeight || null;
+    const imgWidth = img.getAttribute('width') || img.naturalWidth || 750;
+    const imgHeight = img.getAttribute('height') || img.naturalHeight || 750;
     const optimizedPic = createOptimizedPicture(
       img.src,
       img.alt,
