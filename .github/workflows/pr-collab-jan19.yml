@@ -1,5 +1,5 @@
 
-name: PR Collaboration Snapshot (Phase B - Safe)
+name: PR Collaboration Snapshot (Phase C)
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
   pull-requests: read
 
 jobs:
-  pr_collab_phase_b:
+  pr_collab_phase_c:
     runs-on: ubuntu-latest
 
     steps:
@@ -34,7 +34,7 @@ jobs:
           echo "PRs detected:"
           cat pr_numbers.txt
 
-      - name: Generate raw analytics files
+      - name: Generate raw analytics (metrics.csv, reviews.tsv, review_code_comments.tsv)
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -46,22 +46,20 @@ jobs:
           while read -r PR; do
             [ -z "$PR" ] && continue
 
-            # PR core metadata
             PR_JSON=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
               "https://api.github.com/repos/aemsites/idfc/pulls/${PR}")
 
             CREATED=$(echo "$PR_JSON" | jq -r '.created_at')
             MERGED_AT=$(echo "$PR_JSON" | jq -r '.merged_at')
-
             echo "${PR},${CREATED},${MERGED_AT}" >> metrics.csv
 
-            # Review events (state + submitted_at)
+            # Review events
             curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
               "https://api.github.com/repos/aemsites/idfc/pulls/${PR}/reviews" \
               | jq -r --arg pr "$PR" '.[] | [$pr, .user.login, .state, .submitted_at] | @tsv' \
               >> reviews.tsv
 
-            # Inline code review comments (diff comments)
+            # Inline code review comments
             curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
               "https://api.github.com/repos/aemsites/idfc/pulls/${PR}/comments" \
               | jq -r --arg pr "$PR" '.[] | [$pr, .user.login, .id, .created_at] | @tsv' \
@@ -69,16 +67,16 @@ jobs:
 
           done < pr_numbers.txt
 
-          echo "Generated files:"
-          ls -l metrics.csv reviews.tsv review_code_comments.tsv
+      - name: Build reviewer-load table
+        shell: bash
+        run: |
+          echo "reviewer,prs_reviewed,total_reviews,approvals,changes_requested,comments,other,code_review_comments" \
+            > reviewer_load.csv
 
-      - name: Upload phase B raw data
-        uses: actions/upload-artifact@v4
-        with:
-          name: pr-phase-b-raw
-          path: |
-            prs.json
-            pr_numbers.txt
-            metrics.csv
-            reviews.tsv
-            review_code_comments.tsv
+          # PHASE C PART 1 — Aggregate review events
+          # Format: pr_number <tab> reviewer <tab> state <tab> submitted_at
+          declare -A TOTAL REV_APPR REV_CHG REV_COMM REV_OTHER
+          declare -A UNIQUE_PR
+
+          while IFS=$'\t' read -r pr reviewer state ts; do
+            [[ "$reviewer" == "reviewer" ]] && continue
