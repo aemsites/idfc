@@ -1,15 +1,45 @@
 
-name: Safe Test
+name: PR Collaboration Snapshot (Phase A)
 
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
-  test:
+  pr_collab_phase_a:
     runs-on: ubuntu-latest
     steps:
-      - name: Step 1
+      - name: Install jq
         shell: bash
         run: |
-          echo "This is a safe test workflow."
-          echo "If this runs, your YAML structure is fixed."
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Search PRs (Jan 1–19, 2026)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          QUERY="repo:aemsites/idfc is:pr created:2026-01-01..2026-01-19"
+          ENCODED=$(echo "$QUERY" | sed 's/ /+/g')
+
+          # Call GitHub Search API for PRs in that exact window (max 100 results per page).
+          curl -sS -H "Authorization: Bearer ${GH_TOKEN}" \
+               "https://api.github.com/search/issues?q=${ENCODED}&per_page=100" \
+            > prs.json
+
+          echo "PR numbers in window:"
+          jq -r '.items[].number' prs.json | tee pr_numbers.txt
+
+      - name: Upload Phase A artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-phase-a-results
+          path: |
+            prs.json
+            pr_numbers.txt
