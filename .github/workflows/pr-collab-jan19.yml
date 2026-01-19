@@ -1,5 +1,5 @@
 
-name: PR Collaboration Snapshot (Phase A)
+name: PR Collaboration Snapshot (Phase B)
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
   pull-requests: read
 
 jobs:
-  pr_collab_phase_a:
+  pr_collab_phase_b:
     runs-on: ubuntu-latest
     steps:
       - name: Install jq
@@ -28,7 +28,7 @@ jobs:
           QUERY="repo:aemsites/idfc is:pr created:2026-01-01..2026-01-19"
           ENCODED=$(echo "$QUERY" | sed 's/ /+/g')
 
-          # Call GitHub Search API for PRs in that exact window (max 100 results per page).
+          # Retrieve PRs created in the date window (max 100)
           curl -sS -H "Authorization: Bearer ${GH_TOKEN}" \
                "https://api.github.com/search/issues?q=${ENCODED}&per_page=100" \
             > prs.json
@@ -36,10 +36,96 @@ jobs:
           echo "PR numbers in window:"
           jq -r '.items[].number' prs.json | tee pr_numbers.txt
 
-      - name: Upload Phase A artifact
+      - name: Build raw analytics data (metrics.csv, reviews.tsv, review_code_comments.tsv)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Output files
+          echo "pr_number,created_at,merged_at,time_to_first_review_hours,time_to_merge_hours,reviewers_count,issue_comments_count" > metrics.csv
+          echo -e "pr_number\treviewer\tstate\tsubmitted_at" > reviews.tsv
+          echo -e "pr_number\treviewer\tcomment_id\tcreated_at" > review_code_comments.tsv
+
+          # Helper: compute (b - a) in hours via Python
+          to_hours () {
+            python3 - "$@" << 'PY'
+import sys, datetime
+fmt="%Y-%m-%dT%H:%M:%SZ"
+line=sys.stdin.read().strip()
+parts=line.split()
+if len(parts)!=2 or "null" in parts:
+    print("")
+else:
+    a,b=parts
+    ta=datetime.datetime.strptime(a,fmt)
+    tb=datetime.datetime.strptime(b,fmt)
+    print(round((tb-ta).total_seconds()/3600.0,2))
+PY
+          }
+
+          # Iterate PR numbers
+          while read -r PR; do
+            [ -z "$PR" ] && continue
+
+            # Pull Request details (created_at / merged_at)
+            PR_JSON=$(curl -sS -H "Authorization: Bearer ${GH_TOKEN}" \
+              "https://api.github.com/repos/aemsites/idfc/pulls/${PR}")
+
+            CREATED=$(echo "$PR_JSON" | jq -r '.created_at')
+            MERGED_AT=$(echo "$PR_JSON" | jq -r '.merged_at')
+
+            # Reviews (APPROVED / CHANGES_REQUESTED / COMMENTED)
+            REVIEWS=$(curl -sS -H "Authorization: Bearer ${GH_TOKEN}" \
+              "https://api.github.com/repos/aemsites/idfc/pulls/${PR}/reviews")
+
+            # First review time & unique reviewers
+            FIRST_REVIEW=$(echo "$REVIEWS" | jq -r '.[].submitted_at' | sort | head -n 1)
+            REVIEWERS=$(echo "$REVIEWS" | jq -r '.[].user.login' | sort -u | sed '/^$/d' | wc -l)
+
+            # Issue-level discussion comments (not code review comments)
+            ISSUE_COMMENTS=$(curl -sS -H "Authorization: Bearer ${GH_TOKEN}" \
+              "https://api.github.com/repos/aemsites/idfc/issues/${PR}/comments")
+            ISSUE_COMMENTS_COUNT=$(echo "$ISSUE_COMMENTS" | jq 'length')
+
+            # Inline code review comments on diffs
+            REVIEW_CODE_COMMENTS=$(curl -sS -H "Authorization: Bearer ${GH_TOKEN}" \
+              "https://api.github.com/repos/aemsites/idfc/pulls/${PR}/comments")
+
+            # Compute time deltas
+            TFFR=$( (echo "$CREATED"; echo "${FIRST_REVIEW:-null}") | paste -sd' ' - | to_hours )
+            TTM=$( (echo "$CREATED"; echo "${MERGED_AT:-null}") | paste -sd' ' - | to_hours )
+
+            # Per-PR metrics
+            echo "${PR},${CREATED},${MERGED_AT},${TFFR},${TTM},${REVIEWERS},${ISSUE_COMMENTS_COUNT}" >> metrics.csv
+
+            # Review events
+            echo "$REVIEWS" \
+              | jq -r --arg pr "$PR" '.[] | [$pr, .user.login, .state, .submitted_at] | @tsv' \
+              >> reviews.tsv
+
+            # Inline code review comments
+            echo "$REVIEW_CODE_COMMENTS" \
+              | jq -r --arg pr "$PR" '.[] | [$pr, .user.login, .id, .created_at] | @tsv' \
+              >> review_code_comments.tsv
+
+          done < pr_numbers.txt
+
+          echo "Preview metrics.csv:"
+          head -n 5 metrics.csv || true
+          echo "Preview reviews.tsv:"
+          head -n 10 reviews.tsv || true
+          echo "Preview review_code_comments.tsv:"
+          head -n 10 review_code_comments.tsv || true
+
+      - name: Upload Phase B artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pr-phase-a-results
+          name: pr-phase-b-raw
           path: |
             prs.json
             pr_numbers.txt
+            metrics.csv
+            reviews.tsv
+            review_code_comments.tsv
