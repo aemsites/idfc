@@ -1,5 +1,5 @@
 
-name: Test Workflow
+name: PR Collaboration Snapshot (Jan 1–19, 2026)
 
 on:
   workflow_dispatch:
@@ -9,20 +9,26 @@ permissions:
   pull-requests: read
 
 jobs:
-  test:
+  pr_collab_snapshot:
     runs-on: ubuntu-latest
+
     steps:
+
       - name: Install jq
         shell: bash
         run: |
           sudo apt-get update
           sudo apt-get install -y jq
 
-      - name: Fetch dummy data
+      - name: Search PRs
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Running simple API test..."
-          curl -s https://api.github.com > api.json
-          ls -l
+          QUERY="repo:aemsites/idfc is:pr created:2026-01-01..2026-01-19"
+          ENCODED=$(echo "$QUERY" | sed 's/ /+/g')
+          curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
+            "https://api.github.com/search/issues?q=${ENCODED}" \
+            > prs.json
+
+          jq '.items[].number' prs.json
