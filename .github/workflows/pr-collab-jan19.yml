@@ -1,126 +1,15 @@
 
-name: PR Collaboration Snapshot (Jan 1–19, 2026)
+name: Safe Test
 
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pull-requests: read
-
 jobs:
-  pr_collab_snapshot:
+  test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Install jq
+      - name: Step 1
         shell: bash
         run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
-
-      - name: Search PRs (Jan 1–19, 2026)
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          QUERY="repo:aemsites/idfc is:pr created:2026-01-01..2026-01-19"
-          ENCODED=$(echo "$QUERY" | sed 's/ /+/g')
-          curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
-            "https://api.github.com/search/issues?q=${ENCODED}&per_page=100" \
-            > prs.json
-
-          echo "Found PR numbers:"
-          jq -r '.items[].number' prs.json | tee pr_numbers.txt
-
-      - name: Build raw analytics data (metrics.csv, reviews.tsv, review_code_comments.tsv)
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Output files
-          echo "pr_number,created_at,merged_at,time_to_first_review_hours,time_to_merge_hours,reviewers_count,issue_comments_count" > metrics.csv
-          echo -e "pr_number\treviewer\tstate\tsubmitted_at" > reviews.tsv
-          echo -e "pr_number\treviewer\tcomment_id\tcreated_at" > review_code_comments.tsv
-
-          # Helper: compute (b - a) in hours using Python
-          to_hours () {
-            python3 - "$@" << 'PY'
-import sys, datetime
-fmt = "%Y-%m-%dT%H:%M:%SZ"
-data = sys.stdin.read().strip().split()
-if len(data) != 2 or "null" in data:
-    print("")
-else:
-    a, b = data
-    ta = datetime.datetime.strptime(a, fmt)
-    tb = datetime.datetime.strptime(b, fmt)
-    print(round((tb - ta).total_seconds() / 3600.0, 2))
-PY
-          }
-
-          # Iterate PRs
-          while read -r PR; do
-            if [ -z "$PR" ]; then continue; fi
-
-            # Pull request details
-            PR_JSON=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
-              "https://api.github.com/repos/aemsites/idfc/pulls/${PR}")
-
-            CREATED=$(echo "$PR_JSON"   | jq -r '.created_at')
-            MERGED_AT=$(echo "$PR_JSON" | jq -r '.merged_at')
-
-            # Reviews (events like APPROVED / CHANGES_REQUESTED / COMMENTED)
-            REVIEWS=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
-              "https://api.github.com/repos/aemsites/idfc/pulls/${PR}/reviews")
-
-            # First review timestamp (if any)
-            FIRST_REVIEW=$(echo "$REVIEWS" | jq -r '.[].submitted_at' | sort | head -n 1)
-            # Unique reviewers count
-            REVIEWERS=$(echo "$REVIEWS" | jq -r '.[].user.login' | sort -u | sed '/^$/d' | wc -l)
-
-            # Issue-level discussion comments on the PR
-            ISSUE_COMMENTS=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
-              "https://api.github.com/repos/aemsites/idfc/issues/${PR}/comments")
-            ISSUE_COMMENTS_COUNT=$(echo "$ISSUE_COMMENTS" | jq 'length')
-
-            # Inline code review comments (diff comments)
-            REVIEW_CODE_COMMENTS=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
-              "https://api.github.com/repos/aemsites/idfc/pulls/${PR}/comments")
-
-            # Compute times
-            TFFR=$( (echo "$CREATED"; echo "${FIRST_REVIEW:-null}") | paste -sd' ' - | to_hours )
-            TTM=$( (echo "$CREATED"; echo "${MERGED_AT:-null}") | paste -sd' ' - | to_hours )
-
-            # Append per-PR metrics row
-            echo "${PR},${CREATED},${MERGED_AT},${TFFR},${TTM},${REVIEWERS},${ISSUE_COMMENTS_COUNT}" >> metrics.csv
-
-            # Append review events
-            echo "$REVIEWS" \
-              | jq -r --arg pr "$PR" '.[] | [$pr, .user.login, .state, .submitted_at] | @tsv' \
-              >> reviews.tsv
-
-            # Append inline code-review comments
-            echo "$REVIEW_CODE_COMMENTS" \
-              | jq -r --arg pr "$PR" '.[] | [$pr, .user.login, .id, .created_at] | @tsv' \
-              >> review_code_comments.tsv
-
-          done < pr_numbers.txt
-
-          echo "— metrics.csv preview —"
-          head -n 5 metrics.csv || true
-          echo "— reviews.tsv preview —"
-          head -n 10 reviews.tsv || true
-          echo "— review_code_comments.tsv preview —"
-          head -n 10 review_code_comments.tsv || true
-
-      - name: Upload raw analytics artifact (Phase B)
-        uses: actions/upload-artifact@v4
-        with:
-          name: pr-collab-jan1-19-2026-raw
-          path: |
-            prs.json
-            pr_numbers.txt
-            metrics.csv
-            reviews.tsv
-            review_code_comments.tsv
+          echo "This is a safe test workflow."
+          echo "If this runs, your YAML structure is fixed."
