@@ -70,8 +70,10 @@ jobs:
       - name: Build reviewer-load table
         shell: bash
         run: |
-          echo "reviewer,prs_reviewed,total_reviews,approvals,changes_requested,comments,other,code_review_comments" \
-            > reviewer_load.csv
+          set -euo pipefail
+
+          # Write CSV header (no line continuation, no backslash)
+          echo "reviewer,prs_reviewed,total_reviews,approvals,changes_requested,comments,other,code_review_comments" > reviewer_load.csv
 
           # PHASE C PART 1 — Aggregate review events
           # Format: pr_number <tab> reviewer <tab> state <tab> submitted_at
@@ -80,3 +82,47 @@ jobs:
 
           while IFS=$'\t' read -r pr reviewer state ts; do
             [[ "$reviewer" == "reviewer" ]] && continue
+            [[ -z "$reviewer" ]] && continue
+
+            TOTAL["$reviewer"]=$(( ${TOTAL["$reviewer"]:-0} + 1 ))
+
+            case "$state" in
+              APPROVED)          REV_APPR["$reviewer"]=$(( ${REV_APPR["$reviewer"]:-0} + 1 )) ;;
+              CHANGES_REQUESTED) REV_CHG["$reviewer"]=$(( ${REV_CHG["$reviewer"]:-0} + 1 )) ;;
+              COMMENTED)         REV_COMM["$reviewer"]=$(( ${REV_COMM["$reviewer"]:-0} + 1 )) ;;
+              *)                 REV_OTHER["$reviewer"]=$(( ${REV_OTHER["$reviewer"]:-0} + 1 )) ;;
+            esac
+
+            UNIQUE_KEY="${reviewer}|${pr}"
+            if [[ -z "${UNIQUE_PR[$UNIQUE_KEY]+x}" ]]; then
+              UNIQUE_PR[$UNIQUE_KEY]=1
+            fi
+          done < reviews.tsv
+
+          # Count unique PRs per reviewer
+          declare -A PRS_REVIEWED
+          for key in "${!UNIQUE_PR[@]}"; do
+            reviewer="${key%%|*}"
+            PRS_REVIEWED["$reviewer"]=$(( ${PRS_REVIEWED["$reviewer"]:-0} + 1 ))
+          done
+
+          # PHASE C PART 2 — Aggregate inline diff comments
+          declare -A CODE_COMM
+          while IFS=$'\t' read -r pr reviewer cid created; do
+            [[ "$reviewer" == "reviewer" ]] && continue
+            [[ -z "$reviewer" ]] && continue
+            CODE_COMM["$reviewer"]=$(( ${CODE_COMM["$reviewer"]:-0} + 1 ))
+          done < review_code_comments.tsv
+
+          # PHASE C PART 3 — Write unified reviewer_load.csv
+          declare -A ALL_REVIEWERS
+          for r in "${!TOTAL[@]}"; do ALL_REVIEWERS["$r"]=1; done
+          for r in "${!CODE_COMM[@]}"; do ALL_REVIEWERS["$r"]=1; done
+
+          for r in "${!ALL_REVIEWERS[@]}"; do
+            echo "$r,$((${PRS_REVIEWED[$r]:-0})),$((${TOTAL[$r]:-0})),$((${REV_APPR[$r]:-0})),$((${REV_CHG[$r]:-0})),$((${REV_COMM[$r]:-0})),$((${REV_OTHER[$r]:-0})),$((${CODE_COMM[$r]:-0}))" \
+              >> reviewer_load.csv
+          done
+
+          echo "Preview reviewer_load.csv:"
+          head -n 10 reviewer_load.csv || true
