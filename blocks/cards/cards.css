@@ -108,6 +108,16 @@
   transform: translateY(0);
 }
 
+/* Ensure clickable benefit-cards have adequate touch target size */
+.cards .benefit-cards.card-clickable {
+  padding: 16px 12px;
+  min-height: 88px;
+}
+
+.cards .benefit-cards.card-clickable .cards-card-body {
+  padding: var(--spacing-xxs) 0;
+}
+
 /* Screen reader only - hide link text but keep accessible */
 .cards .sr-only {
   position: absolute;
