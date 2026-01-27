@@ -502,6 +502,19 @@
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
+/* Ensure clickable related-search cards have adequate touch target size */
+.cards.related-search li.card-clickable {
+  min-height: 96px;
+  height: auto;
+  padding: 20px 16px;
+}
+
+.cards.related-search li.card-clickable .cards-card-body {
+  padding-right: 48px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
 .cards.related-search li:hover {
   box-shadow: 0 4px 16px rgba(0 0 0 / 12%);
   transform: translateY(-2px);
@@ -1185,6 +1198,10 @@ main .cards.key-benefits li.benefit-cards {
 
   .cards.related-search li {
     margin-bottom: 0;
+  }
+
+  .cards.related-search li.card-clickable {
+    padding: 20px;
   }
 
   .cards.related-search li .cards-card-image {
@@ -1988,6 +2005,10 @@ main .cards.joining-perks .swiper-slide {
   .cards.related-search li {
     padding: 0 20px;
     margin-bottom: 0;
+  }
+
+  .cards.related-search li.card-clickable {
+    padding: 24px 20px;
   }
 
   .cards.related-search li .cards-card-image {
