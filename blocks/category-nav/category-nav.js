@@ -823,14 +823,20 @@ export default function decorate(block) {
 
         if (hasCardsBlock && !hasCategoryNav && hasIcon) {
           sectionsWithCardsData.push({ section, textElements });
-        }
-      });
 
-      // Move bell-outline section to bottom of main to prevent CLS
-      sectionsWithCardsData.forEach(({ section }) => {
-        if (section.id === 'bell-outline' || section.getAttribute('data-category-id')?.includes('bell')) {
-          if (main && section.parentElement === main) {
-            main.appendChild(section);
+          // Move bell notification sections to bottom immediately upon detection to prevent CLS
+          // Only move sections with EXACT bell icon names (bell or bell-outline)
+          // AND cards-container class for maximum safety
+          // This happens BEFORE processing, as early as possible in the execution
+          const iconElement = textElements.find((el) => el.querySelector('span.icon'))?.querySelector('span.icon');
+          const iconName = iconElement?.classList[1]?.replace('icon-', '') || '';
+          const isCardsContainer = section.classList.contains('cards-container');
+
+          // Only match exact bell icons: 'bell' or 'bell-outline' + must be cards-container
+          if ((iconName === 'bell' || iconName === 'bell-outline') && isCardsContainer) {
+            if (main && section.parentElement === main) {
+              main.appendChild(section);
+            }
           }
         }
       });
