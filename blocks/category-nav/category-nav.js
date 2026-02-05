@@ -825,6 +825,15 @@ export default function decorate(block) {
           sectionsWithCardsData.push({ section, textElements });
         }
       });
+
+      // Move bell-outline section to bottom of main to prevent CLS
+      sectionsWithCardsData.forEach(({ section }) => {
+        if (section.id === 'bell-outline' || section.getAttribute('data-category-id')?.includes('bell')) {
+          if (main && section.parentElement === main) {
+            main.appendChild(section);
+          }
+        }
+      });
     }
   }
 
