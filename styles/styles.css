@@ -1273,7 +1273,7 @@ The height and width are set to 200 assuming the doodles won't be larger. */
 }
 
 @media (width >= 990px) {
-    /* Desktop: no app banner, so header is nav-height only. Prevents awkward space on pages without category nav. */
+    /* Desktop: no app banner, so header is nav-height only. Prevents space on pages without category nav. */
     header {
       height: var(--nav-height);
     }
