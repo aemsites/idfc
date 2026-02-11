@@ -1273,13 +1273,17 @@ The height and width are set to 200 assuming the doodles won't be larger. */
 }
 
 @media (width >= 990px) {
+    /* Desktop: no app banner, so header is nav-height only. Prevents awkward space on pages without category nav. */
+    header {
+      height: var(--nav-height);
+    }
     /* Reserve space for category-nav BEFORE it loads to prevent CLS.
      The has-category-nav class is added by scripts.js based on page metadata.
      This runs BEFORE body.appear, ensuring correct header height from the start. */
-     body.has-category-nav header,
-     header:has(.category-nav-wrapper) {
-       height: calc(var(--category-nav-height) + var(--nav-height)); /* nav + category-nav = 80px + 64px = 144px */
-     }
+    body.has-category-nav header,
+    header:has(.category-nav-wrapper) {
+      height: calc(var(--category-nav-height) + var(--nav-height)); /* nav + category-nav = 80px + 64px = 144px */
+    }
   }
 
 @media (width >= 1200px) {
