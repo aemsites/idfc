@@ -635,9 +635,94 @@ Part 3 suggested tokens are re-categorized so that **within each category, every
 
 ---
 
+## Part 5: Part 4 groups with locations and line numbers
+
+Same groupings as Part 4 (Delta E ≤ 1), with an additional column listing **file path and line number** where each suggested token (or the hardcoded color it replaces) is used. Use this to find-and-replace when applying tokens.
+
+**Path convention:** `styles/styles.css` for global styles; `blocks/<block-name>/<file>.css` for block CSS.
+
+| Group | Canonical value | Suggested token (use one per group) | Values merged (ΔE ≤ 1) | Locations (file: line) |
+|-------|-----------------|-------------------------------------|-------------------------|-------------------------|
+| 1 | `#000000` | `--color-black-solid` | `#000000` | blocks/hotspot/hotspot.css:103 |
+| 2 | `#08133C` | `--color-blue-deep` | `#08133C` | blocks/tabs/tabs.css:22, 68; blocks/tabs-cc-concept/tabs-cc-concept.css:21 |
+| 3 | `#155724` | `--color-success-bg` | `#155724` | blocks/form/form.css:106 |
+| 4 | `#1A1A1A` | `--color-text-secondary` or `--color-gray-dark-900` | `#1A1A1A` | blocks/cards/cards.css:1555-1556; blocks/header/header.css:392 |
+| 5 | `#1A1A5E` | `--color-text-blue-dark` | `#1A1A5E` | blocks/hotspot/hotspot.css:72, 122, 224 |
+| 6 | `#1C1C1C` | `--color-black-soft` | `#1C1C1C` | blocks/cards/cards.css:93 |
+| 7 | `#2C2C2C` | `--color-gray-dark-800` | `#2C2C2C` | blocks/cards/cards.css:1555-1556 |
+| 8 | `#2E3E79` | `--color-blue-tabs` | `#2E3E79` | blocks/cards/cards.css:834; blocks/tabs/tabs.css:10, 40; blocks/tabs-cc-concept/tabs-cc-concept.css:9, 21; blocks/modal/modal.css:343 |
+| 9 | `#333333` | `--color-text-dark` or `--color-text-primary` | `#333333`, `#353535` | blocks/category-nav/category-nav.css:142, 261, 451; blocks/form/form.css:55, 160; blocks/header/header.css:253, 313, 353, 450, 540, 1219, 1227, 1512, 1519, 1868, 1926, 2499, 2508, 2541, 2481, 2542; blocks/header/nav-pane.css:22-23, 50-51, 954 |
+| 10 | `#3A3A3A` | `--color-text-quaternary` or `--color-text-muted` | `#3A3A3A`, `rgb(58 58 58)` | blocks/header/header.css:2484; blocks/category-nav/category-nav.css:267 |
+| 11 | `#3D3D3D` | `--color-gray-dark-400` | `#3D3D3D` | blocks/cards/cards.css:798 |
+| 12 | `#495057` | `--color-form-text` | `#495057` | blocks/form/form.css:68, 76 |
+| 13 | `#4A4A4A` | `--color-gray-dark-500` | `#4A4A4A` | blocks/cards/cards.css:798 |
+| 14 | `#525252` | `--color-gray-footer` | `#525252` | blocks/footer/footer.css:68, 75; blocks/header/nav-pane.css:104, 139 |
+| 15 | `#54565B` | `--color-gray-body` | `#54565B` | styles/styles.css:271; blocks/cards/cards.css:456; blocks/overview/overview.css:32; blocks/overview-rte/overview-rte.css:24; blocks/header/nav-pane.css:162, 170, 181, 432, 1111 |
+| 16 | `#555555` | `--color-gray-icon` | `#555` | blocks/hotspot/hotspot.css:134, 139 |
+| 17 | `#5A5A5A` | `--color-gray-dark-300` | `#5A5A5A` | blocks/cards/cards.css:798 |
+| 18 | `#666666` | `--color-gray-mid-dark` | `#666` | blocks/header/header.css:2216 |
+| 19 | `#686873` | `--color-text-tertiary` | `#686873` | blocks/header/header.css:527 |
+| 20 | `#6C757D` | `--color-form-muted` | `#6C757D` | blocks/form/form.css:82, 149, 178 |
+| 21 | `#721C24` | `--color-error-dark` | `#721C24` | blocks/form/form.css:112 |
+| 22 | `#767676` | `--color-gray-mid` or `--color-text-muted-alt` | `#767676`, `#787878` | styles/styles.css:1141; blocks/header/nav-pane.css:1111 |
+| 23 | `#7A151B` | `--color-red-hero` | `#7A151B` | blocks/cards/cards.css:1123 |
+| 24 | `#880E16` | `--color-red-border-dark` | `#880E16` | blocks/modal/modal.css:548 |
+| 25 | `#88807A` | `--color-pewter-muted` | `rgb(136 128 122)` | blocks/hero-heritage-cc/hero-heritage-cc.css:128 |
+| 26 | `#898989` | `--color-shadow-gray-full` | `rgb(137 137 137)` | blocks/cards/cards.css:104 |
+| 27 | `#8A1515` | `--color-red-slider` | `#8A1515` | blocks/cc-hero-slider/cc-hero-slider.css:124 |
+| 28 | `#902A2C` | `--color-red-500-alt` | `#902A2C` | blocks/anchor-nav/anchor-nav.css:145, 148, 165; blocks/header/header.css:759, 774, 781, 253, 2560, 2562, 2568, 2569 |
+| 29 | `#981A1D` | `--color-red-header` | `#981A1D` | blocks/header/header.css:1853 |
+| 30 | `#992222` | `--color-red-nav-fallback` | `#922` | blocks/category-nav/category-nav.css:620, 697 |
+| 31 | `#999999` | `--color-gray-silver-mid` | `#999` | blocks/cards/cards.css:675; blocks/tabs/tabs.css:85-86; blocks/header/header.css:2067, 2072 |
+| 32 | `#9D1D27` | `--color-red-footer-alt` | `#9D1D27` | blocks/footer/footer.css:333 |
+| 33 | `#ADB5BD` | `--color-input-border` | `#ADB5BD` | blocks/form/form.css:170 |
+| 34 | `#B31B1B` | `--color-red-focus` | `#B31B1B` | blocks/cards/cards.css:108, 145, 1316 |
+| 35 | `#B81619` | `--color-red-form-active` | `#B81619` | blocks/form/form.css:144-145 |
+| 36 | `#BC3B45` | `--color-footer-red` | `rgb(188, 59, 69)` | blocks/footer/footer.css:28, 38 |
+| 37 | `#BD3E46` | `--color-red-badge` | `#BD3E46` | blocks/header/header.css:2314, 2321 |
+| 38 | `#C1C1C1` | `--color-gray-divider` | `#C1C1C1` | blocks/modal/modal.css:736 |
+| 39 | `#C3E6CB` | `--color-success-border` | `#C3E6CB` | blocks/form/form.css:108 |
+| 40 | `#CACACA` | `--color-gray-silver-dark` or `--color-gray-border` | `#CACACA`, `#CCCCCC` | blocks/cards/cards.css:675; blocks/tabs/tabs.css:85-86; blocks/category-nav/category-nav.css:20, 784; blocks/header/header.css:2067 |
+| 41 | `#CC0000` | `--color-red-link` | `#C00` | blocks/category-nav/category-nav.css:304 |
+| 42 | `#CED4DA` | `--color-border-form` | `#CED4DA` | blocks/form/form.css:162 |
+| 43 | `#D01920` | `--color-red-form-hover` | `#D01920` | blocks/form/form.css:138-139 |
+| 44 | `#D0D0D0` | `--color-gray-panel-alt` | `#D0D0D0` | blocks/header/nav-pane.css:141 |
+| 45 | `#D23643` | `--color-red-footer-link` | `#D23643` | blocks/footer/footer.css:450, 458 |
+| 46 | `#D4EDDA` | `--color-success-light` | `#D4EDDA` | blocks/form/form.css:107 |
+| 47 | `#D8D8D8` | `--color-gray-panel` or `--color-gray-border-dark` | `#D8D8D8`, `#D9D9D9` | blocks/header/nav-pane.css:31, 104, 116, 154, 276, 1024 |
+| 48 | `#DC3545` | `--color-red-form-error` | `#DC3545` | blocks/form/form.css:88 |
+| 49 | `#DD9999` | `--color-red-disabled` | `#D99` | blocks/category-nav/category-nav.css:717 |
+| 50 | `#DDDDDD` | `--color-gray-light` | `#DDD` | blocks/link-to-upi/link-to-upi.css:62 |
+| 51 | `#E0E0E0` | `--color-border-light` | `#E0E0E0` | styles/styles.css:926, 927; blocks/category-nav/category-nav.css (multiple); blocks/header/header.css:54, 241, 509, 554-555, 823, 1051, 1133, 1202, 1470, 1930, 2665, 2726 |
+| 52 | `#E6E6E6` | `--color-gray-input-bg` or `--color-steps-track` | `#E6E6E6`, `#E7E7E7` | blocks/modal/modal.css:565; blocks/steps/steps.css:53-54, 187-188 |
+| 53 | `#EBDFDF` | `--color-red-tint-bg` | `#EBDFDF` | blocks/modal/modal.css:543 |
+| 54 | `#EBFFFF` | `--color-tag-pale-cyan` | `#EBFFFF` | blocks/category-nav/category-nav.css:437 |
+| 55 | `#EC1C24` | `--color-red-form-primary` | `#EC1C24` | blocks/form/form.css:60, 130-131 |
+| 56 | `#EEFFF2` | `--color-tag-pale-mint` | `#EEFFF2` | blocks/category-nav/category-nav.css:442 |
+| 57 | `#F0F0F0` | `--color-neutral-100` (merge light grays) | `#EFEFEF`, `#F0F0F0`, `#F2F2F2`, `#F3F3F3`, `#F5F5F5`, `#F6F6F6` | blocks/cards/cards.css:549, 675; blocks/tabs/tabs.css:85-86; blocks/header/header.css:254, 302, 331, 426, 509, 601, 660; blocks/category-nav/category-nav.css:40, 594, 603, 696, 716; blocks/header/nav-pane.css:115-116, 159, 594, 603, 673, 846 |
+| 58 | `#F2E5FF` | `--color-tag-pale-purple` | `#F2E5FF` | blocks/category-nav/category-nav.css:441 |
+| 59 | `#F5C6CB` | `--color-error-border` | `#F5C6CB` | blocks/form/form.css:114 |
+| 60 | `#F8D7DA` | `--color-error-light` | `#F8D7DA` | blocks/form/form.css:113 |
+| 61 | `#F9F9F9` | `--color-neutral-50` (merge off-whites) | `#F8F9FA`, `#F9F9F9`, `#FAFAFA` | blocks/category-nav/category-nav.css:19, 40, 88, 594, 603, 696, 717; blocks/header/header.css:8, 254, 309, 430, 452, 515, 564, 601, 660, 2816; blocks/form/form.css:169; blocks/header/nav-pane.css:846 |
+| 62 | `#FFCB05` | `--color-yellow-cta` | `#FFCB05` | blocks/footer/footer.css:65 |
+| 63 | `#FFCECE` | `--color-tag-pale-rose` | `#FFCECE` | blocks/category-nav/category-nav.css:439 |
+| 64 | `#FFE1EC` | `--color-tag-pale-pink` | `#FFE1EC` | blocks/category-nav/category-nav.css:440 |
+| 65 | `#FFEFFD` | `--color-tag-pale-lavender` | `#FFEFFD` | blocks/category-nav/category-nav.css:438 |
+| 66 | `#FFF7F7` | `--color-tag-pale-white` | `#FFF7F7` | blocks/category-nav/category-nav.css:443 |
+| 67 | `#FFFBE6` | `--color-tag-pale-yellow` | `#FFFBE6` | blocks/category-nav/category-nav.css:436 |
+
+### How to use Part 5
+
+- **Locations (file: line)** list every place the color (or a ΔE ≤ 1 equivalent) appears. Replace the hardcoded value at each listed location with `var(--your-chosen-token)`.
+- Ranges like `1555-1556` or `22-23` mean use that token on each of those lines in the file.
+- For groups that merge multiple Part 3 tokens (e.g. 9, 40, 57, 61), the locations column combines all files/lines from every token in that group.
+
+---
+
 ## Summary
 
 - **Part 1:** All color-related tokens are defined in `styles/styles.css` in `:root`: 21 single-value color tokens, 7 semantic aliases, and 16 gradient tokens (including `--modal-backdrop-gradient`). The tables above list each token and the hex/rgb values they use.
 - **Part 2:** Every line listed above uses at least one hex or rgb color that is **not** coming from a token defined in `styles/styles.css`. Replacing these with new or existing tokens in `styles.css` would centralize colors and make them easier to change.
 - **Part 3:** Suggested new `--color-*` and `--gradient-*` tokens derived from Part 2. Add the ones you need to `styles.css` and replace hardcoded values in the listed locations.
 - **Part 4:** Part 3 colors are grouped by **perceptual similarity (Delta E ≤ 1)**. Within each group, one canonical value and one token can replace all listed values and locations without visible change. Use the summary table to pick one token per group and reduce token count while keeping appearance consistent.
+- **Part 5:** Same Part 4 groups with an additional **Locations (file: line)** column listing the exact file path and line numbers where each suggested token (or the color it replaces) is used. Use Part 5 for find-and-replace when applying tokens.
