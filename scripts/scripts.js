@@ -960,9 +960,10 @@ async function loadEager(doc) {
 
   const getAppBanner = sessionStorage.getItem('getAppBanner');
   const header = doc.querySelector('header');
-  // we are starting out assuming the app banner is open
+  // When app banner was closed previously, use nav-height only (avoids space on mobile)
   if (getAppBanner && header && !MEDIA_QUERIES.desktop.matches) {
     header.style.height = 'var(--nav-height)';
+    document.body.classList.add('app-banner-closed');
   }
 
   const templateName = getMetadata('template');
@@ -1029,6 +1030,7 @@ function decorateGetAppBanner(container) {
     closeBtn.addEventListener('click', () => {
       getAppBanner.classList.add('d-none');
       sessionStorage.setItem('getAppBanner', 'true');
+      document.body.classList.add('app-banner-closed');
       // Reset height style on header when banner is closed
       const header = document.querySelector('header');
       if (header) {

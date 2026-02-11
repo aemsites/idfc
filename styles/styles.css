@@ -155,8 +155,20 @@ body.appear {
 }
 
 header {
-  height: calc(var(--get-app-banner-height) + var(--nav-height));
+  height: var(--nav-height);
   background-color: var(--background-color); /* Header always white to prevent black flash on nav */
+}
+
+/* Mobile: only reserve banner space when the banner is actually in the header (avoids gap when banner not yet loaded or hidden) */
+@media (width < 990px) {
+  header:has(#grnt-app-mob) {
+    height: calc(var(--get-app-banner-height) + var(--nav-height));
+  }
+}
+
+/* When user has closed the app banner, use nav-height only (class set in loadEager or when they click close) */
+body.app-banner-closed header {
+  height: var(--nav-height);
 }
 
 header .header,
