@@ -36,104 +36,44 @@ export default async function decorate(block) {
   let imageAlt = '';
   let tableRowMaxWidth = '';
 
+  // Parse grouped background cell (background_color, background_image/Alt, background_imageMobile)
   if (rows[0]?.children.length === 1) {
     const cell = rows[0].children[0];
-    const text = cell.textContent?.trim();
-    if (text && !cell.querySelector('img, picture')) {
-      block.id = text;
+    const pictures = cell.querySelectorAll('picture');
+    const textContent = [...cell.childNodes]
+      .filter((n) => (n.nodeType === Node.TEXT_NODE
+        || (n.tagName === 'P' && !n.querySelector('picture, img'))))
+      .map((n) => n.textContent.trim())
+      .find((t) => t) || '';
+    const isColorOrGradient = textContent && (textContent.startsWith('var(')
+      || textContent.startsWith('#') || textContent.includes('gradient')
+      || textContent.includes('rgb') || textContent.match(/^[0-9a-fA-F]{3,6}$/i)
+      || textContent.match(/^(transparent|inherit|initial|unset)$/i));
+
+    if (pictures.length > 0 || isColorOrGradient) {
+      if (pictures[0]) desktopImageUrl = extractImageUrl(pictures[0]);
+      if (pictures[1]) mobileImageUrl = extractImageUrl(pictures[1]);
+      const img = cell.querySelector('img');
+      if (img?.alt) imageAlt = img.alt;
+      if (isColorOrGradient) backgroundColor = textContent;
       metadataCount = 1;
     }
   }
 
-  if (rows[1]?.children.length === 1) {
-    const cell = rows[1].children[0];
-    if (!cell.querySelector('img, picture')) {
-      const text = cell.textContent?.trim();
-      const isColorOrGradient = text && (text.startsWith('var(') || text.startsWith('#')
-        || text.includes('gradient') || text.includes('rgb')
-        || text.match(/^[0-9a-fA-F]{3,6}$/i)
-        || text.match(/^(transparent|inherit|initial|unset)$/i));
-
-      if (isColorOrGradient) {
-        backgroundColor = text;
-        metadataCount = 2;
-      } else if (text) {
-        metadataCount = 2;
-      }
-    }
-  }
-
-  for (let i = 0; i < 2; i += 1) {
-    let foundImage = false;
-    for (let j = metadataCount; j < rows.length; j += 1) {
-      if (rows[j]?.children.length === 1) {
-        const cell = rows[j].children[0];
-        const imageElement = cell.querySelector('picture, img');
-        if (imageElement) {
-          const url = extractImageUrl(imageElement);
-          if (i === 0) desktopImageUrl = url;
-          else mobileImageUrl = url;
-          metadataCount = j + 1;
-          foundImage = true;
-          break;
-        } else if (cell.textContent?.trim()) {
-          break;
-        }
-      }
-    }
-    if (!foundImage) {
-      break;
-    }
-  }
-
-  for (let j = metadataCount; j < rows.length; j += 1) {
-    if (rows[j]?.children.length === 1) {
-      const cell = rows[j].children[0];
-      if (!cell.querySelector('img, picture')) {
-        const text = cell.textContent?.trim();
-        if (text) {
-          const isColorPattern = text.startsWith('var(') || text.startsWith('#') || text.includes('gradient');
-          if (text !== 'true' && text !== 'false' && !text.match(/^\d+px$/) && !isColorPattern) {
-            imageAlt = text;
-            metadataCount = j + 1;
-            break;
-          } else {
-            break;
-          }
-        }
-      } else {
-        break;
-      }
-    }
-  }
-
-  for (let j = metadataCount; j < rows.length; j += 1) {
-    if (rows[j]?.children.length === 1) {
-      const cell = rows[j].children[0];
-      const text = cell.textContent?.trim();
-      if (text) {
-        if (text.match(/^\d+px$/)) {
-          tableRowMaxWidth = text;
-          metadataCount = j + 1;
-          break;
-        } else if (!cell.querySelector('img, picture')) {
-          break;
-        }
-      }
-    }
-  }
-
+  // Parse tableRowMaxWidth
   if (rows[metadataCount]?.children.length === 1) {
     const cell = rows[metadataCount].children[0];
     const text = cell.textContent?.trim();
-    if (text === 'true' || text === 'false') {
+    if (text?.match(/^\d+px$/)) {
+      tableRowMaxWidth = text;
       metadataCount += 1;
     }
   }
 
   const table = document.createElement('table');
   const noHeaderVariants = ['fees-and-charges', 'reward-points'];
-  const thead = noHeaderVariants.includes(block.id) ? null : document.createElement('thead');
+  const hasNoHeader = noHeaderVariants.some((v) => block.classList.contains(v));
+  const thead = hasNoHeader ? null : document.createElement('thead');
   const tbody = document.createElement('tbody');
 
   if (tableRowMaxWidth) {
@@ -192,8 +132,8 @@ export default async function decorate(block) {
     imageWrapper.className = 'table-background-image';
 
     // Same logic as Section: handleBackground + handleBackgroundImages.
-    // Table: backgroundColor, image, imageMobile. Section: backgroundcolor,
-    // sectionBackgroundImage, sectionBackgroundImageMobile.
+    // Table: background_color, background_image, background_imageMobile.
+    // Section: backgroundcolor, sectionBackgroundImage, sectionBackgroundImageMobile.
     if (backgroundColor) {
       const normalizedColor = normalizeBackgroundColor(backgroundColor);
       handleBackground({ text: normalizedColor }, imageWrapper);

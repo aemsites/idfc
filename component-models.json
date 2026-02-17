@@ -603,24 +603,24 @@
       {
         "component": "reference",
         "valueType": "string",
-        "name": "doodle-image-top",
-        "label": "Background accessory image - top",
+        "name": "decoration-image-top",
+        "label": "Background decoration image - top",
         "description": "Displayed at top left of the section",
         "multi": false
       },
       {
         "component": "reference",
         "valueType": "string",
-        "name": "doodle-image-bottom",
-        "label": "Background accessory image - bottom",
+        "name": "decoration-image-bottom",
+        "label": "Background decoration image - bottom",
         "description": "Displayed at bottom right of the section",
         "multi": false
       },
       {
         "component": "boolean",
         "valueType": "boolean",
-        "name": "doodle-reverse",
-        "label": "Reverse background accessory images",
+        "name": "decoration-reverse",
+        "label": "Reverse background decoration images",
         "description": "Display at top right and bottom left of the section"
       },
       {
@@ -2254,10 +2254,24 @@
     "id": "table",
     "fields": [
       {
-        "component": "text",
-        "name": "id",
+        "component": "select",
+        "name": "classes_id",
         "label": "Table ID",
-        "description": "Adds an ID value to the table"
+        "description": "Adds an ID value to the table",
+        "options": [
+          {
+            "name": "None",
+            "value": ""
+          },
+          {
+            "name": "Fees and Charges",
+            "value": "fees-and-charges"
+          },
+          {
+            "name": "Reward Points",
+            "value": "reward-points"
+          }
+        ]
       },
       {
         "component": "select",
@@ -2282,16 +2296,12 @@
           {
             "name": "4 Columns",
             "value": "table-4-columns"
-          },
-          {
-            "name": "5 Columns",
-            "value": "table-5-columns"
           }
         ]
       },
       {
         "component": "text",
-        "name": "backgroundColor",
+        "name": "background_color",
         "label": "Background Color/gradient",
         "value": "",
         "valueType": "string",
@@ -2299,19 +2309,19 @@
       },
       {
         "component": "reference",
-        "name": "image",
+        "name": "background_image",
         "label": "Image (Desktop)",
         "valueType": "string"
       },
       {
         "component": "reference",
-        "name": "imageMobile",
+        "name": "background_imageMobile",
         "label": "Image (Mobile)",
         "valueType": "string"
       },
       {
         "component": "text",
-        "name": "imageAlt",
+        "name": "background_imageAlt",
         "label": "Image Alt Text",
         "valueType": "string"
       },
