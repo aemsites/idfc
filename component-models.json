@@ -603,24 +603,24 @@
       {
         "component": "reference",
         "valueType": "string",
-        "name": "doodle-image-top",
-        "label": "Background accessory image - top",
+        "name": "decoration-image-top",
+        "label": "Background decoration image - top",
         "description": "Displayed at top left of the section",
         "multi": false
       },
       {
         "component": "reference",
         "valueType": "string",
-        "name": "doodle-image-bottom",
-        "label": "Background accessory image - bottom",
+        "name": "decoration-image-bottom",
+        "label": "Background decoration image - bottom",
         "description": "Displayed at bottom right of the section",
         "multi": false
       },
       {
         "component": "boolean",
         "valueType": "boolean",
-        "name": "doodle-reverse",
-        "label": "Reverse background accessory images",
+        "name": "decoration-reverse",
+        "label": "Reverse background decoration images",
         "description": "Display at top right and bottom left of the section"
       },
       {
@@ -2282,45 +2282,59 @@
           {
             "name": "4 Columns",
             "value": "table-4-columns"
+          }
+        ]
+      },
+      {
+        "component": "select",
+        "name": "classes_maxwidth",
+        "label": "Table Max Width",
+        "valueType": "string",
+        "description": "Sets a max width on the table",
+        "options": [
+          {
+            "name": "Default (full width)",
+            "value": ""
           },
           {
-            "name": "5 Columns",
-            "value": "table-5-columns"
+            "name": "Narrow (400px)",
+            "value": "maxwidth-narrow"
+          },
+          {
+            "name": "Medium (600px)",
+            "value": "maxwidth-medium"
+          },
+          {
+            "name": "Wide (800px)",
+            "value": "maxwidth-wide"
           }
         ]
       },
       {
         "component": "text",
-        "name": "backgroundColor",
+        "name": "background_color",
         "label": "Background Color/gradient",
         "value": "",
         "valueType": "string",
-        "description": "Use hex color notation (e.g. 000000 for black, fff for white) or CSS color values (e.g. var(--color-red-300), transparent)"
+        "description": "Use hex color notation (e.g. #000000 for black, #fff for white) or CSS color values (e.g. var(--color-red-300), transparent)"
       },
       {
         "component": "reference",
-        "name": "image",
-        "label": "Image (Desktop)",
+        "name": "background_image",
+        "label": "Background Image (Desktop)",
         "valueType": "string"
       },
       {
         "component": "reference",
-        "name": "imageMobile",
-        "label": "Image (Mobile)",
+        "name": "background_imageMobile",
+        "label": "Background Image (Mobile)",
         "valueType": "string"
       },
       {
         "component": "text",
-        "name": "imageAlt",
-        "label": "Image Alt Text",
+        "name": "background_imageAlt",
+        "label": "Background Image Alt Text",
         "valueType": "string"
-      },
-      {
-        "component": "text",
-        "name": "tableRowMaxWidth",
-        "label": "Table Row Max Width",
-        "valueType": "string",
-        "description": "ex. 600px"
       }
     ]
   },
