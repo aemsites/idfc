@@ -92,24 +92,10 @@
       "id": "table",
       "fields": [
         {
-          "component": "select",
-          "name": "classes_id",
+          "component": "text",
+          "name": "id",
           "label": "Table ID",
-          "description": "Adds an ID value to the table",
-          "options": [
-            {
-              "name": "None",
-              "value": ""
-            },
-            {
-              "name": "Fees and Charges",
-              "value": "fees-and-charges"
-            },
-            {
-              "name": "Reward Points",
-              "value": "reward-points"
-            }
-          ]
+          "description": "Adds an ID value to the table"
         },
         {
           "component": "select",
@@ -134,12 +120,16 @@
             {
               "name": "4 Columns",
               "value": "table-4-columns"
+            },
+            {
+              "name": "5 Columns",
+              "value": "table-5-columns"
             }
           ]
         },
         {
           "component": "text",
-          "name": "background_color",
+          "name": "backgroundColor",
           "label": "Background Color/gradient",
           "value": "",
           "valueType": "string",
@@ -147,19 +137,19 @@
         },
         {
           "component": "reference",
-          "name": "background_image",
+          "name": "image",
           "label": "Image (Desktop)",
           "valueType": "string"
         },
         {
           "component": "reference",
-          "name": "background_imageMobile",
+          "name": "imageMobile",
           "label": "Image (Mobile)",
           "valueType": "string"
         },
         {
           "component": "text",
-          "name": "background_imageAlt",
+          "name": "imageAlt",
           "label": "Image Alt Text",
           "valueType": "string"
         },
