@@ -13,15 +13,17 @@ import {
 } from '../../scripts/scripts.js';
 
 /**
- * Extracts image URL from picture or img element
- * @param {Element} element - Picture or img element
- * @returns {string|null} - Image URL or null
+ * Checks if a text value represents a CSS color or gradient
+ * @param {string} text - Text to check
+ * @returns {boolean}
  */
-function extractImageUrl(element) {
-  if (!element) return null;
-  if (element.tagName === 'IMG') return element.src;
-  if (element.tagName === 'PICTURE') return element.querySelector('img')?.src || null;
-  return null;
+function isBackgroundColor(text) {
+  return text.startsWith('var(')
+    || text.startsWith('#')
+    || text.includes('gradient')
+    || text.includes('rgb')
+    || /^[0-9a-fA-F]{3,8}$/i.test(text)
+    || /^(transparent|inherit|initial|unset)$/i.test(text);
 }
 
 /**
@@ -34,100 +36,48 @@ export default async function decorate(block) {
   let desktopImageUrl = null;
   let mobileImageUrl = null;
   let imageAlt = '';
-  let tableRowMaxWidth = '';
 
+  // Parse id from first single-column text row
   if (rows[0]?.children.length === 1) {
     const cell = rows[0].children[0];
     const text = cell.textContent?.trim();
-    if (text && !cell.querySelector('img, picture')) {
+    if (text && !cell.querySelector('picture')) {
       block.id = text;
       metadataCount = 1;
     }
   }
 
-  if (rows[1]?.children.length === 1) {
-    const cell = rows[1].children[0];
-    if (!cell.querySelector('img, picture')) {
-      const text = cell.textContent?.trim();
-      const isColorOrGradient = text && (text.startsWith('var(') || text.startsWith('#')
-        || text.includes('gradient') || text.includes('rgb')
-        || text.match(/^[0-9a-fA-F]{3,6}$/i)
-        || text.match(/^(transparent|inherit|initial|unset)$/i));
+  // Parse background group cell (element grouping: color, desktop image+alt, mobile image)
+  const bgRow = rows[metadataCount];
+  if (bgRow?.children.length === 1) {
+    const cell = bgRow.children[0];
+    const pictures = Array.from(cell.querySelectorAll('picture'));
 
-      if (isColorOrGradient) {
-        backgroundColor = text;
-        metadataCount = 2;
-      } else if (text) {
-        metadataCount = 2;
+    if (pictures.length > 0) {
+      // Desktop image (first picture, alt applied via field collapse)
+      const desktopImg = pictures[0].querySelector('img');
+      desktopImageUrl = desktopImg?.src || null;
+      imageAlt = desktopImg?.alt || '';
+
+      // Mobile image (second picture, if present)
+      if (pictures.length > 1) {
+        mobileImageUrl = pictures[1].querySelector('img')?.src || null;
       }
-    }
-  }
 
-  for (let i = 0; i < 2; i += 1) {
-    let foundImage = false;
-    for (let j = metadataCount; j < rows.length; j += 1) {
-      if (rows[j]?.children.length === 1) {
-        const cell = rows[j].children[0];
-        const imageElement = cell.querySelector('picture, img');
-        if (imageElement) {
-          const url = extractImageUrl(imageElement);
-          if (i === 0) desktopImageUrl = url;
-          else mobileImageUrl = url;
-          metadataCount = j + 1;
-          foundImage = true;
-          break;
-        } else if (cell.textContent?.trim()) {
-          break;
-        }
-      }
-    }
-    if (!foundImage) {
-      break;
-    }
-  }
+      // Background color from remaining text content
+      const cellClone = cell.cloneNode(true);
+      cellClone.querySelectorAll('picture').forEach((pic) => pic.remove());
+      const colorText = cellClone.textContent?.trim();
+      if (colorText) backgroundColor = colorText;
 
-  for (let j = metadataCount; j < rows.length; j += 1) {
-    if (rows[j]?.children.length === 1) {
-      const cell = rows[j].children[0];
-      if (!cell.querySelector('img, picture')) {
-        const text = cell.textContent?.trim();
-        if (text) {
-          const isColorPattern = text.startsWith('var(') || text.startsWith('#') || text.includes('gradient');
-          if (text !== 'true' && text !== 'false' && !text.match(/^\d+px$/) && !isColorPattern) {
-            imageAlt = text;
-            metadataCount = j + 1;
-            break;
-          } else {
-            break;
-          }
-        }
-      } else {
-        break;
-      }
-    }
-  }
-
-  for (let j = metadataCount; j < rows.length; j += 1) {
-    if (rows[j]?.children.length === 1) {
-      const cell = rows[j].children[0];
-      const text = cell.textContent?.trim();
-      if (text) {
-        if (text.match(/^\d+px$/)) {
-          tableRowMaxWidth = text;
-          metadataCount = j + 1;
-          break;
-        } else if (!cell.querySelector('img, picture')) {
-          break;
-        }
-      }
-    }
-  }
-
-  if (rows[metadataCount]?.children.length === 1) {
-    const cell = rows[metadataCount].children[0];
-    const text = cell.textContent?.trim();
-    if (text === 'true' || text === 'false') {
       metadataCount += 1;
+    } else {
+      // No images — check for color-only background
+      const text = cell.textContent?.trim();
+      if (text && isBackgroundColor(text)) {
+        backgroundColor = text;
+        metadataCount += 1;
+      }
     }
   }
 
@@ -135,10 +85,6 @@ export default async function decorate(block) {
   const noHeaderVariants = ['fees-and-charges', 'reward-points'];
   const thead = noHeaderVariants.includes(block.id) ? null : document.createElement('thead');
   const tbody = document.createElement('tbody');
-
-  if (tableRowMaxWidth) {
-    table.style.maxWidth = tableRowMaxWidth;
-  }
 
   // Filter out empty rows (rows where all cells have no content)
   const dataRows = rows.slice(metadataCount).filter((row) => {
