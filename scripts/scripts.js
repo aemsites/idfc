@@ -220,7 +220,7 @@ export default async function decorateFragment(block) {
  * This allows text (in superscript) and button to be moved together in responsive layouts
  * @param {Element} element container element
  */
-function decorateButtonGroups(element) {
+export function decorateButtonGroups(element) {
   element.querySelectorAll('p.button-container').forEach((buttonContainer) => {
     if (buttonContainer.parentElement?.classList.contains('button-group')) {
       return;
