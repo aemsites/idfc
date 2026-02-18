@@ -217,7 +217,6 @@ async function applyChanges(event) {
         decorateIcons(newBlock);
         decorateBlock(newBlock);
         decorateRichtext(newBlock);
-        decorateButtonGroups(newBlock);
         await loadBlock(newBlock);
         block.remove();
         newBlock.style.display = null;
@@ -247,7 +246,6 @@ async function applyChanges(event) {
           decorateButtons(newSection);
           decorateIcons(newSection);
           decorateRichtext(newSection);
-          decorateButtonGroups(newSection);
           decorateSections(parentElement);
 
           // added for multi-section blocks
