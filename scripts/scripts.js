@@ -215,6 +215,38 @@ export default async function decorateFragment(block) {
   }
 }
 
+/**
+ * Handle button groups: wrap button with preceding superscript text
+ * This allows text (in superscript) and button to be moved together in responsive layouts
+ * @param {Element} element container element
+ */
+export function decorateButtonGroups(element) {
+  element.querySelectorAll('p.button-container').forEach((buttonContainer) => {
+    if (buttonContainer.parentElement?.classList.contains('button-group')) {
+      return;
+    }
+
+    // Collect all consecutive preceding <p> elements containing <sup>
+    // (Word may split long superscript text across multiple paragraphs)
+    const supParagraphs = [];
+    let sibling = buttonContainer.previousElementSibling;
+    while (sibling && sibling.tagName === 'P' && sibling.querySelector('sup')) {
+      supParagraphs.unshift(sibling);
+      sibling = sibling.previousElementSibling;
+    }
+
+    if (supParagraphs.length > 0) {
+      const buttonGroup = document.createElement('div');
+      buttonGroup.className = 'button-group';
+
+      buttonContainer.parentElement.insertBefore(buttonGroup, supParagraphs[0]);
+
+      supParagraphs.forEach((p) => buttonGroup.appendChild(p));
+      buttonGroup.appendChild(buttonContainer);
+    }
+  });
+}
+
 function prepareHeroForCLS(main) {
   if (!window.matchMedia('(min-width: 900px)').matches) {
     return;
@@ -948,6 +980,7 @@ export function decorateMain(main) {
   buildAutoBlocks(main);
   initEntranceAnimationObserver(main);
   decorateBlocks(main);
+  decorateButtonGroups(main);
   buildEmbedBlocks(main);
   decorateLinkedPictures(main);
 }
