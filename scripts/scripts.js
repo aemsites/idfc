@@ -222,25 +222,26 @@ export default async function decorateFragment(block) {
  */
 function decorateButtonGroups(element) {
   element.querySelectorAll('p.button-container').forEach((buttonContainer) => {
-    // Check if this button container hasn't already been grouped
     if (buttonContainer.parentElement?.classList.contains('button-group')) {
       return;
     }
 
-    // Check if the previous sibling is a <p> containing a <sup>
-    const previousSibling = buttonContainer.previousElementSibling;
-    if (previousSibling
-      && previousSibling.tagName === 'P'
-      && previousSibling.querySelector('sup')) {
-      // Create a new div with class 'button-group'
+    // Collect all consecutive preceding <p> elements containing <sup>
+    // (Word may split long superscript text across multiple paragraphs)
+    const supParagraphs = [];
+    let sibling = buttonContainer.previousElementSibling;
+    while (sibling && sibling.tagName === 'P' && sibling.querySelector('sup')) {
+      supParagraphs.unshift(sibling);
+      sibling = sibling.previousElementSibling;
+    }
+
+    if (supParagraphs.length > 0) {
       const buttonGroup = document.createElement('div');
       buttonGroup.className = 'button-group';
 
-      // Insert the new div before the previous sibling
-      buttonContainer.parentElement.insertBefore(buttonGroup, previousSibling);
+      buttonContainer.parentElement.insertBefore(buttonGroup, supParagraphs[0]);
 
-      // Move both elements into the button-group
-      buttonGroup.appendChild(previousSibling);
+      supParagraphs.forEach((p) => buttonGroup.appendChild(p));
       buttonGroup.appendChild(buttonContainer);
     }
   });
