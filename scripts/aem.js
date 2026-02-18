@@ -467,6 +467,8 @@ function decorateButtons(element) {
       }
     }
   });
+  // eslint-disable-next-line no-use-before-define
+  decorateButtonGroups(element);
 }
 
 /**
@@ -496,6 +498,36 @@ function decorateIcons(element, prefix = '') {
   const icons = [...element.querySelectorAll('span.icon')];
   icons.forEach((span) => {
     decorateIcon(span, prefix);
+  });
+}
+
+/**
+ * Handle button groups: wrap button with preceding superscript text
+ * This allows text (in superscript) and button to be moved together in responsive layouts
+ * @param {Element} element container element
+ */
+function decorateButtonGroups(element) {
+  element.querySelectorAll('p.button-container').forEach((buttonContainer) => {
+    if (buttonContainer.parentElement?.classList.contains('button-group')) {
+      return;
+    }
+
+    const supParagraphs = [];
+    let sibling = buttonContainer.previousElementSibling;
+    while (sibling && sibling.tagName === 'P' && sibling.querySelector('sup')) {
+      supParagraphs.unshift(sibling);
+      sibling = sibling.previousElementSibling;
+    }
+
+    if (supParagraphs.length > 0) {
+      const buttonGroup = document.createElement('div');
+      buttonGroup.className = 'button-group';
+
+      buttonContainer.parentElement.insertBefore(buttonGroup, supParagraphs[0]);
+
+      supParagraphs.forEach((p) => buttonGroup.appendChild(p));
+      buttonGroup.appendChild(buttonContainer);
+    }
   });
 }
 

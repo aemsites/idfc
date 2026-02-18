@@ -15,7 +15,6 @@ import {
   decorateMain,
   loadFragment,
   moveAllAttributes,
-  decorateButtonGroups,
 } from './scripts.js';
 
 // Set flag to indicate we're in the Universal Editor - suppresses timed modals etc.
@@ -272,7 +271,6 @@ async function applyChanges(event) {
           decorateButtons(parentElement);
           decorateIcons(parentElement);
           decorateRichtext(parentElement);
-          decorateButtonGroups(parentElement);
         }
         return true;
       }
