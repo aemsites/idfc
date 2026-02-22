@@ -4,10 +4,10 @@
   "version": "1.3.0",
   "description": "Starter project for Adobe Helix",
   "scripts": {
-    "lint:js": "eslint . --ext .json,.js,.mjs",
+    "lint:js": "cross-env ESLINT_USE_FLAT_CONFIG=false eslint . --ext .json,.js,.mjs",
     "lint:css": "stylelint blocks/**/*.css styles/*.css",
     "fix-css": " stylelint --fix **/**/*.css",
-    "fix-js": "eslint --fix **/**/*.js",
+    "fix-js": "cross-env ESLINT_USE_FLAT_CONFIG=false eslint --fix **/**/*.js",
     "lint": "npm run lint:js && npm run lint:css",
     "build:json": "npm-run-all -p build:json:models build:json:definitions build:json:filters",
     "build:json:models": "merge-json-cli -i \"models/_component-models.json\" -o \"component-models.json\"",
@@ -26,18 +26,22 @@
   },
   "homepage": "https://github.com/adobe/aem-boilerplate#readme",
   "devDependencies": {
+    "@babel/core": "^7.29.0",
     "@babel/eslint-parser": "7.28.0",
     "chai": "5.0.0",
-    "eslint": "8.57.1",
+    "cross-env": "^7.0.3",
+    "eslint": "^9.20.0",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-json": "3.1.0",
-    "eslint-plugin-sonarjs": "^1.0.0",
+    "eslint-plugin-sonarjs": "^3.0.7",
     "eslint-plugin-xwalk": "github:adobe-rnd/eslint-plugin-xwalk#v0.1.3",
+    "globals": "^17.3.0",
     "husky": "9.1.1",
     "merge-json-cli": "^1.0.4",
     "npm-run-all": "^4.1.5",
     "stylelint": "16.23.1",
-    "stylelint-config-standard": "39.0.0"
+    "stylelint-config-standard": "39.0.0",
+    "ts-api-utils": "^2.4.0"
   }
 }

@@ -30,6 +30,17 @@ npm i
 ## Linting
 This project is using StyleLint and ESLint (including the SonarJS plugin for ESLint 8).
 
+Add "eslint.useFlatConfig": false to your workspace .vscode/settings.json.
+With ESLint 9, the VS Code/Cursor ESLint extension defaults to flat config (eslint.config.js). This project still uses legacy config (.eslintrc.js), so setting eslint.useFlatConfig to false makes the extension use legacy config and the .eslintrc.js.
+
+upgrade to sonarjs 3:
+npm install eslint-plugin-sonarjs@^3.0.0 --legacy-peer-deps 2>&1
+npm install globals --legacy-peer-deps --save-dev 2>&1
+npm install ts-api-utils --legacy-peer-deps --save-dev 2>&1
+npm install --legacy-peer-deps 2>&1
+npm install @babel/core --legacy-peer-deps --save-dev 2>&1
+
+
 ```sh
 npm run lint
 ```
