@@ -30,10 +30,10 @@ function extractImageUrl(element) {
 export default async function decorate(block) {
   const rows = Array.from(block.children);
   let metadataCount = 0;
-  let backgroundColor = '';
+  let background_backgroundColor = '';
   let desktopImageUrl = null;
   let mobileImageUrl = null;
-  let imageAlt = '';
+  let background_imageAlt = '';
   let tableRowMaxWidth = '';
 
   if (rows[0]?.children.length === 1) {
@@ -55,7 +55,7 @@ export default async function decorate(block) {
         || text.match(/^(transparent|inherit|initial|unset)$/i));
 
       if (isColorOrGradient) {
-        backgroundColor = text;
+        background_backgroundColor = text;
         metadataCount = 2;
       } else if (text) {
         metadataCount = 2;
@@ -94,7 +94,7 @@ export default async function decorate(block) {
         if (text) {
           const isColorPattern = text.startsWith('var(') || text.startsWith('#') || text.includes('gradient');
           if (text !== 'true' && text !== 'false' && !text.match(/^\d+px$/) && !isColorPattern) {
-            imageAlt = text;
+            background_imageAlt = text;
             metadataCount = j + 1;
             break;
           } else {
@@ -187,15 +187,14 @@ export default async function decorate(block) {
 
   block.textContent = '';
 
-  if (backgroundColor || desktopImageUrl || mobileImageUrl) {
+  if (background_backgroundColor || desktopImageUrl || mobileImageUrl) {
     const imageWrapper = document.createElement('div');
     imageWrapper.className = 'table-background-image';
 
     // Same logic as Section: handleBackground + handleBackgroundImages.
-    // Table: backgroundColor, image, imageMobile. Section: backgroundcolor,
-    // sectionBackgroundImage, sectionBackgroundImageMobile.
-    if (backgroundColor) {
-      const normalizedColor = normalizeBackgroundColor(backgroundColor);
+    // Table: background_backgroundColor, background_image, background_imageMobile.
+    if (background_backgroundColor) {
+      const normalizedColor = normalizeBackgroundColor(background_backgroundColor);
       handleBackground({ text: normalizedColor }, imageWrapper);
     }
 
@@ -206,7 +205,7 @@ export default async function decorate(block) {
       handleBackgroundImages(desktopUrl, mobileUrl, imageWrapper);
     }
 
-    if (imageAlt) imageWrapper.dataset.imageAlt = imageAlt;
+    if (background_imageAlt) imageWrapper.dataset.imageAlt = background_imageAlt;
     block.append(imageWrapper);
 
     // setColorScheme(imageWrapper) only applies to imageWrapper's direct children (the picture).

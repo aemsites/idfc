@@ -129,7 +129,7 @@
         },
         {
           "component": "text",
-          "name": "backgroundColor",
+          "name": "background_backgroundColor",
           "label": "Background Color/gradient",
           "value": "",
           "valueType": "string",
@@ -137,19 +137,19 @@
         },
         {
           "component": "reference",
-          "name": "image",
+          "name": "background_image",
           "label": "Image (Desktop)",
           "valueType": "string"
         },
         {
           "component": "reference",
-          "name": "imageMobile",
+          "name": "background_imageMobile",
           "label": "Image (Mobile)",
           "valueType": "string"
         },
         {
           "component": "text",
-          "name": "imageAlt",
+          "name": "background_imageAlt",
           "label": "Image Alt Text",
           "valueType": "string"
         },
