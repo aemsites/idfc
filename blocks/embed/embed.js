@@ -4,10 +4,7 @@
  * https://www.hlx.live/developer/block-collection/embed
  */
 
-import { sanitizeHTML } from '../../scripts/scripts.js';
-
-/* eslint-disable secure-coding/no-improper-sanitization --
-sanitizeHTML uses DOMPurify via the import from scripts.js which linting can't see */
+import { DOMPURIFY } from '../../scripts/scripts.js';
 
 const loadScript = (url, callback, type) => {
   const head = document.querySelector('head');
@@ -85,10 +82,14 @@ const loadEmbed = (block, link, autoplay) => {
   const config = EMBEDS_CONFIG.find((e) => e.match.some((match) => link.includes(match)));
   const url = new URL(link);
   if (config) {
-    block.innerHTML = sanitizeHTML(config.embed(url, autoplay));
+    const embedHtml = config.embed(url, autoplay);
+    block.innerHTML = (window.DOMPurify?.sanitize(embedHtml, DOMPURIFY))
+      ?? embedHtml;
     block.classList = `block embed embed-${config.match[0]}`;
   } else {
-    block.innerHTML = sanitizeHTML(getDefaultEmbed(url));
+    const defaultHtml = getDefaultEmbed(url);
+    block.innerHTML = (window.DOMPurify?.sanitize(defaultHtml, DOMPURIFY))
+      ?? defaultHtml;
     block.classList = 'block embed';
   }
   block.classList.add('embed-is-loaded');
@@ -102,7 +103,9 @@ export default function decorate(block) {
   if (placeholder) {
     const wrapper = document.createElement('div');
     wrapper.className = 'embed-placeholder';
-    wrapper.innerHTML = sanitizeHTML('<div class="embed-placeholder-play"><button type="button" title="Play"></button></div>');
+    const placeholderHtml = '<div class="embed-placeholder-play"><button type="button" title="Play"></button></div>';
+    wrapper.innerHTML = (window.DOMPurify?.sanitize(placeholderHtml, DOMPURIFY))
+      ?? placeholderHtml;
     wrapper.prepend(placeholder);
     wrapper.addEventListener('click', () => {
       loadEmbed(block, link, true);

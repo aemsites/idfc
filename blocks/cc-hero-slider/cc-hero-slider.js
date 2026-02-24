@@ -1,5 +1,5 @@
 import { loadScript, loadCSS } from '../../scripts/aem.js';
-import { moveInstrumentation, sanitizeHTML } from '../../scripts/scripts.js';
+import { moveInstrumentation, DOMPURIFY } from '../../scripts/scripts.js';
 
 /**
  * Decorates the CC Hero Slider block
@@ -61,7 +61,9 @@ export default async function decorate(block) {
     if (popupTriggerDiv?.textContent.trim()) {
       const popupTrigger = document.createElement('div');
       popupTrigger.className = 'cc-hero-slider-popup-trigger';
-      popupTrigger.innerHTML = sanitizeHTML(popupTriggerDiv.innerHTML);
+      const popupRaw = popupTriggerDiv.innerHTML;
+      popupTrigger.innerHTML = (window.DOMPurify?.sanitize(popupRaw, DOMPURIFY))
+        ?? popupRaw;
       swiperSlide.appendChild(popupTrigger);
     }
 

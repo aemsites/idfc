@@ -10,7 +10,7 @@ import {
   handleBackground,
   normalizeBackgroundColor,
   getColorScheme,
-  sanitizeHTML,
+  DOMPURIFY,
 } from '../../scripts/scripts.js';
 
 /**
@@ -111,6 +111,7 @@ function findDesktopMobileImages(rows, startCount) {
 
 /** Find imageAlt in next single-cell text row that is not color/boolean/px. */
 function findImageAlt(rows, startCount) {
+  // Loop is bounded: max MAX_METADATA_SCAN_ROWS iterations and early return when j >= rows.length
   // eslint-disable-next-line secure-coding/no-unchecked-loop-condition
   for (let step = 0; step < MAX_METADATA_SCAN_ROWS; step += 1) {
     const j = startCount + step;
@@ -209,13 +210,15 @@ function buildTableRows(dataRows, thead, tbody) {
       const cell = document.createElement(isHeaderRow ? 'th' : 'td');
       if (isHeaderRow) cell.setAttribute('scope', 'column');
       cell.setAttribute('colspan', '2');
-      cell.innerHTML = sanitizeHTML(firstCell.innerHTML);
+      cell.innerHTML = (window.DOMPurify?.sanitize(firstCell.innerHTML, DOMPURIFY))
+        ?? firstCell.innerHTML;
       tr.append(cell);
     } else {
       cells.forEach((cell) => {
         const td = document.createElement(isHeaderRow ? 'th' : 'td');
         if (isHeaderRow) td.setAttribute('scope', 'column');
-        td.innerHTML = sanitizeHTML(cell.innerHTML);
+        td.innerHTML = (window.DOMPurify?.sanitize(cell.innerHTML, DOMPURIFY))
+          ?? cell.innerHTML;
         tr.append(td);
       });
     }

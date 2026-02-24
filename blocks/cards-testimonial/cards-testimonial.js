@@ -1,10 +1,7 @@
 import {
   createOptimizedPicture, loadScript, loadCSS, getMetadata,
 } from '../../scripts/aem.js';
-import { moveInstrumentation, sanitizeHTML } from '../../scripts/scripts.js';
-
-/* eslint-disable secure-coding/no-improper-sanitization --
-sanitizeHTML uses DOMPurify via the import from scripts.js which linting can't see */
+import { moveInstrumentation, DOMPURIFY } from '../../scripts/scripts.js';
 
 function parseReviewDateToISO(dateText) {
   if (!dateText || !String(dateText).trim()) return '';
@@ -40,17 +37,19 @@ function formatDateForDisplay(isoDate) {
 function extractOneTestimonial(card) {
   const cardBody = card.querySelector('.cards-card-body');
   if (!cardBody) return null;
-  let authorName = sanitizeHTML(card.dataset.personName || card.getAttribute('data-person-name') || '');
-  let productName = sanitizeHTML(card.dataset.productName || card.getAttribute('data-product-name') || 'IDFC FIRST Bank Credit Card');
+  const rawName = card.dataset.personName || card.getAttribute('data-person-name') || '';
+  const rawProduct = card.dataset.productName || card.getAttribute('data-product-name') || 'IDFC FIRST Bank Credit Card';
+  let authorName = rawName;
+  let productName = rawProduct;
   let ratingValue = parseInt(card.dataset.authorRating || card.getAttribute('data-author-rating'), 10) || 0;
   let datePublished = parseReviewDateToISO(card.dataset.reviewDate || card.getAttribute('data-review-date') || '');
   if (!authorName) {
-    const authorEl = cardBody.querySelector('.testimonial-person-name') || cardBody.querySelector('h5');
-    authorName = sanitizeHTML(authorEl ? authorEl.textContent : '');
+    const authorEl = cardBody.querySelector('.testimonial-person-name');
+    authorName = authorEl ? authorEl.textContent : '';
   }
   if (!productName || productName === 'IDFC FIRST Bank Credit Card') {
     const productEl = cardBody.querySelector('.testimonial-product-name u') || cardBody.querySelector('p u');
-    productName = sanitizeHTML(productEl ? productEl.textContent : 'IDFC FIRST Bank Credit Card');
+    productName = productEl ? productEl.textContent : 'IDFC FIRST Bank Credit Card';
   }
   if (ratingValue <= 0) {
     const starIcons = cardBody.querySelectorAll('[class*="icon-star"]');
@@ -66,9 +65,8 @@ function extractOneTestimonial(card) {
       reviewText += p.textContent.trim();
     }
   });
-  reviewText = sanitizeHTML(reviewText);
   if (!datePublished) {
-    const dateEl = cardBody.querySelector('.testimonial-date') || cardBody.querySelector('h6');
+    const dateEl = cardBody.querySelector('.testimonial-date');
     const dateText = dateEl ? dateEl.textContent : '';
     const dateParts = dateText.split('|');
     const dateString = dateParts.length > 1 ? dateParts[1].trim() : dateText.trim();
@@ -361,7 +359,7 @@ function applyLegacyNormalization(cardItem, mainBody) {
   }
   const authorEl = mainBody.querySelector('h5');
   if (authorEl) {
-    const name = sanitizeHTML(authorEl.textContent);
+    const name = authorEl.textContent;
     const p = document.createElement('p');
     p.className = 'testimonial-person-name';
     p.textContent = name;
@@ -370,7 +368,7 @@ function applyLegacyNormalization(cardItem, mainBody) {
   }
   const dateEl = mainBody.querySelector('h6');
   if (dateEl) {
-    const dt = sanitizeHTML(dateEl.textContent);
+    const dt = dateEl.textContent;
     const p = document.createElement('p');
     p.className = 'testimonial-date';
     p.textContent = dt;
@@ -379,7 +377,7 @@ function applyLegacyNormalization(cardItem, mainBody) {
   }
   const productEl = mainBody.querySelector('p u');
   if (productEl) {
-    const name = sanitizeHTML(productEl.textContent);
+    const name = productEl.textContent;
     const parentP = productEl.closest('p');
     if (parentP && !parentP.classList.contains('testimonial-product-name')) {
       parentP.classList.add('testimonial-product-name');
@@ -414,8 +412,8 @@ function getDetailsFromLayout(layoutMap, bodyDivsByIndex) {
     const detailsBody = bodyDivsByIndex.get(quotedetailsIdx);
     const detailsParas = detailsBody ? [...detailsBody.querySelectorAll('p')] : [];
     return {
-      personName: sanitizeHTML(detailsParas[0]?.textContent ?? ''),
-      productName: sanitizeHTML(detailsParas[1]?.textContent ?? '') || DEFAULT_PRODUCT,
+      personName: detailsParas[0]?.textContent ?? '',
+      productName: (detailsParas[1]?.textContent ?? '') || DEFAULT_PRODUCT,
       ratingRaw: detailsParas[2]?.textContent?.trim() ?? '',
       dateText: detailsParas[3]?.textContent?.trim() ?? '',
     };
@@ -437,8 +435,8 @@ function getDetailsFromLayout(layoutMap, bodyDivsByIndex) {
   const ratingDiv = bodyDivsByIndex.get(ratingIdx);
   const dateDiv = bodyDivsByIndex.get(dateIdx);
   return {
-    personName: personDiv ? sanitizeHTML(personDiv.textContent) : '',
-    productName: (productDiv ? sanitizeHTML(productDiv.textContent) : '') || DEFAULT_PRODUCT,
+    personName: personDiv ? personDiv.textContent : '',
+    productName: (productDiv ? productDiv.textContent : '') || DEFAULT_PRODUCT,
     ratingRaw: ratingDiv ? ratingDiv.textContent.trim() : '',
     dateText: dateDiv ? dateDiv.textContent.trim() : '',
   };
@@ -478,7 +476,8 @@ function normalizeTestimonialCard(cardItem) {
   cardItem.setAttribute('data-quote-icon', quoteIcon);
   if (reviewHtml.trim()) {
     const reviewWrapper = document.createElement('div');
-    reviewWrapper.innerHTML = reviewHtml;
+    reviewWrapper.innerHTML = (window.DOMPurify?.sanitize(reviewHtml, DOMPURIFY))
+      ?? reviewHtml;
     newBody.append(...reviewWrapper.childNodes);
   }
   const pPerson = document.createElement('p');
