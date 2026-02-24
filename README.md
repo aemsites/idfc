@@ -28,8 +28,9 @@ npm i
 ```
 
 ## Linting
-This project is using StyleLint and ESLint (including the SonarJS code quality and the Interlace secure-coding security plugins for ESLint).
+This project is using StyleLint and ESLint (including the SonarJS code quality and the Interlace secure-coding security +  browser-security plugins for ESLint).
 https://dev.to/ofri-peretz/sonarjs-has-269-rules-it-still-misses-65-of-security-vulnerabilities-3jh
+https://eslint.interlace.tools/docs/security/plugin-browser-security/rules
 
 ```sh
 npm run lint
