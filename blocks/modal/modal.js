@@ -1,7 +1,7 @@
 import {
   buildBlock, decorateBlock, loadBlock, loadCSS,
 } from '../../scripts/aem.js';
-import { loadFragment, sanitizeHTML } from '../../scripts/scripts.js';
+import { loadFragment, DOMPURIFY } from '../../scripts/scripts.js';
 
 /*
   This is not a traditional block, so there is no decorate function.
@@ -260,7 +260,7 @@ function setupMayuraConnectorLines(container) {
     const existingSvg = section.querySelector('.mayura-connector-svg');
     if (existingSvg) existingSvg.remove();
 
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const svg = document.createElementNS('https://www.w3.org/2000/svg', 'svg');
     svg.classList.add('mayura-connector-svg');
     svg.style.cssText = `
       position: absolute;
@@ -324,7 +324,7 @@ function setupMayuraConnectorLines(container) {
         y2 = buttonRect.top + (buttonRect.height / 2) - sectionRect.top;
       }
 
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      const line = document.createElementNS('https://www.w3.org/2000/svg', 'line');
       line.setAttribute('x1', x1);
       line.setAttribute('y1', y1);
       line.setAttribute('x2', x2);
@@ -399,9 +399,9 @@ export async function createModal(contentNodes, options = {}) {
   closeButton.classList.add('close-button');
   closeButton.setAttribute('aria-label', 'Close');
   closeButton.type = 'button';
-  // CWE-116: sanitizeHTML uses DOMPurify (comprehensive sanitization)
-  // eslint-disable-next-line secure-coding/no-improper-sanitization -- DOMPurify via scripts.js
-  closeButton.innerHTML = sanitizeHTML('<span class="icon icon-close"></span>');
+  const closeIcon = document.createElement('span');
+  closeIcon.className = 'icon icon-close';
+  closeButton.appendChild(closeIcon);
   closeButton.addEventListener('click', () => animatedClose(dialog));
   dialog.prepend(closeButton);
 
@@ -409,7 +409,8 @@ export async function createModal(contentNodes, options = {}) {
   if (options.ctaContent) {
     const ctaWrapper = document.createElement('div');
     ctaWrapper.classList.add('modal-cta');
-    ctaWrapper.innerHTML = sanitizeHTML(options.ctaContent);
+    ctaWrapper.innerHTML = (window.DOMPurify?.sanitize(options.ctaContent, DOMPURIFY))
+      ?? options.ctaContent;
     dialog.prepend(ctaWrapper);
   }
 

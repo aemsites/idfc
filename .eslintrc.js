@@ -1,6 +1,6 @@
 module.exports = {
   root: true,
-  plugins: ['secure-coding', 'sonarjs'],
+  plugins: ['secure-coding', 'browser-security', 'sonarjs'],
   extends: [
     'airbnb-base',
     'plugin:json/recommended',
@@ -18,10 +18,15 @@ module.exports = {
   },
   rules: {
     // secure-coding: preset is flat-config only; rules enabled manually for legacy config
+    // see https://eslint.interlace.tools/docs/security/plugin-secure-coding/rules
     'secure-coding/no-hardcoded-credentials': 'error',
     'secure-coding/no-redos-vulnerable-regex': 'error',
     'secure-coding/no-unsafe-deserialization': 'error',
-    'secure-coding/no-improper-sanitization': 'error',
+    'secure-coding/no-improper-sanitization': ['error', {
+      safeSanitizers: [
+        'DOMPurify.sanitize', 'he.encode', 'encodeURIComponent', 'encodeURI', 'escape',
+      ],
+    }],
     'secure-coding/no-format-string-injection': 'error',
     'secure-coding/no-unchecked-loop-condition': 'error',
     'secure-coding/no-unlimited-resource-allocation': 'error',
@@ -34,6 +39,43 @@ module.exports = {
     'secure-coding/no-missing-authentication': 'warn',
     'secure-coding/no-sensitive-data-exposure': 'warn',
     'secure-coding/no-pii-in-logs': 'warn',
+    // browser-security: configs.recommended is flat-config only; rules enabled manually for
+    // legacy config.see https://eslint.interlace.tools/docs/security/plugin-browser-security
+    'browser-security/no-innerhtml': ['error', {
+      trustedSanitizers: [
+        'DOMPurify.sanitize', 'sanitize', 'sanitizeHtml', 'xss', 'purify',
+      ],
+    }],
+    'browser-security/no-eval': 'error',
+    'browser-security/require-postmessage-origin-check': 'error',
+    'browser-security/no-postmessage-wildcard-origin': 'error',
+    'browser-security/no-postmessage-innerhtml': 'error',
+    'browser-security/no-sensitive-localstorage': 'error',
+    'browser-security/no-jwt-in-storage': 'error',
+    'browser-security/no-sensitive-sessionstorage': 'error',
+    'browser-security/no-sensitive-indexeddb': 'error',
+    'browser-security/no-sensitive-cookie-js': 'error',
+    'browser-security/no-cookie-auth-tokens': 'error',
+    'browser-security/require-cookie-secure-attrs': 'error',
+    'browser-security/require-websocket-wss': 'error',
+    'browser-security/no-websocket-innerhtml': 'error',
+    'browser-security/no-websocket-eval': 'error',
+    'browser-security/no-filereader-innerhtml': 'error',
+    'browser-security/require-blob-url-revocation': 'warn',
+    'browser-security/no-dynamic-service-worker-url': 'error',
+    'browser-security/no-worker-message-innerhtml': 'error',
+    'browser-security/no-unsafe-inline-csp': 'error',
+    'browser-security/no-unsafe-eval-csp': 'error',
+    'browser-security/detect-mixed-content': 'error',
+    'browser-security/no-allow-arbitrary-loads': 'error',
+    'browser-security/no-clickjacking': 'error',
+    'browser-security/no-credentials-in-query-params': 'error',
+    'browser-security/no-http-urls': 'error',
+    'browser-security/no-insecure-redirects': 'error',
+    'browser-security/require-https-only': 'error',
+    'browser-security/no-insecure-websocket': 'error',
+    'browser-security/no-unvalidated-deeplinks': 'error',
+    'browser-security/no-client-side-auth-logic': 'error',
     'import/extensions': ['error', { js: 'always' }], // require js file extensions in imports
     'linebreak-style': ['error', 'unix'], // enforce unix linebreaks
     'no-param-reassign': [2, { props: false }], // allow modifying properties of param

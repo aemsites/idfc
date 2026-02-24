@@ -14,13 +14,12 @@ import {
   loadCSS,
   loadScript,
   getMetadata,
-  sanitizeHTML,
+  DOMPURIFY,
   // readBlockConfig,
   toCamelCase,
 } from './aem.js';
 
-// Re-export for blocks that import from scripts.js
-export { sanitizeHTML };
+export { DOMPURIFY };
 
 // Max collection size before iteration to prevent DoS from excessive loops (CWE-400)
 const MAX_ITERATION_LIMIT = 500;
@@ -205,7 +204,7 @@ export async function loadFragment(path) {
     if (resp.ok) {
       await ensureDOMPurify();
       const main = document.createElement('main');
-      main.innerHTML = sanitizeHTML(await resp.text());
+      main.innerHTML = window.DOMPurify.sanitize(await resp.text(), DOMPURIFY);
 
       // reset base path for media to fragment base (whitelist attr to avoid prototype pollution)
       const resetAttributeBase = (tag, attr) => {

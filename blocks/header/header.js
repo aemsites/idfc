@@ -1,9 +1,6 @@
 import { getMetadata, decorateIcons } from '../../scripts/aem.js';
-import { loadFragment, sanitizeHTML } from '../../scripts/scripts.js';
+import { loadFragment, DOMPURIFY } from '../../scripts/scripts.js';
 import { parseCategoryNavBlock, buildDropdown } from '../category-nav/category-nav.js';
-
-/* eslint-disable secure-coding/no-improper-sanitization --
-sanitizeHTML uses DOMPurify via the import from scripts.js which linting can't see */
 
 // media query matches for different viewport sizes
 const isDesktop = window.matchMedia('(min-width: 990px)');
@@ -134,7 +131,7 @@ function createDropdown(options) {
 
   const closeBtn = document.createElement('button');
   closeBtn.className = `${className.split(' ')[0]}-close-btn`;
-  closeBtn.innerHTML = '&times;';
+  closeBtn.textContent = '\u00D7'; // × (multiplication sign / close icon)
   closeBtn.setAttribute('aria-label', 'Close');
   dropdown.appendChild(closeBtn);
 
@@ -390,14 +387,15 @@ function buildMobileOdometerContainer(odometerItemTexts) {
 
   const spans = odometerItemTexts.map((text) => `<span>${text}</span>`).join('');
   const firstItemText = odometerItemTexts[0];
-  container.innerHTML = sanitizeHTML(`
+  const odometerHtml = `
     <div class="grnt-animation-odometer">
       <div class="grnt-odometer-track">
         ${spans}
         <span>${firstItemText}</span>
       </div>
     </div>
-  `);
+  `;
+  container.innerHTML = (window.DOMPurify?.sanitize(odometerHtml, DOMPURIFY)) ?? odometerHtml;
   return container;
 }
 
@@ -458,10 +456,12 @@ function setupSearchDropdown(navToolsWrapper, navTools) {
   const mobileSearchBox = document.createElement('div');
   mobileSearchBox.className = 'mobile-search-input-wrapper';
   mobileSearchBox.id = 'mobile-search-box';
-  mobileSearchBox.innerHTML = `
+  const mobileSearchHtml = `
     <span class="icon icon-search"></span>
     <input type="text" placeholder="What are you looking for..." class="search-input mobile-search-input" />
   `;
+  mobileSearchBox.innerHTML = (window.DOMPurify?.sanitize(mobileSearchHtml, DOMPURIFY))
+   ?? mobileSearchHtml;
 
   const insertMobileSearchBox = () => {
     const firstSection = search.dropdown.querySelector('.section');
@@ -494,14 +494,19 @@ function setupSearchDropdown(navToolsWrapper, navTools) {
     if (loadingEl) loadingEl.remove();
 
     if (results.length === 0) {
-      /* eslint-disable-next-line secure-coding/no-format-string-injection --
-      HTML, sanitizeHTML; not format string */
-      container.innerHTML += sanitizeHTML(`
-        <div class="search-results-empty">
-          <p>No results found for "${query}"</p>
-          <p>Try searching for something else or press Enter to see all results</p>
-        </div>
-      `);
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'search-results-empty';
+      const p1 = document.createElement('p');
+      p1.append(
+        document.createTextNode('No results found for "'),
+        document.createTextNode(query),
+        document.createTextNode('"'),
+      );
+      emptyDiv.appendChild(p1);
+      const p2 = document.createElement('p');
+      p2.textContent = 'Try searching for something else or press Enter to see all results';
+      emptyDiv.appendChild(p2);
+      container.appendChild(emptyDiv);
       return;
     }
 
@@ -509,25 +514,31 @@ function setupSearchDropdown(navToolsWrapper, navTools) {
     resultsList.classList.add('search-results-list');
     results.forEach((result) => {
       const li = document.createElement('li');
-      li.innerHTML = sanitizeHTML(`
+      const liHtml = `
         <a href="${result.url}">
           <span class="search-result-title">${result.title}</span>
           ${result.type ? `<span class="search-result-type">${result.type}</span>` : ''}
         </a>
-      `);
+      `;
+      li.innerHTML = (window.DOMPurify?.sanitize(liHtml, DOMPURIFY)) ?? liHtml;
       resultsList.appendChild(li);
     });
     container.appendChild(resultsList);
 
     const viewAllLink = document.createElement('div');
     viewAllLink.classList.add('search-results-footer');
-    /* eslint-disable-next-line secure-coding/no-format-string-injection --
-    HTML, sanitizeHTML; not format string. Next time don't use 'query' in the format string. */
-    viewAllLink.innerHTML = sanitizeHTML(`
-      <a href="https://www.idfcfirst.bank.in/search?skey=${encodeURIComponent(query)}" class="view-all-results">
-        View all results for "${query}" <span class="icon icon-arrow-right-alt"></span>
-      </a>
-    `);
+    const viewAllAnchor = document.createElement('a');
+    viewAllAnchor.href = `https://www.idfcfirst.bank.in/search?skey=${encodeURIComponent(query)}`;
+    viewAllAnchor.className = 'view-all-results';
+    viewAllAnchor.append(
+      document.createTextNode('View all results for "'),
+      document.createTextNode(query),
+      document.createTextNode('" '),
+    );
+    const viewAllIcon = document.createElement('span');
+    viewAllIcon.className = 'icon icon-arrow-right-alt';
+    viewAllAnchor.appendChild(viewAllIcon);
+    viewAllLink.appendChild(viewAllAnchor);
     viewAllLink.querySelector('.view-all-results').addEventListener('click', () => {
       sessionStorage.setItem('searchKeySolar', query);
     });
@@ -558,16 +569,22 @@ function setupSearchDropdown(navToolsWrapper, navTools) {
     const resultsContainer = document.createElement('div');
     resultsContainer.classList.add('search-results', 'section');
     resultsContainer.setAttribute('data-search-results', 'true');
-    /* eslint-disable-next-line secure-coding/no-format-string-injection --
-    HTML, sanitizeHTML; not format string.  */
-    resultsContainer.innerHTML = sanitizeHTML(`
-      <div class="search-results-header">
-        <h3>Search results for "${query}"</h3>
-      </div>
-      <div class="search-results-loading">
-        <p>Searching...</p>
-      </div>
-    `);
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'search-results-header';
+    const headerH3 = document.createElement('h3');
+    headerH3.append(
+      document.createTextNode('Search results for "'),
+      document.createTextNode(query),
+      document.createTextNode('"'),
+    );
+    headerDiv.appendChild(headerH3);
+    resultsContainer.appendChild(headerDiv);
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'search-results-loading';
+    const loadingP = document.createElement('p');
+    loadingP.textContent = 'Searching...';
+    loadingDiv.appendChild(loadingP);
+    resultsContainer.appendChild(loadingDiv);
     firstSection.parentNode.insertBefore(resultsContainer, firstSection);
     setTimeout(() => fetchSearchResults(query, resultsContainer), 300);
   };
@@ -587,8 +604,10 @@ function setupSearchDropdown(navToolsWrapper, navTools) {
   const handleSearchKeydown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      const query = e.target.value.trim();
-      if (query) {
+      const { target } = e;
+      if (!target || typeof target.value !== 'string') return;
+      const query = String(target.value).trim();
+      if (typeof query === 'string' && query.length > 0) {
         sessionStorage.setItem('searchKeySolar', query);
         window.location.href = `https://www.idfcfirst.bank.in/search?skey=${encodeURIComponent(query)}`;
       }
@@ -673,9 +692,10 @@ function getLogoFromFragment(fragment) {
  * @param {{ logoImgSrc: string, logoImgAlt: string }} logo Logo data
  */
 function buildNavBrand(navBrand, logo) {
-  navBrand.innerHTML = sanitizeHTML(`<a href="https://www.idfcfirst.bank.in/personal-banking" aria-label="IDFC FIRST Bank Home">
+  const navBrandHtml = `<a href="https://www.idfcfirst.bank.in/personal-banking" aria-label="IDFC FIRST Bank Home">
     <img src="${logo.logoImgSrc}" alt="${logo.logoImgAlt}">
-  </a>`);
+  </a>`;
+  navBrand.innerHTML = (window.DOMPurify?.sanitize(navBrandHtml, DOMPURIFY)) ?? navBrandHtml;
 }
 
 /**
@@ -795,11 +815,14 @@ function buildNavToolsDOM(navToolsWrapper, toolsData) {
     const searchText = searchP.textContent.trim();
     const searchElement = document.createElement('p');
     searchElement.id = 'search-box';
-    /* eslint-disable secure-coding/no-graphql-injection -- HTML, sanitizeHTML; not GraphQL */
-    const searchHtml = '<span class="icon icon-search"></span>'
-      + `<input type="text" placeholder="${searchText}" class="search-input" />`;
-    /* eslint-enable secure-coding/no-graphql-injection */
-    searchElement.innerHTML = sanitizeHTML(searchHtml);
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'icon icon-search';
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.placeholder = searchText;
+    searchInput.className = 'search-input';
+    searchElement.appendChild(iconSpan);
+    searchElement.appendChild(searchInput);
     navToolsWrapper.appendChild(searchElement);
   }
 
@@ -808,14 +831,16 @@ function buildNavToolsDOM(navToolsWrapper, toolsData) {
     const odometerLi = document.createElement('li');
     const odometerSpans = odometerItemTexts.map((text) => `<span>${text}</span>`).join('');
     const firstItemText = odometerItemTexts[0];
-    odometerLi.innerHTML = sanitizeHTML(`
+    const odometerLiHtml = `
       <div class="grnt-animation-odometer">
         <div class="grnt-odometer-track">
           ${odometerSpans}
           <span>${firstItemText}</span>
         </div>
       </div>
-    `);
+    `;
+    odometerLi.innerHTML = (window.DOMPurify?.sanitize(odometerLiHtml, DOMPURIFY))
+    ?? odometerLiHtml;
     toolsUlClone.appendChild(odometerLi);
     navToolsWrapper.appendChild(toolsUlClone);
   }
@@ -998,7 +1023,10 @@ export default async function decorate(block) {
         const viewAllBtn = document.createElement('a');
         viewAllBtn.href = link.href;
         viewAllBtn.classList.add('nav-view-all-btn');
-        viewAllBtn.innerHTML = 'View All <span class="icon icon-arrow-right-alt"></span>';
+        viewAllBtn.textContent = 'View All';
+        const arrowSpan = document.createElement('span');
+        arrowSpan.className = 'icon icon-arrow-right-alt';
+        viewAllBtn.appendChild(arrowSpan);
         wrapper.appendChild(viewAllBtn);
         decorateIcons(viewAllBtn);
       }
@@ -1381,7 +1409,11 @@ export default async function decorate(block) {
         exploreLink = document.createElement('a');
         exploreLink.classList.add('explore-section-link');
         exploreLink.href = titleUrl;
-        exploreLink.innerHTML = `Explore ${titleText} <span class="arrow">→</span>`;
+        exploreLink.textContent = `Explore ${titleText}`;
+        const arrowSpan = document.createElement('span');
+        arrowSpan.className = 'arrow';
+        arrowSpan.textContent = '→';
+        exploreLink.appendChild(arrowSpan);
 
         // Insert before the fragment content
         const fragmentContent = section.querySelector('.nav-fragment-content');

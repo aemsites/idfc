@@ -1,4 +1,4 @@
-import { sanitizeHTML } from '../../scripts/scripts.js';
+import { DOMPURIFY } from '../../scripts/scripts.js';
 
 /**
  * Extract block-level fields from rows. Each row is a div containing a single div with content.
@@ -21,7 +21,7 @@ function parseBlockFields(rows) {
 
   return {
     title: firstCell?.textContent?.trim() || '',
-    text: sanitizeHTML(secondCell?.innerHTML || ''),
+    text: (window.DOMPurify?.sanitize(secondCell?.innerHTML || '', DOMPURIFY)) ?? (secondCell?.innerHTML || ''),
     image,
     imageAlt: fourthCell?.textContent?.trim() || '',
   };
@@ -57,7 +57,8 @@ function buildContainer(fields) {
   if (fields.text) {
     const textEl = document.createElement('div');
     textEl.className = 'link-to-upi-text';
-    textEl.innerHTML = sanitizeHTML(fields.text);
+    textEl.innerHTML = (window.DOMPurify?.sanitize(fields.text, DOMPURIFY))
+      ?? fields.text;
     container.append(textEl);
   }
 
@@ -67,6 +68,6 @@ function buildContainer(fields) {
 export default function decorate(block) {
   const rows = Array.from(block.children);
   const fields = parseBlockFields(rows);
-  block.innerHTML = sanitizeHTML('');
+  block.innerHTML = (window.DOMPurify?.sanitize('', DOMPURIFY)) ?? '';
   block.append(buildContainer(fields));
 }

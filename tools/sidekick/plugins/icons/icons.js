@@ -93,7 +93,11 @@ export async function decorate(container, inputData, query) {
         const icon = res.icons[iconText];
         const card = createElement('sp-card', '', { variant: 'quiet', heading: icon.label, size: 's' });
         const cardIcon = createElement('div', 'icon', { size: 's', slot: 'preview' });
-        cardIcon.innerHTML = icon.svg;
+        const svgDoc = new DOMParser().parseFromString(icon.svg, 'image/svg+xml');
+        const svgEl = svgDoc.documentElement;
+        if (svgEl?.tagName?.toLowerCase() === 'svg') {
+          cardIcon.append(svgEl);
+        }
         card.append(cardIcon);
         iconGrid.append(card);
 

@@ -577,16 +577,8 @@ async function fetchPlaceholders(prefix = 'default') {
   return cache.get(safePrefix);
 }
 
-/**
- * Sanitize HTML before assigning to innerHTML. Uses DOMPurify when available.
- * @param {string} html - Raw HTML string
- * @returns {string} Sanitized HTML safe for insertion
- */
-export function sanitizeHTML(html) {
-  if (!html || typeof html !== 'string') return html;
-  if (!window.DOMPurify) return html;
-  return window.DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
-}
+/** DOMPurify options for HTML. Use: DOMPurify.sanitize(html, DOMPURIFY). */
+export const DOMPURIFY = { USE_PROFILES: { html: true } };
 
 /**
  * Builds a block DOM Element from a two dimensional array, string, or object
@@ -606,7 +598,9 @@ function buildBlock(blockName, content) {
       vals.forEach((val) => {
         if (val) {
           if (typeof val === 'string') {
-            colEl.innerHTML += sanitizeHTML(val);
+            colEl.innerHTML += (window.DOMPurify
+              ? window.DOMPurify.sanitize(val, DOMPURIFY)
+              : val);
           } else {
             colEl.appendChild(val);
           }

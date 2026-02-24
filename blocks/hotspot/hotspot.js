@@ -6,7 +6,7 @@
  * Link hotspots (#id) navigate to other hotspot blocks.
  */
 
-import { ensureDOMPurify, moveInstrumentation, sanitizeHTML } from '../../scripts/scripts.js';
+import { ensureDOMPurify, moveInstrumentation, DOMPURIFY } from '../../scripts/scripts.js';
 
 // Per-section tracking (keyed by section element)
 // Stores: { firstBlockId, firstBlockElement, maxHeight, seenFirst, contentMap }
@@ -122,8 +122,7 @@ function showInitialPanel(container, currentBlockId, skipPaddingCalculation = fa
     return;
   }
 
-  // Show the panel with the content (sanitize in case content came from dataset/cache)
-  tooltipContent.innerHTML = sanitizeHTML(panelHTML);
+  tooltipContent.innerHTML = (window.DOMPurify?.sanitize(panelHTML, DOMPURIFY)) ?? panelHTML;
   tooltipPanel.classList.add('visible');
 
   // Only calculate padding if not skipped (during transitions, fadeTransition handles this)
@@ -220,7 +219,8 @@ function showInitialPanel(container, currentBlockId, skipPaddingCalculation = fa
 
           // eslint-disable-next-line no-use-before-define
           fadeTransition(container, () => {
-            container.innerHTML = sanitizeHTML(targetContent);
+            container.innerHTML = (window.DOMPurify?.sanitize(targetContent, DOMPURIFY))
+              ?? targetContent;
             // eslint-disable-next-line no-use-before-define
             reattachHotspotListeners(container, targetId);
             showInitialPanel(container, targetId, true);
@@ -341,7 +341,7 @@ function handleGoBackLinkClick(evt, sectionData, container, reattachListeners) {
 
   transitioningContainers.add(container);
   fadeTransition(container, () => {
-    container.innerHTML = sanitizeHTML(content);
+    container.innerHTML = (window.DOMPurify?.sanitize(content, DOMPURIFY)) ?? content;
     reattachListeners(container, targetId);
     showInitialPanel(container, targetId, true);
   });
@@ -411,7 +411,7 @@ function navigateToHotspotContent(container, targetId, hotspot, reattachListener
   transitioningContainers.add(container);
   applyClickPadding(container, hotspot);
   fadeTransition(container, () => {
-    container.innerHTML = sanitizeHTML(newContent);
+    container.innerHTML = (window.DOMPurify?.sanitize(newContent, DOMPURIFY)) ?? newContent;
     reattachListeners(container, targetId);
     showInitialPanel(container, targetId, true);
   });
@@ -439,7 +439,7 @@ function setupConnectorLine(container, currentBlockId = null) {
   if (existingSvg) existingSvg.remove();
 
   // Create SVG container
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  const svg = document.createElementNS('https://www.w3.org/2000/svg', 'svg');
   svg.classList.add('hotspot-connector-svg');
   svg.style.cssText = `
     position: absolute;
@@ -598,7 +598,7 @@ function setupConnectorLine(container, currentBlockId = null) {
     }
 
     // Create line element
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    const line = document.createElementNS('https://www.w3.org/2000/svg', 'line');
     line.setAttribute('x1', x1);
     line.setAttribute('y1', y1);
     line.setAttribute('x2', x2);
@@ -607,14 +607,14 @@ function setupConnectorLine(container, currentBlockId = null) {
     line.setAttribute('stroke-width', '1');
 
     // Create small circle at the panel item end (text side)
-    const circleStart = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    const circleStart = document.createElementNS('https://www.w3.org/2000/svg', 'circle');
     circleStart.setAttribute('cx', x1);
     circleStart.setAttribute('cy', y1);
     circleStart.setAttribute('r', '3');
     circleStart.setAttribute('fill', lineColor);
 
     // Create small circle at the hotspot end
-    const circleEnd = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    const circleEnd = document.createElementNS('https://www.w3.org/2000/svg', 'circle');
     circleEnd.setAttribute('cx', x2);
     circleEnd.setAttribute('cy', y2);
     circleEnd.setAttribute('r', '3');
@@ -669,7 +669,9 @@ function parseBlockMetadata(rows) {
     const textRow = rows[2];
     const firstCell = textRow.children[0];
     const rawHTML = firstCell ? firstCell.innerHTML?.trim() : textRow.innerHTML?.trim();
-    if (rawHTML) hotspotText = sanitizeHTML(rawHTML);
+    if (rawHTML) {
+      hotspotText = (window.DOMPurify?.sanitize(rawHTML, DOMPURIFY)) ?? rawHTML;
+    }
   }
   return { imageElement, blockId, hotspotText };
 }
@@ -693,8 +695,9 @@ function handleStandardHotspotClick(
     return;
   }
   hotspot.classList.add('active');
+  const panelItemHtml = `<div class="hotspot-panel-item">${hotspotText}</div>`;
   tooltipContent.innerHTML = hotspotText
-    ? sanitizeHTML(`<div class="hotspot-panel-item">${hotspotText}</div>`)
+    ? ((window.DOMPurify?.sanitize(panelItemHtml, DOMPURIFY)) ?? panelItemHtml)
     : '';
   tooltipPanel.classList.add('visible');
   attachGoBackHandlers(tooltipContent, container, reattachListeners);
@@ -860,7 +863,9 @@ export default async function decorate(block) {
   // Content is stored per-section to avoid conflicts between sections with same block IDs.
   // Sanitize before storing to keep contentMap safe for later innerHTML use.
   if (blockId) {
-    sectionData.contentMap.set(blockId, sanitizeHTML(container.innerHTML));
+    const stored = (window.DOMPurify?.sanitize(container.innerHTML, DOMPURIFY))
+      ?? container.innerHTML;
+    sectionData.contentMap.set(blockId, stored);
   }
 }
 
@@ -905,7 +910,8 @@ function reattachHotspotListeners(container, blockId) {
 
         if (!isActive && tooltipPanel && tooltipContent) {
           hotspot.classList.add('active');
-          tooltipContent.innerHTML = sanitizeHTML(panelHTML);
+          tooltipContent.innerHTML = (window.DOMPurify?.sanitize(panelHTML, DOMPURIFY))
+          ?? panelHTML;
           tooltipPanel.classList.add('visible');
 
           // Attach go-back handlers to any links with href starting with #
