@@ -8,6 +8,14 @@
 
 import { ensureDOMPurify, moveInstrumentation, DOMPURIFY } from '../../scripts/scripts.js';
 
+/** DOMPurify config for hotspot container HTML: preserve data-* attributes for navigation. */
+const HOTSPOT_CONTAINER_DOMPURIFY = {
+  ...DOMPURIFY,
+  ADD_ATTR: [
+    'data-target-hotspot', 'data-panel-content', 'data-x', 'data-y', 'data-original-block-id',
+  ],
+};
+
 // Per-section tracking (keyed by section element)
 // Stores: { firstBlockId, firstBlockElement, maxHeight, seenFirst, contentMap }
 // contentMap stores original decorated content for each hotspot block by ID within that section
@@ -219,8 +227,9 @@ function showInitialPanel(container, currentBlockId, skipPaddingCalculation = fa
 
           // eslint-disable-next-line no-use-before-define
           fadeTransition(container, () => {
-            container.innerHTML = (window.DOMPurify?.sanitize(targetContent, DOMPURIFY))
-              ?? targetContent;
+            const cfg = HOTSPOT_CONTAINER_DOMPURIFY;
+            const sanitized = window.DOMPurify?.sanitize(targetContent, cfg);
+            container.innerHTML = sanitized ?? targetContent;
             // eslint-disable-next-line no-use-before-define
             reattachHotspotListeners(container, targetId);
             showInitialPanel(container, targetId, true);
@@ -341,7 +350,8 @@ function handleGoBackLinkClick(evt, sectionData, container, reattachListeners) {
 
   transitioningContainers.add(container);
   fadeTransition(container, () => {
-    container.innerHTML = (window.DOMPurify?.sanitize(content, DOMPURIFY)) ?? content;
+    const sanitized = window.DOMPurify?.sanitize(content, HOTSPOT_CONTAINER_DOMPURIFY);
+    container.innerHTML = sanitized ?? content;
     reattachListeners(container, targetId);
     showInitialPanel(container, targetId, true);
   });
@@ -411,7 +421,8 @@ function navigateToHotspotContent(container, targetId, hotspot, reattachListener
   transitioningContainers.add(container);
   applyClickPadding(container, hotspot);
   fadeTransition(container, () => {
-    container.innerHTML = (window.DOMPurify?.sanitize(newContent, DOMPURIFY)) ?? newContent;
+    const sanitized = window.DOMPurify?.sanitize(newContent, HOTSPOT_CONTAINER_DOMPURIFY);
+    container.innerHTML = sanitized ?? newContent;
     reattachListeners(container, targetId);
     showInitialPanel(container, targetId, true);
   });
@@ -434,31 +445,25 @@ function setupConnectorLine(container, currentBlockId = null) {
   const existingCleanup = animationFrameMap.get(cleanupKey);
   if (existingCleanup) existingCleanup();
 
-  // Remove any existing SVG
-  const existingSvg = container.querySelector('.hotspot-connector-svg');
-  if (existingSvg) existingSvg.remove();
+  // Remove any existing connector (wrapper + SVG)
+  const existingWrapper = container.querySelector('.hotspot-connector-wrapper');
+  if (existingWrapper) existingWrapper.remove();
 
-  // Create SVG container
-  const svg = document.createElementNS('https://www.w3.org/2000/svg', 'svg');
-  svg.classList.add('hotspot-connector-svg');
-  svg.style.cssText = `
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    overflow: visible;
-    z-index: 1;
-  `;
-  container.style.position = 'relative';
-  container.appendChild(svg);
+  if (container.style) container.style.position = 'relative';
+
+  // Wrapper div: use .style so connector overlays container
+  const wrapper = document.createElement('div');
+  wrapper.className = 'hotspot-connector-wrapper';
+  const wrapperStyle = 'position:absolute;inset:0;pointer-events:none;overflow:visible;'
+    + 'z-index:10';
+  wrapper.style.cssText = wrapperStyle;
+  container.appendChild(wrapper);
 
   let animationFrameId = null;
 
   function drawLine() {
-    // Clear existing lines
-    svg.innerHTML = '';
+    // Clear previous frame's line
+    wrapper.querySelectorAll('.hotspot-connector-line').forEach((el) => el.remove());
 
     const tooltipPanel = container.querySelector('.hotspot-tooltip-panel');
     const panelItem = container.querySelector('.hotspot-panel-item');
@@ -487,6 +492,12 @@ function setupConnectorLine(container, currentBlockId = null) {
     }
 
     const containerRect = container.getBoundingClientRect();
+    const w = containerRect.width;
+    const h = containerRect.height;
+    if (!w || !h) {
+      animationFrameId = requestAnimationFrame(drawLine);
+      return;
+    }
     const hotspotRect = targetHotspot.getBoundingClientRect();
     const tooltipPanelRect = tooltipPanel.getBoundingClientRect();
     const imageSectionRect = imageSection.getBoundingClientRect();
@@ -538,8 +549,7 @@ function setupConnectorLine(container, currentBlockId = null) {
     // Offset to add spacing between text and line start
     const lineOffset = 10;
 
-    // Line color - dark gray
-    const lineColor = '#555';
+    const lineColor = 'black';
 
     // Hotspot center coordinates
     const hotspotCenterX = hotspotRect.left + (hotspotRect.width / 2) - containerRect.left;
@@ -597,32 +607,15 @@ function setupConnectorLine(container, currentBlockId = null) {
       y2 = hotspotCenterY;
     }
 
-    // Create line element
-    const line = document.createElementNS('https://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', x1);
-    line.setAttribute('y1', y1);
-    line.setAttribute('x2', x2);
-    line.setAttribute('y2', y2);
-    line.setAttribute('stroke', lineColor);
-    line.setAttribute('stroke-width', '1');
+    // Draw connector as a rotated div (avoids SVG rendering issues)
+    const length = Math.hypot(x2 - x1, y2 - y1);
+    const angleDeg = (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI;
 
-    // Create small circle at the panel item end (text side)
-    const circleStart = document.createElementNS('https://www.w3.org/2000/svg', 'circle');
-    circleStart.setAttribute('cx', x1);
-    circleStart.setAttribute('cy', y1);
-    circleStart.setAttribute('r', '3');
-    circleStart.setAttribute('fill', lineColor);
-
-    // Create small circle at the hotspot end
-    const circleEnd = document.createElementNS('https://www.w3.org/2000/svg', 'circle');
-    circleEnd.setAttribute('cx', x2);
-    circleEnd.setAttribute('cy', y2);
-    circleEnd.setAttribute('r', '3');
-    circleEnd.setAttribute('fill', lineColor);
-
-    svg.appendChild(line);
-    svg.appendChild(circleStart);
-    svg.appendChild(circleEnd);
+    const lineEl = document.createElement('div');
+    lineEl.className = 'hotspot-connector-line';
+    lineEl.style.cssText = `position:absolute;left:${x1}px;top:${y1}px;width:${length}px;`
+      + `height:1px;background:${lineColor};transform-origin:0 50%;transform:rotate(${angleDeg}deg);`;
+    wrapper.appendChild(lineEl);
 
     // Continue the animation loop
     animationFrameId = requestAnimationFrame(drawLine);
@@ -637,8 +630,8 @@ function setupConnectorLine(container, currentBlockId = null) {
       cancelAnimationFrame(animationFrameId);
       animationFrameId = null;
     }
-    if (svg.parentNode) {
-      svg.remove();
+    if (wrapper.parentNode) {
+      wrapper.remove();
     }
   };
 
@@ -861,9 +854,9 @@ export default async function decorate(block) {
 
   // Store original content AFTER showing initial panel (so stored state includes visible panel)
   // Content is stored per-section to avoid conflicts between sections with same block IDs.
-  // Sanitize before storing to keep contentMap safe for later innerHTML use.
+  // Use HOTSPOT_CONTAINER_DOMPURIFY so data-target-hotspot/data-panel-content are preserved.
   if (blockId) {
-    const stored = (window.DOMPurify?.sanitize(container.innerHTML, DOMPURIFY))
+    const stored = (window.DOMPurify?.sanitize(container.innerHTML, HOTSPOT_CONTAINER_DOMPURIFY))
       ?? container.innerHTML;
     sectionData.contentMap.set(blockId, stored);
   }

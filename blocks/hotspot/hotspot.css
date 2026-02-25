@@ -39,7 +39,8 @@
   opacity: 0;
 }
 
-.hotspot-container.fade-out .hotspot-connector-svg {
+.hotspot-container.fade-out .hotspot-connector-svg,
+.hotspot-container.fade-out .hotspot-connector-wrapper {
   visibility: hidden;
 }
 
