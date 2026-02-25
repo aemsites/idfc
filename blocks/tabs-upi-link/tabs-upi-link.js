@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-unresolved
 import { toClassName } from '../../scripts/aem.js';
-import { moveInstrumentation } from '../../scripts/scripts.js';
+import { ensureDOMPurify, moveInstrumentation, DOMPURIFY } from '../../scripts/scripts.js';
 
 /**
  * Returns a fallback video URL for DAM paths. When the primary URL is /content/dam/...,
@@ -58,6 +58,55 @@ function createVideoElement(videoSrc, fallbackUrl = null) {
 }
 
 /**
+ * Remove the .mp4 link from the DOM (prefer removing parent p if present).
+ * @param {HTMLAnchorElement} link - The link element to remove
+ */
+function removeMp4LinkFromDom(link) {
+  const p = link.closest('p');
+  if (p) p.remove();
+  else link.remove();
+}
+
+/**
+ * Try to get video URL from an anchor with .mp4 href. Removes the link from DOM on success.
+ * @param {HTMLAnchorElement|null} link - Link element
+ * @returns {string|null} Absolute video URL or null
+ */
+function getVideoUrlFromMp4Link(link) {
+  if (!link) return null;
+  const raw = link.getAttribute('href');
+  if (!raw) return null;
+  try {
+    const url = new URL(raw, window.location.href).href;
+    removeMp4LinkFromDom(link);
+    return url;
+  } catch {
+    if (link.href) {
+      removeMp4LinkFromDom(link);
+      return link.href;
+    }
+    return null;
+  }
+}
+
+/**
+ * Try to get video URL from legacy paragraph text (plain URL ending in .mp4). Removes p on success.
+ * @param {HTMLElement} phoneGroupDiv - Container to search for p
+ * @returns {string|null} Video URL or null
+ */
+function getVideoUrlFromLegacyParagraph(phoneGroupDiv) {
+  const p = phoneGroupDiv.querySelector('p');
+  if (!p) return null;
+  const text = p.textContent.trim();
+  // eslint-disable-next-line browser-security/detect-mixed-content -- localhost is valid
+  if (text.endsWith('.mp4') && (text.startsWith('http://localhost') || text.startsWith('https://'))) {
+    p.remove();
+    return text;
+  }
+  return null;
+}
+
+/**
  * Gets the phone animation video URL from the phone group div (picture + .mp4 link).
  * Removes the link from the DOM so it is not shown. Supports AEM picker links and
  * legacy plain HTTP(S) URLs in a paragraph.
@@ -66,43 +115,18 @@ function createVideoElement(videoSrc, fallbackUrl = null) {
  */
 function getPhoneVideoUrlFromPhoneGroup(phoneGroupDiv) {
   const link = phoneGroupDiv.querySelector('a[href*=".mp4"]');
-  if (link) {
-    const raw = link.getAttribute('href');
-    if (raw) {
-      try {
-        const url = new URL(raw, window.location.href).href;
-        const p = link.closest('p');
-        if (p) p.remove();
-        else link.remove();
-        return url;
-      } catch {
-        if (link.href) {
-          const p = link.closest('p');
-          if (p) p.remove();
-          else link.remove();
-          return link.href;
-        }
-      }
-    }
-  }
-  const p = phoneGroupDiv.querySelector('p');
-  if (p) {
-    const text = p.textContent.trim();
-    if (text.endsWith('.mp4') && (text.startsWith('http://') || text.startsWith('https://'))) {
-      p.remove();
-      return text;
-    }
-  }
-  return null;
+  const fromLink = link ? getVideoUrlFromMp4Link(link) : null;
+  if (fromLink) return fromLink;
+  return getVideoUrlFromLegacyParagraph(phoneGroupDiv);
 }
 
-export default async function decorate(block) {
-  if (block.querySelector('.tabs-list')) return;
-
-  const children = [...block.children];
+/**
+ * @param {HTMLElement[]} children
+ * @returns {{ titleDiv: HTMLElement|undefined, imageDiv: HTMLElement|undefined,
+ *   phoneGroupDiv: HTMLElement|null, pictureSourceDiv: HTMLElement|undefined|null }}
+ */
+function getBlockStructure(children) {
   const titleDiv = children.find((child) => child.querySelector('h2'));
-
-  // Image cell: either image-only (old) or phone group with picture + video link (new)
   const imageDiv = children.find((child) => {
     const hasPicture = child.querySelector('picture');
     const hasOtherContent = child.querySelector('h2, h3, p');
@@ -112,6 +136,140 @@ export default async function decorate(block) {
     ? children.find((child) => child !== titleDiv && child.querySelector('picture') && child.querySelector('a[href*=".mp4"]'))
     : null;
   const pictureSourceDiv = imageDiv || phoneGroupDiv;
+  return {
+    titleDiv, imageDiv, phoneGroupDiv, pictureSourceDiv,
+  };
+}
+
+/**
+ * Build tablist buttons and populate tabNames map.
+ * @param {HTMLElement} block
+ * @param {HTMLElement[]} tabPanels
+ * @param {HTMLElement} tablist
+ * @param {Map<number, string>} tabNames
+ */
+function buildTabButtons(block, tabPanels, tablist, tabNames) {
+  tabPanels.forEach((tabpanel, i) => {
+    const firstChildDiv = tabpanel.querySelector(':scope > div:first-child');
+    if (!firstChildDiv) return;
+
+    const tabNameElement = firstChildDiv.querySelector('p');
+    if (!tabNameElement) return;
+
+    const tabName = tabNameElement.textContent.trim();
+    if (!tabName) return;
+
+    tabNames.set(i, i === 0 ? 'the app' : tabName);
+    const id = toClassName(tabName);
+
+    tabpanel.className = 'tabs-panel';
+    tabpanel.id = `tabpanel-${id}`;
+    tabpanel.setAttribute('aria-hidden', !!i);
+    tabpanel.setAttribute('aria-labelledby', `tab-${id}`);
+    tabpanel.setAttribute('role', 'tabpanel');
+
+    const button = document.createElement('button');
+    button.className = 'tabs-tab';
+    button.id = `tab-${id}`;
+    moveInstrumentation(tabNameElement.parentElement, tabpanel.lastElementChild);
+    const tabLabelHtml = `<p>${tabNameElement.innerHTML}</p>`;
+    button.innerHTML = window.DOMPurify.sanitize(tabLabelHtml, DOMPURIFY);
+
+    button.setAttribute('aria-controls', `tabpanel-${id}`);
+    button.setAttribute('aria-selected', !i);
+    button.setAttribute('role', 'tab');
+    button.setAttribute('type', 'button');
+    button.addEventListener('click', () => {
+      if (button.getAttribute('aria-selected') === 'true') return;
+      block.querySelectorAll('[role=tabpanel]').forEach((panel) => {
+        panel.setAttribute('aria-hidden', true);
+      });
+      tablist.querySelectorAll('button').forEach((btn) => {
+        btn.setAttribute('aria-selected', false);
+      });
+      tabpanel.setAttribute('aria-hidden', false);
+      button.setAttribute('aria-selected', true);
+    });
+    tablist.append(button);
+    firstChildDiv.remove();
+    const buttonP = button.querySelector('p');
+    if (buttonP) moveInstrumentation(buttonP, null);
+  });
+}
+
+/**
+ * Build image section and mobile panel layout when picture source exists.
+ * @param {HTMLElement} pictureSourceDiv
+ * @param {HTMLElement[]} tabPanels
+ * @param {HTMLElement} tabsWrapper
+ */
+function buildImageAndMobilePanels(pictureSourceDiv, tabPanels, tabsWrapper) {
+  if (!pictureSourceDiv) return;
+  const picture = pictureSourceDiv.querySelector('picture');
+  if (!picture) return;
+
+  const imageWrapper = document.createElement('div');
+  imageWrapper.className = 'tabs-upi-link-image';
+  imageWrapper.appendChild(picture.cloneNode(true));
+  const videoContainer = document.createElement('div');
+  videoContainer.className = 'phone-animation-video-container';
+  imageWrapper.appendChild(videoContainer);
+  tabsWrapper.appendChild(imageWrapper);
+
+  tabPanels.forEach((tabpanel) => {
+    const mobileImageWrapper = document.createElement('div');
+    mobileImageWrapper.className = 'tabs-upi-link-panel-image';
+    mobileImageWrapper.appendChild(picture.cloneNode(true));
+    const mobileVideoContainer = document.createElement('div');
+    mobileVideoContainer.className = 'phone-animation-video-container mobile';
+    mobileImageWrapper.appendChild(mobileVideoContainer);
+
+    const buttonContainer = tabpanel.querySelector('.button-container');
+    if (buttonContainer) buttonContainer.remove();
+
+    const contentWrapper = document.createElement('div');
+    contentWrapper.className = 'tabs-upi-link-panel-content';
+    while (tabpanel.firstChild) {
+      contentWrapper.appendChild(tabpanel.firstChild);
+    }
+    const topSection = document.createElement('div');
+    topSection.className = 'tabs-upi-link-panel-top';
+    topSection.appendChild(mobileImageWrapper);
+    topSection.appendChild(contentWrapper);
+    tabpanel.appendChild(topSection);
+    if (buttonContainer) tabpanel.appendChild(buttonContainer);
+  });
+}
+
+/**
+ * Attach video elements to all .phone-animation-video-container in the block.
+ * @param {HTMLElement} block
+ */
+function attachVideosToBlock(block) {
+  const videoPath = block.dataset.phoneVideoUrl;
+  if (!videoPath) return;
+
+  const fallbackUrl = getBlockFallbackVideoUrl(videoPath);
+  let useFallbackFirst = false;
+  try {
+    useFallbackFirst = Boolean(fallbackUrl && new URL(videoPath).pathname.includes('/content/dam/'));
+  } catch {
+    // ignore
+  }
+  const initialUrl = useFallbackFirst ? fallbackUrl : videoPath;
+  const errorFallbackUrl = useFallbackFirst ? null : fallbackUrl;
+  block.querySelectorAll('.phone-animation-video-container').forEach((container) => {
+    container.appendChild(createVideoElement(initialUrl, errorFallbackUrl));
+  });
+}
+
+export default async function decorate(block) {
+  if (block.querySelector('.tabs-list')) return;
+
+  await ensureDOMPurify();
+
+  const children = [...block.children];
+  const { titleDiv, phoneGroupDiv, pictureSourceDiv } = getBlockStructure(children);
 
   if (phoneGroupDiv) {
     const videoUrl = getPhoneVideoUrlFromPhoneGroup(phoneGroupDiv);
@@ -132,97 +290,12 @@ export default async function decorate(block) {
   const tablist = document.createElement('div');
   tablist.className = 'tabs-list';
   tablist.setAttribute('role', 'tablist');
-  const tabNames = [];
-  const processableTabs = tabPanels.map((tabpanel) => ({ tabpanel }));
-
-  processableTabs.forEach(({ tabpanel }, i) => {
-    const firstChildDiv = tabpanel.querySelector(':scope > div:first-child');
-    if (!firstChildDiv) return;
-
-    const tabNameElement = firstChildDiv.querySelector('p');
-    if (!tabNameElement) return;
-
-    const tabName = tabNameElement.textContent.trim();
-    if (!tabName) return;
-
-    tabNames.push(i === 0 ? 'the app' : tabName);
-    const id = toClassName(tabName);
-
-    tabpanel.className = 'tabs-panel';
-    tabpanel.id = `tabpanel-${id}`;
-    tabpanel.setAttribute('aria-hidden', !!i);
-    tabpanel.setAttribute('aria-labelledby', `tab-${id}`);
-    tabpanel.setAttribute('role', 'tabpanel');
-
-    // Build tab button
-    const button = document.createElement('button');
-    button.className = 'tabs-tab';
-    button.id = `tab-${id}`;
-    moveInstrumentation(tabNameElement.parentElement, tabpanel.lastElementChild);
-    button.innerHTML = `<p>${tabNameElement.innerHTML}</p>`;
-
-    button.setAttribute('aria-controls', `tabpanel-${id}`);
-    button.setAttribute('aria-selected', !i);
-    button.setAttribute('role', 'tab');
-    button.setAttribute('type', 'button');
-    button.addEventListener('click', () => {
-      if (button.getAttribute('aria-selected') === 'true') return;
-      block.querySelectorAll('[role=tabpanel]').forEach((panel) => {
-        panel.setAttribute('aria-hidden', true);
-      });
-      tablist.querySelectorAll('button').forEach((btn) => {
-        btn.setAttribute('aria-selected', false);
-      });
-      tabpanel.setAttribute('aria-hidden', false);
-      button.setAttribute('aria-selected', true);
-    });
-    tablist.append(button);
-    firstChildDiv.remove();
-    const buttonP = button.querySelector('p');
-    if (buttonP) {
-      moveInstrumentation(buttonP, null);
-    }
-  });
+  const tabNames = new Map();
+  buildTabButtons(block, tabPanels, tablist, tabNames);
 
   const tabsWrapper = document.createElement('div');
   tabsWrapper.className = 'tabs-upi-link-content';
-
-  if (pictureSourceDiv) {
-    const imageWrapper = document.createElement('div');
-    imageWrapper.className = 'tabs-upi-link-image';
-    const picture = pictureSourceDiv.querySelector('picture');
-    if (picture) {
-      imageWrapper.appendChild(picture.cloneNode(true));
-      const videoContainer = document.createElement('div');
-      videoContainer.className = 'phone-animation-video-container';
-      imageWrapper.appendChild(videoContainer);
-      tabsWrapper.appendChild(imageWrapper);
-
-      tabPanels.forEach((tabpanel) => {
-        const mobileImageWrapper = document.createElement('div');
-        mobileImageWrapper.className = 'tabs-upi-link-panel-image';
-        mobileImageWrapper.appendChild(picture.cloneNode(true));
-        const mobileVideoContainer = document.createElement('div');
-        mobileVideoContainer.className = 'phone-animation-video-container mobile';
-        mobileImageWrapper.appendChild(mobileVideoContainer);
-
-        const buttonContainer = tabpanel.querySelector('.button-container');
-        if (buttonContainer) buttonContainer.remove();
-
-        const contentWrapper = document.createElement('div');
-        contentWrapper.className = 'tabs-upi-link-panel-content';
-        while (tabpanel.firstChild) {
-          contentWrapper.appendChild(tabpanel.firstChild);
-        }
-        const topSection = document.createElement('div');
-        topSection.className = 'tabs-upi-link-panel-top';
-        topSection.appendChild(mobileImageWrapper);
-        topSection.appendChild(contentWrapper);
-        tabpanel.appendChild(topSection);
-        if (buttonContainer) tabpanel.appendChild(buttonContainer);
-      });
-    }
-  }
+  buildImageAndMobilePanels(pictureSourceDiv, tabPanels, tabsWrapper);
 
   const tabsContainer = document.createElement('div');
   tabsContainer.className = 'tabs-upi-link-tabs';
@@ -232,10 +305,11 @@ export default async function decorate(block) {
   tabPanels.forEach((tabpanel) => {
     tabsContainer.appendChild(tabpanel);
     const qrPicture = tabpanel.querySelector('.tabs-upi-link-panel-content picture');
-    if (qrPicture && tabNames[tabIndex]) {
+    const tabLabel = tabNames.get(tabIndex);
+    if (qrPicture && tabLabel) {
       const qrText = document.createElement('p');
       qrText.className = 'tabs-upi-link-qr-text';
-      qrText.textContent = `Scan the QR code to open ${tabNames[tabIndex]}`;
+      qrText.textContent = `Scan the QR code to open ${tabLabel}`;
       const qrWrapper = document.createElement('div');
       qrWrapper.className = 'tabs-upi-link-qr-wrapper';
       qrPicture.parentNode.insertBefore(qrWrapper, qrPicture);
@@ -270,20 +344,5 @@ export default async function decorate(block) {
     resizeTimeout = setTimeout(updateScanToTap, 150);
   });
 
-  const videoPath = block.dataset.phoneVideoUrl;
-  if (videoPath) {
-    const fallbackUrl = getBlockFallbackVideoUrl(videoPath);
-    // Use block fallback as initial source when primary is a DAM path (often 404 in EDS/preview)
-    let useFallbackFirst = false;
-    try {
-      useFallbackFirst = Boolean(fallbackUrl && new URL(videoPath).pathname.includes('/content/dam/'));
-    } catch {
-      // ignore
-    }
-    const initialUrl = useFallbackFirst ? fallbackUrl : videoPath;
-    const errorFallbackUrl = useFallbackFirst ? null : fallbackUrl;
-    block.querySelectorAll('.phone-animation-video-container').forEach((container) => {
-      container.appendChild(createVideoElement(initialUrl, errorFallbackUrl));
-    });
-  }
+  attachVideosToBlock(block);
 }
