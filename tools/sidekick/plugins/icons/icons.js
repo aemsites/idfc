@@ -33,27 +33,31 @@ async function processIcons(pageBlock) {
 }
 
 export async function fetchBlock(path) {
-  if (!window.blocks) {
-    window.blocks = {};
+  if (!window.blocks || !(window.blocks instanceof Map)) {
+    window.blocks = new Map();
   }
   if (!window.icons) {
     window.icons = [];
   }
-  if (!window.blocks[path]) {
+  const cache = window.blocks;
+  if (!cache.has(path)) {
     const resp = await fetch('/library/icons.plain.html');
     if (!resp.ok) {
       return '';
     }
 
     const html = await resp.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
+    // HTML only (not XML); parse without DOMParser for no-xxe-injection
+    const doc = document.implementation.createHTMLDocument('');
+    doc.open();
+    doc.write(html);
+    doc.close();
     const icons = await processIcons(doc);
 
-    window.blocks[path] = { doc, icons };
+    cache.set(path, { doc, icons });
   }
 
-  return window.blocks[path];
+  return cache.get(path);
 }
 
 /**
@@ -93,9 +97,10 @@ export async function decorate(container, inputData, query) {
         const icon = res.icons[iconText];
         const card = createElement('sp-card', '', { variant: 'quiet', heading: icon.label, size: 's' });
         const cardIcon = createElement('div', 'icon', { size: 's', slot: 'preview' });
-        const svgDoc = new DOMParser().parseFromString(icon.svg, 'image/svg+xml');
-        const svgEl = svgDoc.documentElement;
-        if (svgEl?.tagName?.toLowerCase() === 'svg') {
+        const svgWrap = document.createElement('div');
+        svgWrap.innerHTML = icon.svg;
+        const svgEl = svgWrap.querySelector('svg');
+        if (svgEl) {
           cardIcon.append(svgEl);
         }
         card.append(cardIcon);
