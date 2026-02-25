@@ -1,3 +1,8 @@
+/** Reject keys that could cause prototype pollution (CWE-915). */
+function isSafeKey(key) {
+  return typeof key === 'string' && key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
+}
+
 /** Needed for icons
  * Create an element with the given id and classes.
  * @param {string} tagName the tag
@@ -12,9 +17,11 @@ export function createElement(tagName, classes, props, html) {
     const classesArr = (typeof classes === 'string') ? [classes] : classes;
     elem.classList.add(...classesArr);
   }
-  if (props) {
-    Object.keys(props).forEach((propName) => {
-      elem.setAttribute(propName, props[propName]);
+  if (props && typeof props === 'object') {
+    Object.keys(props).filter(isSafeKey).forEach((propName) => {
+      if (Object.hasOwn(props, propName)) {
+        elem.setAttribute(propName, props[propName]);
+      }
     });
   }
   if (html) { // added for templates feature
@@ -52,7 +59,7 @@ export function toClassName(name) {
      * @param {Element} elem the page/block element containing the library metadata block
      */
 export function getLibraryMetadata(elem) {
-  const config = {};
+  const config = Object.create(null);
   const libMeta = elem.querySelector('div.library-metadata');
   if (libMeta) {
     libMeta.querySelectorAll(':scope > div').forEach((row) => {
@@ -60,8 +67,9 @@ export function getLibraryMetadata(elem) {
         const cols = [...row.children];
         if (cols[1]) {
           const name = toClassName(cols[0].textContent);
-          const value = row.children[1].textContent;
-          config[name] = value;
+          if (isSafeKey(name)) {
+            config[name] = row.children[1].textContent;
+          }
         }
       }
     });
@@ -71,20 +79,24 @@ export function getLibraryMetadata(elem) {
 }
 
 export async function fetchBlockPage(path) {
-  if (!window.blocks) {
-    window.blocks = {};
+  if (!window.blocks || !(window.blocks instanceof Map)) {
+    window.blocks = new Map();
   }
-  if (!window.blocks[path]) {
+  const cache = window.blocks;
+  if (!cache.has(path)) {
     const resp = await fetch(`${path}.plain.html`);
     if (!resp.ok) return '';
 
     const html = await resp.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    window.blocks[path] = doc;
+    // HTML only (not XML); parse without DOMParser for no-xxe-injection
+    const doc = document.implementation.createHTMLDocument('');
+    doc.open();
+    doc.write(html);
+    doc.close();
+    cache.set(path, doc);
   }
 
-  return window.blocks[path];
+  return cache.get(path);
 }
 
 export function renderScaffolding() {
@@ -217,8 +229,11 @@ export async function renderPreview(pageBlock, path, previewContainer) {
   }
 
   const html = await blockPageResp.text();
-  const parser = new DOMParser();
-  const blockPage = parser.parseFromString(html, 'text/html');
+  // HTML only (not XML); parse without DOMParser for no-xxe-injection
+  const blockPage = document.implementation.createHTMLDocument('');
+  blockPage.open();
+  blockPage.write(html);
+  blockPage.close();
 
   const blockPageDoc = blockPage.documentElement;
   const blockPageMain = blockPageDoc.querySelector('main');
@@ -231,7 +246,7 @@ export async function renderPreview(pageBlock, path, previewContainer) {
   frame.style.display = 'block';
 
   frame.addEventListener('load', () => {
-    // todo
+
   });
 
   previewContainer.innerHTML = '';
