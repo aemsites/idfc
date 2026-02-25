@@ -115,12 +115,13 @@ function initializeStepsAnimation(block, ul, animationDuration) {
   }
 }
 
-export default function decorate(block) {
-  const rows = Array.from(block.children);
-
-  // Extract block-level metadata fields from single-cell rows at the top
-  // Block model fields (from "steps" model) are rendered as rows with 1 cell each
-  // Block item fields (from "steps-item" model) are rendered as rows with multiple cells
+/**
+ * Parse block-level metadata from the first rows (single-cell rows from "steps" model).
+ * @param {HTMLDivElement[]} rows - Block children (table rows)
+ * @returns {{ metadataRowCount: number, title: string, subtitle: string,
+ *   componentId: string, animation: string, animationDuration: string }}
+ */
+function parseStepsMetadata(rows) {
   let metadataRowCount = 0;
   let title = '';
   let subtitle = '';
@@ -128,35 +129,37 @@ export default function decorate(block) {
   let animation = '';
   let animationDuration = '';
 
-  // Row 0: title (1 cell, plain text)
   if (rows.length > 0 && rows[0].children.length === 1) {
     title = rows[0].children[0]?.textContent?.trim() || '';
     metadataRowCount = 1;
   }
-
-  // Row 1: subtitle (1 cell, plain text or richtext)
   if (rows.length > 1 && rows[1].children.length === 1) {
     subtitle = rows[1].children[0]?.textContent?.trim() || '';
     metadataRowCount = 2;
   }
-
-  // Row 2: componentId (1 cell, plain text)
   if (rows.length > 2 && rows[2].children.length === 1) {
     componentId = rows[2].children[0]?.textContent?.trim() || '';
     metadataRowCount = 3;
   }
-
-  // Row 3: animation (1 cell, boolean/select value)
   if (rows.length > 3 && rows[3].children.length === 1) {
     animation = rows[3].children[0]?.textContent?.trim() || '';
     metadataRowCount = 4;
   }
-
-  // Row 4: animationDuration (1 cell, number)
   if (rows.length > 4 && rows[4].children.length === 1) {
     animationDuration = rows[4].children[0]?.textContent?.trim() || '';
     metadataRowCount = 5;
   }
+
+  return {
+    metadataRowCount, title, subtitle, componentId, animation, animationDuration,
+  };
+}
+
+export default function decorate(block) {
+  const rows = Array.from(block.children);
+  const {
+    metadataRowCount, title, subtitle, componentId, animation, animationDuration,
+  } = parseStepsMetadata(rows);
 
   // Check if block already has 'animated' class (set by 'classes' field in model)
   const hasAnimatedClass = block.classList.contains('animated');
