@@ -181,7 +181,7 @@ export function parseCategoryNavBlock(block) {
 
   return {
     title: categoryName,
-    id: categoryName.toLowerCase().replace(/\s+/g, '-').replace(/[&]/g, ''),
+    id: categoryName.toLowerCase().replace(/\s+/g, '-').replace(/&/g, ''),
     eyebrowTitle,
     linkText,
     linkUrl,
@@ -358,13 +358,19 @@ export function buildDropdown(categoryData) {
     const prevButton = document.createElement('button');
     prevButton.classList.add('category-nav-nav-button', 'category-nav-nav-prev');
     prevButton.setAttribute('aria-label', 'Previous');
-    prevButton.innerHTML = '<span class="nav-arrow">‹</span>';
+    const prevArrow = document.createElement('span');
+    prevArrow.classList.add('nav-arrow');
+    prevArrow.textContent = '‹';
+    prevButton.appendChild(prevArrow);
     prevButton.disabled = true; // Start disabled
 
     const nextButton = document.createElement('button');
     nextButton.classList.add('category-nav-nav-button', 'category-nav-nav-next');
     nextButton.setAttribute('aria-label', 'Next');
-    nextButton.innerHTML = '<span class="nav-arrow">›</span>';
+    const nextArrow = document.createElement('span');
+    nextArrow.classList.add('nav-arrow');
+    nextArrow.textContent = '›';
+    nextButton.appendChild(nextArrow);
 
     navigationWrapper.appendChild(prevButton);
     navigationWrapper.appendChild(nextButton);
@@ -432,6 +438,7 @@ function buildUnifiedNavigation(categoriesData) {
 
       // Only add bulletin-notification class for bell icon items
       if (category.title === 'bell-outline' || category.title === 'bell') {
+        /* eslint-disable-next-line secure-coding/no-hardcoded-credentials -- CSS class */
         li.classList.add('category-nav-bulletin-notification');
       }
 
@@ -553,6 +560,7 @@ function convertCardsBlockCardToDropdownCard(cardLi) {
 
   // Main card wrapper (not a link anymore, since we have multiple links inside)
   const cardWrapper = document.createElement('div');
+  /* eslint-disable-next-line secure-coding/no-hardcoded-credentials -- CSS class */
   cardWrapper.classList.add('category-nav-bulletin-card-wrapper');
 
   // Extract content from card body (cards.js already validated structure)
@@ -580,6 +588,7 @@ function convertCardsBlockCardToDropdownCard(cardLi) {
   const cardImage = cardLi.querySelector('.cards-card-image');
   if (cardImage) {
     const imageWrapper = document.createElement('div');
+    /* eslint-disable-next-line secure-coding/no-hardcoded-credentials -- CSS class */
     imageWrapper.classList.add('category-nav-bulletin-card-image');
     imageWrapper.appendChild(cardImage.cloneNode(true));
     cardWrapper.appendChild(imageWrapper);
@@ -593,6 +602,7 @@ function convertCardsBlockCardToDropdownCard(cardLi) {
   // Add title
   if (title) {
     const titleDiv = document.createElement('div');
+    /* eslint-disable-next-line secure-coding/no-hardcoded-credentials -- CSS class */
     titleDiv.classList.add('category-nav-bulletin-card-title');
     titleDiv.textContent = title;
     bodyContainer.appendChild(titleDiv);
@@ -624,11 +634,13 @@ function convertCardsBlockCardToDropdownCard(cardLi) {
     if (text === '---') {
       // Convert "---" to horizontal divider
       const divider = document.createElement('hr');
+      /* eslint-disable-next-line secure-coding/no-hardcoded-credentials -- CSS class */
       divider.classList.add('category-nav-bulletin-card-divider');
       bodyContainer.appendChild(divider);
     } else if (text) {
       // Display as description text
       const textLine = document.createElement('div');
+      /* eslint-disable-next-line secure-coding/no-hardcoded-credentials -- CSS class */
       textLine.classList.add('category-nav-bulletin-card-description');
       textLine.textContent = text;
       bodyContainer.appendChild(textLine);
@@ -638,12 +650,14 @@ function convertCardsBlockCardToDropdownCard(cardLi) {
   // Display button links in a row at the bottom
   if (buttonParagraphs.length > 0) {
     const buttonsRow = document.createElement('div');
+    /* eslint-disable-next-line secure-coding/no-hardcoded-credentials -- CSS class */
     buttonsRow.classList.add('category-nav-bulletin-card-buttons');
 
     buttonParagraphs.forEach((p) => {
       const link = p.querySelector('a[href]');
       if (link) {
         const button = document.createElement('a');
+        /* eslint-disable-next-line secure-coding/no-hardcoded-credentials -- CSS class */
         button.classList.add('category-nav-bulletin-card-button');
         button.href = link.href;
         button.textContent = link.textContent.trim();
@@ -665,90 +679,89 @@ function convertCardsBlockCardToDropdownCard(cardLi) {
 }
 
 /**
+ * Get text elements that are outside any .block (for section-level content)
+ * @param {HTMLElement} section - Section to query
+ * @param {Array<HTMLElement>} [cached] - Optional pre-computed list
+ * @returns {Array<HTMLElement>}
+ */
+function getTextElementsOutsideBlocks(section, cached = null) {
+  if (cached) return cached;
+  const all = section.querySelectorAll('p, h1, h2, h3, h4, h5, h6');
+  const result = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for (const el of all || []) {
+    if (!el.closest('.block')) result.push(el);
+  }
+  return result;
+}
+
+/**
+ * Build icon element and name from a span.icon
+ * @param {HTMLElement} iconSpan - Element with class icon and icon-*
+ * @returns {{ iconElement: HTMLElement, iconName: string }}
+ */
+function createIconElementFromSpan(iconSpan) {
+  const iconClass = Array.from(iconSpan.classList).find((c) => c.startsWith('icon-'));
+  const iconName = iconClass ? iconClass.substring(5) : 'icon';
+  const iconElement = document.createElement('span');
+  iconElement.classList.add('icon', `icon-${iconName}`);
+  const iconImg = document.createElement('img');
+  iconImg.setAttribute('data-icon-name', iconName);
+  iconImg.src = `/icons/${iconName}.svg`;
+  iconImg.alt = iconName;
+  iconImg.loading = 'lazy';
+  iconElement.appendChild(iconImg);
+  return { iconElement, iconName };
+}
+
+/**
  * Parse a section with a Cards block to extract category data
  * @param {HTMLElement} section - The section element containing Cards block
  * @param {Array<HTMLElement>} [cachedTextElements] - Optional cached text elements
  * @returns {Object} Category data object
  */
 function parseSectionWithCardsBlock(section, cachedTextElements = null) {
-  // Use cached text elements if provided, otherwise query
-  let textElementsOutsideBlocks;
-
-  if (cachedTextElements) {
-    textElementsOutsideBlocks = cachedTextElements;
-  } else {
-    const allTextElements = section.querySelectorAll('p, h1, h2, h3, h4, h5, h6');
-    textElementsOutsideBlocks = [];
-    // eslint-disable-next-line no-restricted-syntax
-    for (const el of allTextElements || []) {
-      if (!el.closest('.block')) {
-        textElementsOutsideBlocks.push(el);
-      }
-    }
-  }
+  const textElementsOutsideBlocks = getTextElementsOutsideBlocks(section, cachedTextElements);
 
   let categoryName = 'Category';
   let iconElement = null;
   let dropdownTitle = '';
 
-  // First text element: icon or category name
   if (textElementsOutsideBlocks.length > 0) {
     const firstElement = textElementsOutsideBlocks[0];
     const icon = firstElement.querySelector('span.icon');
     if (icon) {
-      // Get the icon name from classes like "icon-bell"
-      const iconClass = Array.from(icon.classList).find((c) => c.startsWith('icon-'));
-      const iconName = iconClass ? iconClass.substring(5) : 'icon';
-
-      // Create a new icon element with the correct icon name
-      iconElement = document.createElement('span');
-      iconElement.classList.add('icon', `icon-${iconName}`);
-
-      // Create the img element directly
-      const iconImg = document.createElement('img');
-      iconImg.setAttribute('data-icon-name', iconName);
-      iconImg.src = `/icons/${iconName}.svg`;
-      iconImg.alt = iconName;
-      iconImg.loading = 'lazy';
-      iconElement.appendChild(iconImg);
-
+      const { iconElement: el, iconName } = createIconElementFromSpan(icon);
+      iconElement = el;
       categoryName = iconName;
     } else {
       categoryName = firstElement.textContent.trim();
     }
   }
 
-  // Second text element: dropdown container title (eyebrow title)
   if (textElementsOutsideBlocks.length > 1) {
     dropdownTitle = textElementsOutsideBlocks[1].textContent.trim();
   }
 
-  // Find the cards block in this section
   const cardsBlock = section.querySelector('.cards.block');
-  if (!cardsBlock) {
-    return null;
-  }
+  if (!cardsBlock) return null;
 
-  // Get all card items from the cards block
   const cardItems = cardsBlock.querySelectorAll('.cards-card');
   const items = [];
-
   cardItems.forEach((cardLi) => {
     const convertedCard = convertCardsBlockCardToDropdownCard(cardLi);
-    if (convertedCard) {
-      items.push(convertedCard);
-    }
+    if (convertedCard) items.push(convertedCard);
   });
 
   return {
     title: categoryName,
-    id: categoryName.toLowerCase().replace(/\s+/g, '-').replace(/[&]/g, ''),
-    eyebrowTitle: dropdownTitle, // This will be the container title
+    id: categoryName.toLowerCase().replace(/\s+/g, '-').replace(/&/g, ''),
+    eyebrowTitle: dropdownTitle,
     linkText: '',
     linkUrl: '',
     items,
-    isFromCardsBlock: true, // Flag to identify this type
-    iconElement, // Store the icon element if found
+    isFromCardsBlock: true,
+    iconElement,
   };
 }
 
@@ -779,59 +792,47 @@ function isEditingFrameworkPage() {
   return isFrameworkPath;
 }
 
+/**
+ * Find sections that have a Cards block and icon (bell) but no category-nav block.
+ * Returns array of { section, textElements } for use in parseSectionWithCardsBlock.
+ * @param {NodeListOf<Element>|Element[]} allCategoryNavBlocks
+ * @returns {Array<{ section: HTMLElement, textElements: HTMLElement[] }>}
+ */
+function getSectionsWithCardsData(allCategoryNavBlocks) {
+  const sectionsWithCardsData = [];
+  if (allCategoryNavBlocks.length === 0) return sectionsWithCardsData;
+
+  const firstNavBlock = allCategoryNavBlocks[0];
+  const container = firstNavBlock.closest('.section')?.parentElement;
+  if (!container) return sectionsWithCardsData;
+
+  const allSiblings = Array.from(container.children).filter((el) => el.classList.contains('section'));
+  allSiblings.forEach((section) => {
+    const hasCardsBlock = section.querySelector('.cards.block');
+    const hasCategoryNav = section.querySelector('.category-nav.block');
+    const textElements = Array.from(section.querySelectorAll('p, h1, h2, h3, h4, h5, h6'))
+      .filter((el) => !el.closest('.block'));
+    const hasIcon = textElements.some((el) => el.querySelector('span.icon'));
+    if (hasCardsBlock && !hasCategoryNav && hasIcon) {
+      sectionsWithCardsData.push({ section, textElements });
+    }
+  });
+  return sectionsWithCardsData;
+}
+
 export default function decorate(block) {
-  // Skip decoration when viewing framework pages
-  // Framework pages are templates/fragments and should display their raw content
-  if (isEditingFrameworkPage()) {
-    return;
-  }
-
-  // Skip decoration if this block is in a fragment being loaded
-  // It will be decorated explicitly after injection into the page
-  if (block.hasAttribute('data-fragment-block')) {
-    return;
-  }
-
-  // Only build the unified nav once, from the first block that loads
+  if (isEditingFrameworkPage()) return;
+  if (block.hasAttribute('data-fragment-block')) return;
   if (unifiedNavBuilt) {
-    // Hide subsequent blocks
     block.style.display = 'none';
     return;
   }
 
   unifiedNavBuilt = true;
 
-  // Find all category-nav blocks within main (scope to main content area)
   const main = document.querySelector('main');
   const allCategoryNavBlocks = main ? main.querySelectorAll('.category-nav.block') : [block];
-
-  // Find sections with Cards blocks (bell icon) that are siblings of the first category-nav block
-  // This keeps the search scoped and simple - only sections near category-nav blocks are checked
-  // Cache text elements to avoid re-querying the same sections later
-  const sectionsWithCardsData = [];
-
-  if (allCategoryNavBlocks.length > 0) {
-    const firstNavBlock = allCategoryNavBlocks[0];
-    const container = firstNavBlock.closest('.section')?.parentElement;
-
-    if (container) {
-      const allSiblings = Array.from(container.children).filter((el) => el.classList.contains('section'));
-
-      allSiblings.forEach((section) => {
-        const hasCardsBlock = section.querySelector('.cards.block');
-        const hasCategoryNav = section.querySelector('.category-nav.block');
-
-        // Query text elements once and cache them
-        const textElements = Array.from(section.querySelectorAll('p, h1, h2, h3, h4, h5, h6'))
-          .filter((el) => !el.closest('.block'));
-        const hasIcon = textElements.some((el) => el.querySelector('span.icon'));
-
-        if (hasCardsBlock && !hasCategoryNav && hasIcon) {
-          sectionsWithCardsData.push({ section, textElements });
-        }
-      });
-    }
-  }
+  const sectionsWithCardsData = getSectionsWithCardsData(allCategoryNavBlocks);
 
   if (allCategoryNavBlocks.length === 0 && sectionsWithCardsData.length === 0) {
     block.style.display = 'none';
@@ -904,28 +905,6 @@ export default function decorate(block) {
     navWrapper.appendChild(categoryNavWrapper);
     categoryNavWrapper.classList.add('header-category-nav');
   }
-
-  // Build and inject mobile navigation - DISABLED
-  // Mobile navigation is now handled by fragment-based nav in header.js
-  // const mobileNavItems = buildMobileNavigation(categoriesData);
-  // const navSectionsUl = document.querySelector(
-  //   'header nav .nav-sections .default-content-wrapper > ul'
-  // );
-  // if (navSectionsUl && mobileNavItems && mobileNavItems.length > 0) {
-  //   // Insert after the "Explore Personal Banking" item (second li)
-  //   const secondLi = navSectionsUl.children[1];
-  //   const insertionPoint = secondLi ? secondLi.nextSibling : null;
-
-  //   // Insert all category nav items
-  //   mobileNavItems.forEach((categoryNavItem) => {
-  //     if (insertionPoint) {
-  //       navSectionsUl.insertBefore(categoryNavItem, insertionPoint);
-  //     } else {
-  //       // Fallback: append to the end
-  //       navSectionsUl.appendChild(categoryNavItem);
-  //     }
-  //   });
-  // }
 
   // Hide all the individual category-nav blocks in the main content
   allCategoryNavBlocks.forEach((navBlock) => {
