@@ -9,24 +9,25 @@ const HEADING_SELECTOR = 'h1, h2, h3, h4, h5, h6, p';
 const HEADING_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'];
 const ALIGNMENTS = ['left', 'center', 'right'];
 
-const SIZE_MAP = {
-  xxl: 'size-xxl',
-  xl: 'size-xl',
-  l: 'size-l',
-  m: 'size-m',
-  s: 'size-s',
-  xs: 'size-xs',
-};
+const SIZE_MAP = new Map([
+  ['xxl', 'size-xxl'],
+  ['xl', 'size-xl'],
+  ['l', 'size-l'],
+  ['m', 'size-m'],
+  ['s', 'size-s'],
+  ['xs', 'size-xs'],
+]);
 
 function normalizeSize(val) {
   if (!val || typeof val !== 'string') return '';
   const n = val.trim().toLowerCase();
   if (!n) return '';
-  if (SIZE_MAP[n]) return SIZE_MAP[n];
+  const mapped = SIZE_MAP.get(n);
+  if (mapped) return mapped;
   if (n.startsWith('size-')) return n;
   const order = ['xxl', 'xs', 'xl', 'l', 'm', 's'];
   const key = order.find((k) => n.includes(k));
-  return key ? SIZE_MAP[key] : '';
+  return key ? SIZE_MAP.get(key) ?? '' : '';
 }
 
 function cellText(row) {
@@ -86,84 +87,105 @@ function buildHeading(tag, text, className, id = '', clone = null) {
   return el;
 }
 
+function readTitleFromRows(rows, block) {
+  const state = {
+    titleText: '',
+    titleTag: 'h2',
+    titleSizeClass: '',
+    titleId: '',
+    alignVal: '',
+    titleHeadingEl: null,
+  };
+  const titleSource = rows.length >= 1 ? rows[0] : block;
+  const titleHeadingEl = titleSource?.querySelector?.(HEADING_SELECTOR);
+  state.titleHeadingEl = titleHeadingEl;
+  const titleInfo = getHeadingFromCell(titleSource, titleHeadingEl);
+  if (!hasValue(titleInfo.text) && !titleHeadingEl) return state;
+  state.titleText = titleInfo.text;
+  state.titleTag = titleInfo.tag;
+  state.titleId = titleInfo.id;
+  const fromId = parseFromId(titleInfo.id);
+  if (fromId.type) state.titleTag = fromId.type;
+  if (rows.length === 0) {
+    state.titleSizeClass = fromId.sizeClass;
+    state.alignVal = fromId.alignment;
+  }
+  if (rows.length >= 2) {
+    state.titleSizeClass = normalizeSize(cellText(rows[1])) || state.titleSizeClass;
+  }
+  return state;
+}
+
+function readSubtitleFromRows(rows, block) {
+  const state = {
+    subtitleText: '',
+    subtitleTag: 'p',
+    subtitleSizeClass: '',
+    subHeadingEl: null,
+  };
+  if (rows.length >= 3) {
+    state.subHeadingEl = rows[2]?.querySelector?.(HEADING_SELECTOR) ?? null;
+    const sub = getHeadingFromCell(rows[2], state.subHeadingEl);
+    if (hasValue(sub.text) || state.subHeadingEl) {
+      state.subtitleText = sub.text;
+      state.subtitleTag = sub.tag;
+    }
+  }
+  if (rows.length >= 4) state.subtitleSizeClass = normalizeSize(cellText(rows[3]));
+  if (rows.length === 0 && hasValue(block.getAttribute?.('data-subtitle'))) {
+    state.subtitleText = block.getAttribute('data-subtitle');
+  }
+  return state;
+}
+
+function applyConfig(state, config) {
+  const cfg = (key, ...alt) => get(config, key, ...alt);
+  const titleCfg = cfg('title-text', 'title') || cfg('title');
+  if (hasValue(titleCfg)) state.titleText = titleCfg;
+  const tType = validTag(cfg('title-type', 'titleType'));
+  if (tType) state.titleTag = tType;
+  if (hasValue(cfg('title-size', 'titleSize'))) {
+    state.titleSizeClass = normalizeSize(cfg('title-size', 'titleSize'));
+  }
+  const align = cfg('classes', 'alignment') || cfg('alignment');
+  if (ALIGNMENTS.includes(align)) state.alignVal = align;
+  if (hasValue(cfg('subtitle'))) state.subtitleText = cfg('subtitle');
+  const sType = validTag(cfg('subtitle-type', 'subtitleType'));
+  if (sType) state.subtitleTag = sType;
+  if (hasValue(cfg('subtitle-size', 'subtitleSize'))) {
+    state.subtitleSizeClass = normalizeSize(cfg('subtitle-size', 'subtitleSize'));
+  }
+}
+
+function renderSectionTitle(block, state) {
+  block.replaceChildren();
+  block.appendChild(buildHeading(
+    state.titleTag,
+    state.titleText,
+    'title',
+    state.titleId,
+    state.titleHeadingEl?.cloneNode(true) ?? null,
+  ));
+  if (hasValue(state.titleSizeClass)) block.classList.add(state.titleSizeClass);
+  if (ALIGNMENTS.includes(state.alignVal)) block.classList.add(state.alignVal);
+  if (!hasValue(state.subtitleText)) return;
+  block.appendChild(buildHeading(
+    state.subtitleTag,
+    state.subtitleText,
+    'subtitle',
+    '',
+    state.subHeadingEl?.cloneNode(true) ?? null,
+  ));
+  if (hasValue(state.subtitleSizeClass)) block.classList.add(`subtitle-${state.subtitleSizeClass}`);
+}
+
 export default function decorate(block) {
   const config = readBlockConfig(block) ?? {};
   const rows = Array.from(block.querySelectorAll(':scope > div')).slice(0, 4);
-
-  let titleText = '';
-  let titleTag = 'h2';
-  let titleSizeClass = '';
-  let titleId = '';
-  let subtitleText = '';
-  let subtitleTag = 'p';
-  let subtitleSizeClass = '';
-  let alignVal = '';
-
-  const titleSource = rows.length >= 1 ? rows[0] : block;
-  const titleHeadingEl = titleSource?.querySelector?.(HEADING_SELECTOR);
-  const titleInfo = getHeadingFromCell(titleSource, titleHeadingEl);
-  if (hasValue(titleInfo.text) || titleHeadingEl) {
-    titleText = titleInfo.text;
-    titleTag = titleInfo.tag;
-    titleId = titleInfo.id;
-    const fromId = parseFromId(titleInfo.id);
-    if (fromId.type) titleTag = fromId.type;
-    if (rows.length === 0) {
-      titleSizeClass = fromId.sizeClass;
-      alignVal = fromId.alignment;
-    }
-  }
-
-  if (rows.length >= 2) titleSizeClass = normalizeSize(cellText(rows[1])) || titleSizeClass;
-  const subHeadingEl = rows.length >= 3 ? rows[2]?.querySelector?.(HEADING_SELECTOR) : null;
-  if (rows.length >= 3) {
-    const sub = getHeadingFromCell(rows[2], subHeadingEl);
-    if (hasValue(sub.text) || subHeadingEl) {
-      subtitleText = sub.text;
-      subtitleTag = sub.tag;
-    }
-  }
-  if (rows.length >= 4) subtitleSizeClass = normalizeSize(cellText(rows[3]));
-  if (rows.length === 0) {
-    const dataSub = block.getAttribute?.('data-subtitle');
-    if (hasValue(dataSub)) subtitleText = dataSub;
-  }
-
-  const cfg = (key, ...alt) => get(config, key, ...alt);
-  const titleCfg = cfg('title-text', 'title') || cfg('title');
-  if (hasValue(titleCfg)) titleText = titleCfg;
-  const tType = validTag(cfg('title-type', 'titleType'));
-  if (tType) titleTag = tType;
-  if (hasValue(cfg('title-size', 'titleSize'))) titleSizeClass = normalizeSize(cfg('title-size', 'titleSize'));
-  const align = cfg('classes', 'alignment') || cfg('alignment');
-  if (ALIGNMENTS.includes(align)) alignVal = align;
-  if (hasValue(cfg('subtitle'))) subtitleText = cfg('subtitle');
-  const sType = validTag(cfg('subtitle-type', 'subtitleType'));
-  if (sType) subtitleTag = sType;
-  if (hasValue(cfg('subtitle-size', 'subtitleSize'))) subtitleSizeClass = normalizeSize(cfg('subtitle-size', 'subtitleSize'));
-
-  if (!hasValue(titleText) && !titleHeadingEl) return;
-
-  block.innerHTML = '';
-  block.appendChild(buildHeading(
-    titleTag,
-    titleText,
-    'title',
-    titleId,
-    titleHeadingEl?.cloneNode(true) ?? null,
-  ));
-
-  if (hasValue(titleSizeClass)) block.classList.add(titleSizeClass);
-  if (ALIGNMENTS.includes(alignVal)) block.classList.add(alignVal);
-
-  if (hasValue(subtitleText)) {
-    block.appendChild(buildHeading(
-      subtitleTag,
-      subtitleText,
-      'subtitle',
-      '',
-      subHeadingEl?.cloneNode(true) ?? null,
-    ));
-    if (hasValue(subtitleSizeClass)) block.classList.add(`subtitle-${subtitleSizeClass}`);
-  }
+  const titleState = readTitleFromRows(rows, block);
+  const subtitleState = readSubtitleFromRows(rows, block);
+  const state = { ...titleState, ...subtitleState };
+  applyConfig(state, config);
+  if (!hasValue(state.titleText) && !state.titleHeadingEl) return;
+  renderSectionTitle(block, state);
 }
