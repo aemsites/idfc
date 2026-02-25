@@ -1,50 +1,28 @@
-export default function decorate(block) {
-  // Get the main container div
-  const container = block.querySelector(':scope > div');
+const SECTION_CONFIG = [
+  { classes: ['banner-heading'], sub: { selector: 'p', class: 'banner-heading-text' } },
+  { classes: ['banner-bottom-text'], sub: { selector: 'p', class: 'banner-bottom-text-content' } },
+  { classes: ['banner-image-desktop', 'banner-image'], sub: { selector: 'picture', class: 'banner-picture' }, imgLoading: 'eager' },
+  { classes: ['banner-image-mobile', 'banner-image'], sub: { selector: 'picture', class: 'banner-picture' }, imgLoading: 'lazy' },
+];
 
+function decorateSection(section, config) {
+  if (!section || !config) return;
+  section.classList.add(...config.classes);
+  const sub = config.sub && section.querySelector(config.sub.selector);
+  if (sub) sub.classList.add(config.sub.class);
+  const img = config.imgLoading && section.querySelector('img');
+  if (img) {
+    img.classList.add('banner-img');
+    img.loading = config.imgLoading;
+  }
+}
+
+export default function decorate(block) {
+  const container = block.querySelector(':scope > div');
   if (!container) return;
 
-  // Add semantic class to container
   container.classList.add('banner-content');
-
-  // Get all child divs
   const children = Array.from(container.children);
 
-  // Banner Heading
-  if (children[0]) {
-    children[0].classList.add('banner-heading');
-    const headingText = children[0].querySelector('p');
-    if (headingText) headingText.classList.add('banner-heading-text');
-  }
-
-  // Bottom Text
-  if (children[1]) {
-    children[1].classList.add('banner-bottom-text');
-    const bottomText = children[1].querySelector('p');
-    if (bottomText) bottomText.classList.add('banner-bottom-text-content');
-  }
-
-  // Desktop Image
-  if (children[2]) {
-    children[2].classList.add('banner-image-desktop', 'banner-image');
-    const picture = children[2].querySelector('picture');
-    const img = children[2].querySelector('img');
-    if (picture) picture.classList.add('banner-picture');
-    if (img) {
-      img.classList.add('banner-img');
-      img.loading = 'eager';
-    }
-  }
-
-  // Mobile Image
-  if (children[3]) {
-    children[3].classList.add('banner-image-mobile', 'banner-image');
-    const picture = children[3].querySelector('picture');
-    const img = children[3].querySelector('img');
-    if (picture) picture.classList.add('banner-picture');
-    if (img) {
-      img.classList.add('banner-img');
-      img.loading = 'lazy';
-    }
-  }
+  SECTION_CONFIG.forEach((config, i) => decorateSection(children[i], config));
 }
