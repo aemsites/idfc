@@ -1,7 +1,7 @@
 import {
   createOptimizedPicture, loadScript, loadCSS, toCamelCase,
 } from '../../scripts/aem.js';
-import { moveInstrumentation } from '../../scripts/scripts.js';
+import { moveInstrumentation, DOMPURIFY } from '../../scripts/scripts.js';
 import { createModal } from '../modal/modal.js';
 
 /**
@@ -21,6 +21,7 @@ const CONFIG_ROW_COUNT = 7;
 
 /** Cards block model field names in order (markdown/config). */
 const CARDS_FIELDS = [
+  // eslint-disable-next-line secure-coding/no-hardcoded-credentials -- field names only
   'modalTheme', 'modalDialogBackgroundImageTexture', 'modalPageBackgroundImage',
   'modalPageDecorationImage', 'swipable', 'autoplayEnabled', 'startingCard',
 ];
@@ -30,6 +31,21 @@ const CARD_FIELDS = [
   'image', 'imageAlt', 'dividerImage', 'cardTag', 'backgroundImageTexture',
   'text', 'cardLink', 'cardLinkText', 'modalContent',
 ];
+
+/** Set of allowed block config keys (avoids prototype pollution when setting dataset). */
+const CARDS_FIELDS_SET = new Set(CARDS_FIELDS);
+
+/**
+ * Sets a data-* attribute on an element for a whitelisted camelCase key.
+ * @param {HTMLElement} el Element
+ * @param {string} camelKey Key from CARDS_FIELDS (camelCase)
+ * @param {string} value Value to set
+ */
+function setBlockDataAttribute(el, camelKey, value) {
+  if (!CARDS_FIELDS_SET.has(camelKey)) return;
+  const dataAttr = `data-${camelKey.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
+  el.setAttribute(dataAttr, value);
+}
 
 /**
  * Returns the value from a block/card cell: first img src, first a href, or text content.
@@ -94,11 +110,11 @@ function getConfigRowCount(rows) {
   let count = 0;
   const max = Math.min(CONFIG_ROW_COUNT, rows.length);
   if (isOneColumn) {
-    while (count < max && rows[count].children.length === 1) count += 1;
+    while (count < max && rows.at(count)?.children.length === 1) count += 1;
     return count;
   }
   while (count < max) {
-    const row = rows[count];
+    const row = rows.at(count);
     const cols = [...row.children];
     if (cols.length >= 2) {
       const name = toCamelCase(cols[0].textContent?.trim() ?? '');
@@ -114,6 +130,28 @@ function getConfigRowCount(rows) {
   return count;
 }
 
+function applyOneColumnConfigRows(block, rows, limit) {
+  for (let i = 0; i < limit; i += 1) {
+    const key = CARDS_FIELDS[i];
+    const rawVal = getConfigRowValue(rows[i]);
+    if (rawVal) setBlockDataAttribute(block, key, rawVal);
+  }
+}
+
+function applyTwoColumnConfigRows(block, rows, limit) {
+  for (let i = 0; i < limit; i += 1) {
+    const row = rows[i];
+    const cols = [...row.children];
+    if (cols.length >= 2) {
+      const name = toCamelCase(cols[0].textContent?.trim() ?? '');
+      if (name && CARDS_FIELDS.includes(name)) {
+        const value = getConfigColumnValue(cols[1]);
+        if (value) setBlockDataAttribute(block, name, value);
+      }
+    }
+  }
+}
+
 /**
  * Extracts block-level properties from config rows by field index.
  * Cards block has 7 fields only (no "classes" – that is CSS only).
@@ -126,29 +164,9 @@ function extractBlockProperties(block, rowsOverride) {
   const rows = rowsOverride ?? [...block.children];
   const limit = getConfigRowCount(rows);
   if (limit === 0) return 0;
-  const firstRow = rows[0];
-  const isOneColumn = firstRow.children.length === 1;
-
-  if (isOneColumn) {
-    for (let i = 0; i < limit; i += 1) {
-      const key = CARDS_FIELDS[i];
-      const rawVal = getConfigRowValue(rows[i]);
-      if (rawVal) block.dataset[key] = rawVal;
-    }
-    return limit;
-  }
-
-  for (let i = 0; i < limit; i += 1) {
-    const row = rows[i];
-    const cols = [...row.children];
-    if (cols.length >= 2) {
-      const name = toCamelCase(cols[0].textContent?.trim() ?? '');
-      if (name && CARDS_FIELDS.includes(name)) {
-        const value = getConfigColumnValue(cols[1]);
-        if (value) block.dataset[name] = value;
-      }
-    }
-  }
+  const isOneColumn = rows[0].children.length === 1;
+  if (isOneColumn) applyOneColumnConfigRows(block, rows, limit);
+  else applyTwoColumnConfigRows(block, rows, limit);
   return limit;
 }
 
@@ -175,6 +193,107 @@ function appendArrowIcon(cardBody) {
   cardBody.appendChild(arrowP);
 }
 
+function hideLinkInSrOnly(cardLink) {
+  let buttonContainer = cardLink.closest('.button-container');
+  if (!buttonContainer) {
+    buttonContainer = document.createElement('div');
+    buttonContainer.className = 'button-container';
+    cardLink.parentNode.insertBefore(buttonContainer, cardLink);
+    buttonContainer.appendChild(cardLink);
+  }
+  buttonContainer.classList.add('sr-only');
+}
+
+function setupComplexModalCard(cardItem, cardLink, mainBody, shouldAddArrow) {
+  cardItem.classList.add('card-clickable');
+  cardItem.setAttribute('role', 'button');
+  cardItem.setAttribute('tabindex', '0');
+  const handleClick = (e) => {
+    if (e.target.closest('a')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    cardLink.click();
+  };
+  cardItem.addEventListener('click', handleClick);
+  cardItem.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      cardLink.click();
+    }
+  });
+  hideLinkInSrOnly(cardLink);
+  if (shouldAddArrow) appendArrowIcon(mainBody);
+}
+
+function buildModalOptionsFromBlock(parentBlock, modalTheme) {
+  const modalOptions = {};
+  if (modalTheme) modalOptions.modalTheme = modalTheme;
+  const blockTextureUrl = parentBlock?.dataset?.modalDialogBackgroundImageTexture;
+  if (blockTextureUrl) modalOptions.textureImage = blockTextureUrl;
+  const pageBackgroundUrl = parentBlock?.dataset?.modalPageBackgroundImage;
+  if (pageBackgroundUrl) modalOptions.pageBackgroundImage = pageBackgroundUrl;
+  const decorationImageUrl = parentBlock?.dataset?.modalPageDecorationImage;
+  if (decorationImageUrl) modalOptions.decorationImage = decorationImageUrl;
+  const ctaContent = parentBlock?.dataset?.modalCtaContent;
+  if (ctaContent) modalOptions.ctaContent = ctaContent;
+  return modalOptions;
+}
+
+function setupEasyModalCard(
+  cardItem,
+  modalContentDiv,
+  mainBody,
+  shouldAddArrow,
+  modalTheme,
+  parentBlock,
+) {
+  cardItem.classList.add('card-clickable', 'card-modal');
+  cardItem.setAttribute('role', 'button');
+  cardItem.setAttribute('tabindex', '0');
+  const modalContent = modalContentDiv.cloneNode(true);
+  const openCardModal = async () => {
+    const contentWrapper = document.createElement('div');
+    contentWrapper.innerHTML = (window.DOMPurify?.sanitize(modalContent.innerHTML, DOMPURIFY))
+      ?? modalContent.innerHTML;
+    const modalOptions = buildModalOptionsFromBlock(parentBlock, modalTheme);
+    const { showModal } = await createModal([contentWrapper], modalOptions);
+    showModal();
+  };
+  cardItem.addEventListener('click', (e) => {
+    if (e.target.closest('a')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openCardModal();
+  });
+  cardItem.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openCardModal();
+    }
+  });
+  if (shouldAddArrow) appendArrowIcon(mainBody);
+}
+
+function setupRegularLinkCard(cardItem, cardLink, mainBody, shouldAddArrow) {
+  cardItem.classList.add('card-clickable');
+  cardItem.setAttribute('role', 'link');
+  cardItem.setAttribute('tabindex', '0');
+  const handleClick = (e) => {
+    if (e.target.closest('a')) return;
+    e.preventDefault();
+    cardLink.click();
+  };
+  cardItem.addEventListener('click', handleClick);
+  cardItem.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      cardLink.click();
+    }
+  });
+  hideLinkInSrOnly(cardLink);
+  if (shouldAddArrow) appendArrowIcon(mainBody);
+}
+
 /**
  * Sets up card interactivity based on card type:
  * 1. Standard card: No link, no modal - not clickable
@@ -189,178 +308,42 @@ function setupCardInteractivity(cardItem, shouldAddArrow = false, modalTheme = '
   const cardBodies = cardItem.querySelectorAll('.cards-card-body');
   if (cardBodies.length === 0) return;
 
-  // The first cards-card-body is the main text content
-  // The last cards-card-body (if different) is the modal content
-  const mainBody = cardBodies[0];
-  const modalContentDiv = cardBodies.length > 1 ? cardBodies[cardBodies.length - 1] : null;
-
-  // Check if modal content div has actual content (not just a link from cardLink field)
-  // If the div only contains a single link with no other text, it's a cardLink, not modal content
-  const isJustALink = modalContentDiv
-    && modalContentDiv.querySelector('a')
-    && modalContentDiv.textContent.trim() === modalContentDiv.querySelector('a')?.textContent.trim();
-
+  const mainBody = cardBodies.item(0);
+  const modalContentDiv = cardBodies.length > 1 ? cardBodies.item(cardBodies.length - 1) : null;
+  const linkInModal = modalContentDiv?.querySelector('a');
+  const isJustALink = modalContentDiv && linkInModal
+    && modalContentDiv.textContent.trim() === linkInModal?.textContent.trim();
   const hasModalContent = modalContentDiv
     && modalContentDiv.textContent.trim().length > 0
     && modalContentDiv !== mainBody
     && !isJustALink;
 
-  // Hide the secondary body div (whether it's modal content or just a cardLink)
   if (modalContentDiv && modalContentDiv !== mainBody) {
     modalContentDiv.classList.add('cards-modal-content');
   }
 
-  // Check for card link (could be in main body or as a standalone link)
   const cardLink = cardItem.querySelector('a[href]');
   const hasModalPath = cardLink && cardLink.href && cardLink.href.includes('/modals/');
   const hasRegularLink = cardLink && !hasModalPath;
 
-  // Type 3: Complex modal with /modals/ path - make entire card clickable
-  // The autolinkModals function in scripts.js will handle the actual modal opening
   if (hasModalPath) {
-    cardItem.classList.add('card-clickable');
-    cardItem.setAttribute('role', 'button');
-    cardItem.setAttribute('tabindex', '0');
-
-    const handleClick = (e) => {
-      // Don't intercept if clicking on the actual link
-      if (e.target.closest('a')) return;
-      e.preventDefault();
-      e.stopPropagation();
-      // Trigger click on the link to let autolinkModals handle it
-      cardLink.click();
-    };
-
-    cardItem.addEventListener('click', handleClick);
-    cardItem.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        cardLink.click();
-      }
-    });
-
-    // Hide the original link text but keep it functional
-    let buttonContainer = cardLink.closest('.button-container');
-    if (!buttonContainer) {
-      buttonContainer = document.createElement('div');
-      buttonContainer.className = 'button-container';
-      cardLink.parentNode.insertBefore(buttonContainer, cardLink);
-      buttonContainer.appendChild(cardLink);
-    }
-    buttonContainer.classList.add('sr-only');
-
-    // Add arrow icon for interactive cards (if enabled for this variant)
-    if (shouldAddArrow) {
-      appendArrowIcon(mainBody);
-    }
-    return; // Don't process further if this is a complex modal card
-  }
-
-  // Type 2: Easy modal with inline content (no link to /modals/)
-  if (hasModalContent) {
-    cardItem.classList.add('card-clickable', 'card-modal');
-    cardItem.setAttribute('role', 'button');
-    cardItem.setAttribute('tabindex', '0');
-
-    // Store the modal content (already hidden via CSS .cards-modal-content class)
-    const modalContent = modalContentDiv.cloneNode(true);
-
-    const openCardModal = async () => {
-      const contentWrapper = document.createElement('div');
-      contentWrapper.innerHTML = modalContent.innerHTML;
-
-      // Build modal options
-      const modalOptions = {};
-      if (modalTheme) {
-        modalOptions.modalTheme = modalTheme;
-      }
-
-      // Get images from block-level settings (authored in modal settings)
-      // Use passed parentBlock instead of querying
-      const blockTextureUrl = parentBlock?.dataset?.modalDialogBackgroundImageTexture;
-      const pageBackgroundUrl = parentBlock?.dataset?.modalPageBackgroundImage;
-
-      // Only use the block-level authored texture image, never inherit from card
-      if (blockTextureUrl) {
-        modalOptions.textureImage = blockTextureUrl;
-      }
-
-      if (pageBackgroundUrl) {
-        modalOptions.pageBackgroundImage = pageBackgroundUrl;
-      }
-
-      const decorationImageUrl = parentBlock?.dataset?.modalPageDecorationImage;
-      if (decorationImageUrl) {
-        modalOptions.decorationImage = decorationImageUrl;
-      }
-
-      const ctaContent = parentBlock?.dataset?.modalCtaContent;
-      if (ctaContent) {
-        modalOptions.ctaContent = ctaContent;
-      }
-
-      const { showModal } = await createModal([contentWrapper], modalOptions);
-      showModal();
-    };
-
-    cardItem.addEventListener('click', (e) => {
-      // Don't trigger modal if clicking on a regular link within the card
-      if (e.target.closest('a')) return;
-      e.preventDefault();
-      e.stopPropagation();
-      openCardModal();
-    });
-    cardItem.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        openCardModal();
-      }
-    });
-
-    // Add arrow icon for interactive cards (if enabled for this variant)
-    if (shouldAddArrow) {
-      appendArrowIcon(mainBody);
-    }
+    setupComplexModalCard(cardItem, cardLink, mainBody, shouldAddArrow);
     return;
   }
-
-  // Type 1 variant: Card with regular link (not /modals/) - make entire card clickable
-  if (hasRegularLink) {
-    cardItem.classList.add('card-clickable');
-    cardItem.setAttribute('role', 'link');
-    cardItem.setAttribute('tabindex', '0');
-
-    const handleClick = (e) => {
-      if (e.target.closest('a')) return;
-      e.preventDefault();
-      cardLink.click();
-    };
-
-    cardItem.addEventListener('click', handleClick);
-    cardItem.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        cardLink.click();
-      }
-    });
-
-    // Hide the original link text but keep it functional
-    let buttonContainer = cardLink.closest('.button-container');
-    if (!buttonContainer) {
-      buttonContainer = document.createElement('div');
-      buttonContainer.className = 'button-container';
-      cardLink.parentNode.insertBefore(buttonContainer, cardLink);
-      buttonContainer.appendChild(cardLink);
-    }
-    buttonContainer.classList.add('sr-only');
-
-    // Add arrow icon for interactive cards (if enabled for this variant)
-    if (shouldAddArrow) {
-      appendArrowIcon(mainBody);
-    }
+  if (hasModalContent) {
+    setupEasyModalCard(
+      cardItem,
+      modalContentDiv,
+      mainBody,
+      shouldAddArrow,
+      modalTheme,
+      parentBlock,
+    );
+    return;
   }
-  // Type 1: Standard card with no link - no additional interactivity needed
-  // No arrow is added for non-interactive cards
+  if (hasRegularLink) {
+    setupRegularLinkCard(cardItem, cardLink, mainBody, shouldAddArrow);
+  }
 }
 
 /**
@@ -395,7 +378,7 @@ function splitCardContentCell(cardItem, contentCell) {
     } else {
       tagNodes = [nodes[0]];
       bodyNodes = nodes.slice(1, -1);
-      modalNodes = [nodes[nodes.length - 1]];
+      modalNodes = [nodes.at(-1)];
     }
   }
   if (tagNodes.length > 0) {
@@ -444,6 +427,70 @@ function appendCellContentAs(cardItem, cell, wrapperClass) {
   cardItem.appendChild(wrap);
 }
 
+function appendCardImageWithAlt(cardItem, pic, altText) {
+  if (!pic) return;
+  const imageWrap = document.createElement('div');
+  imageWrap.className = 'cards-card-image';
+  const cloned = pic.cloneNode(true);
+  const alt = altText || '';
+  if (alt && cloned.tagName === 'IMG') cloned.alt = alt;
+  if (cloned.tagName === 'PICTURE' && cloned.querySelector('img')) {
+    cloned.querySelector('img').alt = alt;
+  }
+  imageWrap.appendChild(cloned);
+  cardItem.appendChild(imageWrap);
+}
+
+function appendCardDivider(cardItem, pic) {
+  if (!pic) return;
+  const dividerWrap = document.createElement('div');
+  dividerWrap.className = 'cards-card-divider';
+  dividerWrap.appendChild(pic.cloneNode(true));
+  cardItem.appendChild(dividerWrap);
+}
+
+function appendFallbackCardImageFromCell(cardItem, cells, cellIndex) {
+  const pic = getCellPictureOrImg(cells.at(cellIndex));
+  if (!pic) return;
+  const imageWrap = document.createElement('div');
+  imageWrap.className = 'cards-card-image';
+  imageWrap.appendChild(pic.cloneNode(true));
+  cardItem.insertBefore(imageWrap, cardItem.firstChild);
+}
+
+function appendCardTexture(cardItem, pic) {
+  if (!pic) return;
+  const textureWrap = document.createElement('div');
+  textureWrap.className = 'cards-card-bg-texture';
+  textureWrap.appendChild(pic.cloneNode(true));
+  cardItem.appendChild(textureWrap);
+}
+
+function appendCardLinkButton(cardItem, linkEl, linkText, onlySetTextIfDifferentFromHref) {
+  if (!linkEl?.href) return;
+  const btnWrap = document.createElement('p');
+  btnWrap.className = 'button-container';
+  const a = linkEl.cloneNode(true);
+  if (onlySetTextIfDifferentFromHref) {
+    if (linkText && linkText !== linkEl.href) a.textContent = linkText;
+  } else if (linkText) {
+    a.textContent = linkText;
+  }
+  btnWrap.appendChild(a);
+  const body = cardItem.querySelector('.cards-card-body');
+  (body || cardItem).appendChild(btnWrap);
+}
+
+function initCardItemWithRows(cardItem, rowOrRows) {
+  const rows = Array.isArray(rowOrRows) ? rowOrRows : [rowOrRows];
+  rows.forEach((row) => {
+    if (row) moveInstrumentation(row, cardItem);
+  });
+  cardItem.removeAttribute('data-aue-prop');
+  cardItem.setAttribute('data-aue-type', 'container');
+  cardItem.setAttribute('data-aue-label', 'Card');
+}
+
 /**
  * Builds a single card from 9 cells in CARD_FIELDS order (strict index-based).
  * @param {HTMLElement[]} cells Array of 9 cell elements (image, imageAlt, dividerImage,
@@ -456,72 +503,21 @@ function buildCardFromCells(cells, rowOrRows) {
 
   const cardItem = document.createElement('div');
   cardItem.classList.add('cards-card');
-  const rows = Array.isArray(rowOrRows) ? rowOrRows : [rowOrRows];
-  rows.forEach((row) => {
-    if (row) moveInstrumentation(row, cardItem);
-  });
-  cardItem.removeAttribute('data-aue-prop');
-  cardItem.setAttribute('data-aue-type', 'container');
-  cardItem.setAttribute('data-aue-label', 'Card');
+  initCardItemWithRows(cardItem, rowOrRows);
 
-  // CARD_FIELDS[0]: image
   const pic0 = getCellPictureOrImg(cells[0]);
-  if (pic0) {
-    const imageWrap = document.createElement('div');
-    imageWrap.className = 'cards-card-image';
-    const cloned = pic0.cloneNode(true);
-    const alt = (cells[1] && getCellValue(cells[1])) || '';
-    if (alt && cloned.tagName === 'IMG') cloned.alt = alt;
-    if (cloned.tagName === 'PICTURE' && cloned.querySelector('img')) {
-      cloned.querySelector('img').alt = alt;
-    }
-    imageWrap.appendChild(cloned);
-    cardItem.appendChild(imageWrap);
-  }
-  // CARD_FIELDS[2]: dividerImage
   const dividerPic = getCellPictureOrImg(cells[2]);
-  if (dividerPic) {
-    const dividerWrap = document.createElement('div');
-    dividerWrap.className = 'cards-card-divider';
-    dividerWrap.appendChild(dividerPic.cloneNode(true));
-    cardItem.appendChild(dividerWrap);
-  }
-  // Fallback: when image and divider cells (0 and 2) are empty but cell 1 has a picture
-  // (e.g. blog-posts Discover card with single image in second column), use it as card image
+  appendCardImageWithAlt(cardItem, pic0, cells[1] ? getCellValue(cells[1]) : '');
+  appendCardDivider(cardItem, dividerPic);
   if (!pic0 && !dividerPic && cells[1]) {
-    const picFromCell1 = getCellPictureOrImg(cells[1]);
-    if (picFromCell1) {
-      const imageWrap = document.createElement('div');
-      imageWrap.className = 'cards-card-image';
-      imageWrap.appendChild(picFromCell1.cloneNode(true));
-      cardItem.insertBefore(imageWrap, cardItem.firstChild);
-    }
+    appendFallbackCardImageFromCell(cardItem, cells, 1);
   }
-  // CARD_FIELDS[3]: cardTag
   appendCellContentAs(cardItem, cells[3], 'cards-card-tag');
-  // CARD_FIELDS[4]: backgroundImageTexture
-  const texturePic = getCellPictureOrImg(cells[4]);
-  if (texturePic) {
-    const textureWrap = document.createElement('div');
-    textureWrap.className = 'cards-card-bg-texture';
-    textureWrap.appendChild(texturePic.cloneNode(true));
-    cardItem.appendChild(textureWrap);
-  }
-  // CARD_FIELDS[5]: text
+  appendCardTexture(cardItem, getCellPictureOrImg(cells[4]));
   appendCellContentAs(cardItem, cells[5], 'cards-card-body');
-  // CARD_FIELDS[6]: cardLink, [7]: cardLinkText
-  const linkEl = (cells[6]?.querySelector('div') || cells[6])?.querySelector?.('a[href]');
-  const linkText = cells[7] ? getCellValue(cells[7]) : getCellValue(cells[6]);
-  if (linkEl && linkEl.href) {
-    const btnWrap = document.createElement('p');
-    btnWrap.className = 'button-container';
-    const a = linkEl.cloneNode(true);
-    if (linkText) a.textContent = linkText;
-    btnWrap.appendChild(a);
-    const body = cardItem.querySelector('.cards-card-body');
-    (body || cardItem).appendChild(btnWrap);
-  }
-  // CARD_FIELDS[8]: modalContent
+  const linkEl9 = (cells[6]?.querySelector('div') || cells[6])?.querySelector?.('a[href]');
+  const linkText9 = cells[7] ? getCellValue(cells[7]) : getCellValue(cells[6]);
+  appendCardLinkButton(cardItem, linkEl9, linkText9, false);
   appendCellContentAs(cardItem, cells[8], 'cards-card-body cards-modal-content');
   return cardItem;
 }
@@ -532,65 +528,22 @@ function buildCardFromCells(cells, rowOrRows) {
  */
 function buildCardFromSevenCells(cells, rowOrRows) {
   if (!cells || cells.length < 7) return null;
+
   const cardItem = document.createElement('div');
   cardItem.classList.add('cards-card');
-  const rows = Array.isArray(rowOrRows) ? rowOrRows : [rowOrRows];
-  rows.forEach((row) => {
-    if (row) moveInstrumentation(row, cardItem);
-  });
-  cardItem.removeAttribute('data-aue-prop');
-  cardItem.setAttribute('data-aue-type', 'container');
-  cardItem.setAttribute('data-aue-label', 'Card');
+  initCardItemWithRows(cardItem, rowOrRows);
 
   const pic0 = getCellPictureOrImg(cells[0]);
-  if (pic0) {
-    const imageWrap = document.createElement('div');
-    imageWrap.className = 'cards-card-image';
-    const cloned = pic0.cloneNode(true);
-    const alt = (cells[1] && getCellValue(cells[1])) || '';
-    if (alt && cloned.tagName === 'IMG') cloned.alt = alt;
-    if (cloned.tagName === 'PICTURE' && cloned.querySelector('img')) {
-      cloned.querySelector('img').alt = alt;
-    }
-    imageWrap.appendChild(cloned);
-    cardItem.appendChild(imageWrap);
-  }
   const dividerPic = getCellPictureOrImg(cells[2]);
-  if (dividerPic) {
-    const dividerWrap = document.createElement('div');
-    dividerWrap.className = 'cards-card-divider';
-    dividerWrap.appendChild(dividerPic.cloneNode(true));
-    cardItem.appendChild(dividerWrap);
-  }
-  // Fallback: no image/divider in 0 or 2 but cell 1 has a picture → use as card image
+  appendCardImageWithAlt(cardItem, pic0, cells[1] ? getCellValue(cells[1]) : '');
+  appendCardDivider(cardItem, dividerPic);
   if (!pic0 && !dividerPic && cells[1]) {
-    const picFromCell1 = getCellPictureOrImg(cells[1]);
-    if (picFromCell1) {
-      const imageWrap = document.createElement('div');
-      imageWrap.className = 'cards-card-image';
-      imageWrap.appendChild(picFromCell1.cloneNode(true));
-      cardItem.insertBefore(imageWrap, cardItem.firstChild);
-    }
+    appendFallbackCardImageFromCell(cardItem, cells, 1);
   }
-  const texturePic = getCellPictureOrImg(cells[3]);
-  if (texturePic) {
-    const textureWrap = document.createElement('div');
-    textureWrap.className = 'cards-card-bg-texture';
-    textureWrap.appendChild(texturePic.cloneNode(true));
-    cardItem.appendChild(textureWrap);
-  }
+  appendCardTexture(cardItem, getCellPictureOrImg(cells[3]));
   appendCellContentAs(cardItem, cells[4], 'cards-card-body');
-  const linkEl = (cells[5]?.querySelector('div') || cells[5])?.querySelector?.('a[href]');
-  const linkText = getCellValue(cells[5]);
-  if (linkEl && linkEl.href) {
-    const btnWrap = document.createElement('p');
-    btnWrap.className = 'button-container';
-    const a = linkEl.cloneNode(true);
-    if (linkText && linkText !== linkEl.href) a.textContent = linkText;
-    btnWrap.appendChild(a);
-    const body = cardItem.querySelector('.cards-card-body');
-    (body || cardItem).appendChild(btnWrap);
-  }
+  const linkEl7 = (cells[5]?.querySelector('div') || cells[5])?.querySelector?.('a[href]');
+  appendCardLinkButton(cardItem, linkEl7, getCellValue(cells[5]), true);
   appendCellContentAs(cardItem, cells[6], 'cards-card-body cards-modal-content');
   return cardItem;
 }
@@ -708,8 +661,8 @@ function runScrollbarRecoveryForSwiper(swiper, scrollbarContainer) {
       swiper.scrollbar.updateSize();
     }
     swiper.update();
-  } catch (_err) {
-    // Recovery failed; continue without logging in production
+  } catch {
+    // Intentionally ignore so recovery fails gracefully and callers continue
   }
 }
 
@@ -763,9 +716,14 @@ function globalMayuraScrollbarResizeHandler() {
   });
 }
 
-export default async function decorate(block) {
-  // Order: (1) sync setup and build card DOM, (2) block.replaceChildren(cardsContainer),
-  // (3) sync class/interactivity, (4) await Swiper only if needed.
+function getStaticImageDimensionsForBlock(block, img) {
+  if (block.classList.contains('all-about-card')) return { width: 280, height: 350 };
+  if (block.classList.contains('important-documents')) return { width: 175, height: 175 };
+  if (img.closest('.swiper-slide')) return { width: 232, height: 358 };
+  return null;
+}
+
+function applyInitialLayoutLock(block) {
   const isDesktop = window.matchMedia('(min-width: 900px)').matches;
   const section = block.closest('.section');
   const wrapper = block.closest('.cards-wrapper') || block.parentElement;
@@ -780,25 +738,20 @@ export default async function decorate(block) {
     block.style.minHeight = '1412px';
     block.style.visibility = 'hidden';
   }
-
-  // Prevent temporary collapse while we rebuild the DOM for cards on desktop.
   if (isDesktop && initialBlockHeight > 0) {
     block.style.minHeight = `${initialBlockHeight}px`;
-    if (wrapper && initialWrapperHeight) {
-      wrapper.style.minHeight = `${initialWrapperHeight}px`;
-    }
+    if (wrapper && initialWrapperHeight) wrapper.style.minHeight = `${initialWrapperHeight}px`;
     if (section?.classList.contains('cards-container') && initialSectionHeight) {
       section.style.minHeight = `${initialSectionHeight}px`;
     }
   }
 
-  const releaseLayoutLock = () => {
+  const release = () => {
     if (!isDesktop) return;
     block.style.minHeight = '';
     if (wrapper) wrapper.style.minHeight = '';
     if (section) section.style.minHeight = '';
   };
-
   const setRenderedImageDimensions = () => {
     block.querySelectorAll('img').forEach((img) => {
       if (img.hasAttribute('width') && img.hasAttribute('height')) return;
@@ -809,561 +762,497 @@ export default async function decorate(block) {
       }
     });
   };
-
-  const getStaticImageDimensions = (img) => {
-    if (block.classList.contains('all-about-card')) {
-      return { width: 280, height: 350 };
-    }
-    if (block.classList.contains('important-documents')) {
-      return { width: 175, height: 175 };
-    }
-    if (img.closest('.swiper-slide')) {
-      return { width: 232, height: 358 };
-    }
-    return null;
+  return {
+    release,
+    setRenderedImageDimensions,
+    isDesktop,
+    isAllAboutCard,
   };
-  // Cache variant checks once (performance optimization)
+}
+
+function getBlockVariantFlags(block) {
   const { classList } = block;
-  const isImportantDocuments = classList.contains('important-documents');
-  const isRelatedSearch = classList.contains('related-search');
-  const isImageAndTitle = classList.contains('image-and-title');
   const isExperienceLife = classList.contains('experience-life');
-  const isBlogPosts = classList.contains('blog-posts');
-  const isEarnRewards = classList.contains('earn-rewards');
   const isJoiningPerks = classList.contains('joining-perks');
   const supportsSemanticElements = classList.contains('key-benefits')
     || isExperienceLife
     || classList.contains('reward-points');
-  const isExploreOtherCards = classList.contains('explore-other-cards');
+  return {
+    isImportantDocuments: classList.contains('important-documents'),
+    isRelatedSearch: classList.contains('related-search'),
+    isImageAndTitle: classList.contains('image-and-title'),
+    isExperienceLife,
+    isBlogPosts: classList.contains('blog-posts'),
+    isEarnRewards: classList.contains('earn-rewards'),
+    isJoiningPerks,
+    supportsSemanticElements,
+    isExploreOtherCards: classList.contains('explore-other-cards'),
+    isAllAboutCard: classList.contains('all-about-card'),
+    isInCsCards: block.closest('#cscards') !== null,
+  };
+}
 
-  // Check if this cards block is within the #cscards section (customer service dropdown)
-  const isInCsCards = block.closest('#cscards') !== null;
-
-  // Skip rebuild when block was already built (e.g. clone inserted into nav). Otherwise we
-  // misinterpret .grid-cards as "first row" and its .cards-card children as "cells", get
-  // numCells=2, no branch matches, and replaceChildren() wipes the content.
+function shouldSkipRebuild(block) {
   const singleChild = block.children.length === 1 ? block.children[0] : null;
-  const isGridCards = singleChild?.classList?.contains('grid-cards');
-  const hasCardCards = singleChild?.querySelector?.('.cards-card');
-  if (isGridCards && hasCardCards) return;
+  return singleChild?.classList?.contains('grid-cards') && singleChild?.querySelector?.('.cards-card');
+}
 
-  // First CONFIG_ROW_COUNT (7) rows = block config by CARDS_FIELDS order; rest = card rows.
-  // When block has a single .default-content/.block-content child, use its children as rows
-  // (fragment/nav often wraps the table; otherwise we see blockChildrenCount: 1, numCells: 2).
+function parseRowsAndConfig(block) {
   let rows = [...block.children];
-  if (rows.length === 1 && rows[0].classList?.contains('default-content')) {
-    rows = [...rows[0].children];
-  } else if (rows.length === 1 && rows[0].classList?.contains('block-content')) {
-    rows = [...rows[0].children];
-  }
+  const single = rows.length === 1 ? rows[0] : null;
+  const unwrap = single?.classList?.contains('default-content')
+    || single?.classList?.contains('block-content');
+  if (unwrap) rows = [...single.children];
   const configRowCount = extractBlockProperties(block, rows);
   const cardRows = rows.slice(configRowCount);
-
   const firstCardRow = cardRows[0];
   const numCells = firstCardRow ? firstCardRow.children.length : 0;
+  return {
+    rows,
+    configRowCount,
+    cardRows,
+    numCells,
+  };
+}
 
-  // Move block-level UE instrumentation from config rows onto the block (row element only,
-  // not descendants) so the tree shows one "Cards" node. Same pattern as accordion:
-  // moveInstrumentation(sourceRow, targetContainer) without pulling in property-level attrs.
+function moveInstrumentationToBlock(block, rows, configRowCount) {
   for (let i = 0; i < configRowCount; i += 1) {
     moveInstrumentation(rows[i], block);
   }
   block.removeAttribute('data-aue-prop');
   block.setAttribute('data-aue-type', 'container');
   block.setAttribute('data-aue-label', 'Cards');
+}
 
-  const cardsContainer = document.createElement('div');
-  cardsContainer.classList.add('grid-cards');
+function appendCardsFromFourCellRows(cardRows, cardsContainer) {
+  for (let i = 0; i < cardRows.length; i += 3) {
+    const group = cardRows.slice(i, i + 3);
+    if (group.length === 3) {
+      const cells = [...group[0].children, ...group[1].children, ...group[2].children];
+      const cardItem = buildCardFromCells(cells, group);
+      if (cardItem) cardsContainer.append(cardItem);
+    } else if (group.length > 0) {
+      // eslint-disable-next-line no-console
+      console.error('Cards block: card rows group has unexpected length (expected 3, got %d). Index: %d.', group.length, i);
+    }
+  }
+}
 
+function buildCardsFromRows(cardRows, numCells, cardsContainer) {
   if (numCells === CARD_FIELDS.length) {
-    // 1 row per card, 9 cells per row (strict order from _cards.json)
     cardRows.forEach((row) => {
       const cells = [...row.children];
       const cardItem = buildCardFromCells(cells, row);
       if (cardItem) cardsContainer.append(cardItem);
     });
-  } else if (numCells === 4) {
-    // 3 rows per card: 4+4+1 cells (CARD_FIELDS order)
-    for (let i = 0; i < cardRows.length; i += 3) {
-      const group = cardRows.slice(i, i + 3);
-      if (group.length === 3) {
-        const cells = [
-          ...group[0].children,
-          ...group[1].children,
-          ...group[2].children,
-        ];
-        const cardItem = buildCardFromCells(cells, group);
-        if (cardItem) cardsContainer.append(cardItem);
-      } else if (group.length > 0) {
-        // eslint-disable-next-line no-console
-        console.error(
-          'Cards block: card rows group has unexpected length (expected 3, got %d). Index: %d.',
-          group.length,
-          i,
-        );
-      }
-    }
-  } else if (numCells === 3) {
-    // Legacy: 1 row per card, 3 cells (image | decor | content)
+    return;
+  }
+  if (numCells === 4) {
+    appendCardsFromFourCellRows(cardRows, cardsContainer);
+    return;
+  }
+  if (numCells === 3) {
     cardRows.forEach((row) => {
       const cardItem = buildCardFromThreeCells(row);
       if (cardItem) cardsContainer.append(cardItem);
     });
-  } else if (numCells === 7) {
-    // 7 cells per row: sheet order image, imageAlt, divider, texture, text, link, modal
+    return;
+  }
+  if (numCells === 7) {
     cardRows.forEach((row) => {
       const cells = [...row.children];
       const cardItem = buildCardFromSevenCells(cells, row);
       if (cardItem) cardsContainer.append(cardItem);
     });
-  } else if (numCells === 8) {
-    // 8 cells: pad to 9 so buildCardFromCells index mapping holds
+    return;
+  }
+  if (numCells === 8) {
     cardRows.forEach((row) => {
       const cells = [...row.children];
       cells.push(document.createElement('div'));
       const cardItem = buildCardFromCells(cells, row);
       if (cardItem) cardsContainer.append(cardItem);
     });
-  } else if (cardRows.length > 0) {
+    return;
+  }
+  if (cardRows.length > 0) {
     // eslint-disable-next-line no-console
-    console.error(
-      'Cards block: unexpected card row cell count (%d). Expected 3, 4, 7, 8, or 9.',
-      numCells,
-    );
+    console.error('Cards block: unexpected card row cell count (%d). Expected 3, 4, 7, 8, or 9.', numCells);
   }
+}
 
-  // Identify semantic elements (divider/texture by size, cardTag by heading)
-  if (supportsSemanticElements) {
-    cardsContainer.querySelectorAll('.cards-card').forEach((cardItem) => {
-      identifySemanticCardElements(cardItem);
-    });
-  }
-
-  // Replace images with optimized pictures
+function optimizeCardPicturesInContainer(cardsContainer, block) {
   cardsContainer.querySelectorAll('picture > img').forEach((img) => {
     const optimizedPic = createOptimizedPicture(img.src, img.alt, false, [{ width: '750' }]);
     const optimizedImg = optimizedPic.querySelector('img');
     moveInstrumentation(img, optimizedImg);
-
     const width = img.getAttribute('width');
     const height = img.getAttribute('height');
     if (width && height) {
       optimizedImg.setAttribute('width', width);
       optimizedImg.setAttribute('height', height);
     } else {
-      const staticSize = getStaticImageDimensions(img);
+      const staticSize = getStaticImageDimensionsForBlock(block, img);
       if (staticSize) {
         optimizedImg.setAttribute('width', staticSize.width);
         optimizedImg.setAttribute('height', staticSize.height);
       }
     }
-
     img.closest('picture').replaceWith(optimizedPic);
   });
+}
 
-  block.replaceChildren(cardsContainer);
+function getCardVariantClass(flags) {
+  if (flags.isImportantDocuments) return 'important-documents-card';
+  if (flags.isBlogPosts) return 'blog-post-card';
+  const isBenefit = !flags.isEarnRewards && !flags.isJoiningPerks
+    && !flags.isImageAndTitle && !flags.isAllAboutCard;
+  if (!isBenefit) return null;
+  return flags.isExploreOtherCards ? 'explore-other-cards' : 'benefit-cards';
+}
 
-  // Get all card elements once and reuse
-  const allCards = cardsContainer.querySelectorAll('.cards-card');
-
-  // Add appropriate class to card items
+function applyCardClassesAndInteractivity(block, allCards, flags) {
+  const modalTheme = block.dataset.modalTheme || '';
+  const variantClass = getCardVariantClass(flags);
   allCards.forEach((cardItem) => {
-    if (isImportantDocuments) {
-      cardItem.classList.add('important-documents-card');
-    } else if (isBlogPosts) {
-      cardItem.classList.add('blog-post-card');
-    } else if (!isEarnRewards && !isJoiningPerks && !isImageAndTitle && !isAllAboutCard) {
-      if (isExploreOtherCards) {
-        cardItem.classList.add('explore-other-cards');
-      } else {
-        cardItem.classList.add('benefit-cards');
-      }
-    }
-
-    // Setup interactivity for all card types (links, modals)
-    // Skip for blog-posts and important-documents - they use wrap-in-link behavior only
-    if (!isBlogPosts) {
-      // Add arrow icons for key-benefits, experience-life, reward-points variants
-      const shouldAddArrow = supportsSemanticElements;
-      const modalTheme = block.dataset.modalTheme || '';
-      setupCardInteractivity(cardItem, shouldAddArrow, modalTheme, block);
+    if (variantClass) cardItem.classList.add(variantClass);
+    if (!flags.isBlogPosts) {
+      setupCardInteractivity(cardItem, flags.supportsSemanticElements, modalTheme, block);
     }
   });
+}
 
-  // cardsContainer is the block's only child (from replaceChildren); no second append.
+function applySlideCountClasses(block, slideCount) {
+  if (slideCount === 1) block.classList.add('cards-single-slide');
+  else if (slideCount === 2) block.classList.add('cards-two-slides');
+}
 
-  // Check if swiper is enabled via data attribute
-  const isSwipable = block.dataset.swipable === 'true';
+function getSwiperConfig(block, slideCount, flags) {
+  const isMayuraTemplate = document.body.classList.contains('mayura');
   const isAutoplayEnabled = block.dataset.autoplayEnabled === 'true';
   const startingCard = parseInt(block.dataset.startingCard || '0', 10);
+  const isMobileView = window.innerWidth < 600;
+  const initialSlideIndex = isMobileView ? 0 : startingCard;
 
-  if (isSwipable) {
-    // Load Swiper library (will skip if already loaded from head.html)
-    await loadCSS('/scripts/swiperjs/swiper-bundle.min.css');
-    await loadScript('/scripts/swiperjs/swiper-bundle.min.js');
+  const baseConfig = {
+    slidesPerView: 1.2,
+    spaceBetween: 16,
+    initialSlide: initialSlideIndex,
+    centeredSlides: true,
+    ...(isMayuraTemplate
+      ? {
+        scrollbar: {
+          el: '.swiper-scrollbar',
+          dragClass: 'swiper-pagination-handle',
+          dragSize: 33,
+          draggable: true,
+          snapOnRelease: true,
+        },
+      }
+      : {
+        pagination: {
+          el: '.swiper-pagination',
+          clickable: true,
+          dynamicBullets: false,
+          type: 'bullets',
+        },
+      }),
+  };
 
-    // Wait for Swiper to be available (script may need time to execute)
-    const waitForSwiper = () => new Promise((resolve) => {
-      if (typeof Swiper !== 'undefined') {
-        resolve();
-      } else {
-        const checkInterval = setInterval(() => {
-          if (typeof Swiper !== 'undefined') {
-            clearInterval(checkInterval);
-            resolve();
-          }
-        }, 10);
-        // Timeout after 2 seconds
-        setTimeout(() => {
+  if (flags.isExperienceLife) {
+    baseConfig.slidesPerView = 1.15;
+    baseConfig.spaceBetween = 16;
+    baseConfig.breakpoints = {
+      600: {
+        slidesPerView: Math.min(2, slideCount),
+        spaceBetween: 20,
+        centeredSlides: slideCount > 2,
+      },
+      900: {
+        slidesPerView: Math.min(3, slideCount),
+        spaceBetween: 36,
+        centeredSlides: slideCount > 3,
+      },
+    };
+  } else if (flags.isJoiningPerks) {
+    baseConfig.loop = false;
+    baseConfig.watchSlidesProgress = true;
+    baseConfig.watchSlidesVisibility = true;
+    baseConfig.slidesPerView = 1.5;
+    baseConfig.spaceBetween = 16;
+    baseConfig.breakpoints = {
+      600: {
+        slidesPerView: 2,
+        spaceBetween: 30,
+        centeredSlides: slideCount > 2,
+      },
+      900: {
+        slidesPerView: 3,
+        spaceBetween: 60,
+        centeredSlides: slideCount > 3,
+      },
+    };
+  } else if (flags.isExploreOtherCards || flags.isBlogPosts) {
+    baseConfig.loop = false;
+    baseConfig.watchSlidesProgress = true;
+    baseConfig.watchSlidesVisibility = true;
+    baseConfig.slidesPerView = 1;
+    baseConfig.spaceBetween = 25;
+    baseConfig.breakpoints = {
+      600: {
+        slidesPerView: 2,
+        spaceBetween: 20,
+        centeredSlides: slideCount > 2,
+      },
+      900: {
+        slidesPerView: 3,
+        spaceBetween: 42,
+        centeredSlides: slideCount > 3,
+      },
+    };
+  } else if (flags.isAllAboutCard) {
+    baseConfig.loop = false;
+    baseConfig.watchSlidesProgress = true;
+    baseConfig.watchSlidesVisibility = true;
+    baseConfig.slidesPerView = 1.5;
+    baseConfig.spaceBetween = 16;
+    baseConfig.breakpoints = {
+      600: {
+        slidesPerView: 2,
+        spaceBetween: 20,
+        centeredSlides: slideCount > 2,
+      },
+      900: {
+        slidesPerView: 3,
+        spaceBetween: 42,
+        centeredSlides: slideCount > 3,
+      },
+    };
+  } else {
+    baseConfig.spaceBetween = 16;
+    baseConfig.breakpoints = {
+      600: {
+        slidesPerView: Math.min(2, slideCount),
+        spaceBetween: 20,
+        centeredSlides: slideCount > 2,
+      },
+      900: {
+        slidesPerView: Math.min(3, slideCount),
+        spaceBetween: 36,
+        centeredSlides: slideCount > 3,
+      },
+    };
+  }
+  if (isAutoplayEnabled) {
+    baseConfig.autoplay = { delay: 3000, disableOnInteraction: false, pauseOnMouseEnter: true };
+    baseConfig.loop = false;
+  }
+  return { config: baseConfig, initialSlideIndex, isMayuraTemplate };
+}
+
+async function initSwiper(block, cardsContainer, flags, layout) {
+  await loadCSS('/scripts/swiperjs/swiper-bundle.min.css');
+  await loadScript('/scripts/swiperjs/swiper-bundle.min.js');
+  const waitForSwiper = () => new Promise((resolve) => {
+    if (typeof Swiper !== 'undefined') {
+      resolve();
+    } else {
+      const checkInterval = setInterval(() => {
+        if (typeof Swiper !== 'undefined') {
           clearInterval(checkInterval);
           resolve();
-        }, 2000);
-      }
-    });
-    await waitForSwiper();
-
-    // Add Swiper classes
-    block.classList.add('swiper');
-    cardsContainer.classList.add('swiper-wrapper');
-    cardsContainer.classList.remove('grid-cards');
-    cardsContainer.querySelectorAll('.cards-card').forEach((cardItem) => {
-      cardItem.classList.add('swiper-slide');
-    });
-
-    // Count total slides
-    const slideCount = cardsContainer.querySelectorAll('.cards-card').length;
-
-    // For mobile view (< 600px), always start at first card
-    // For larger views, use authored startingCard value
-    const isMobileView = window.innerWidth < 600;
-    const initialSlideIndex = isMobileView ? 0 : startingCard;
-
-    // Mayura template uses native Swiper scrollbar (draggable handle); others use bullet pagination
-    const isMayuraTemplate = document.body.classList.contains('mayura');
-
-    if (isMayuraTemplate) {
-      const scrollbarEl = document.createElement('div');
-      scrollbarEl.className = 'swiper-scrollbar';
-      block.appendChild(scrollbarEl);
-    } else {
-      const swiperPagination = document.createElement('div');
-      swiperPagination.className = 'swiper-pagination';
-      block.appendChild(swiperPagination);
-    }
-
-    // Build Swiper configuration
-    const swiperConfig = {
-      slidesPerView: 1.2,
-      spaceBetween: 16,
-      initialSlide: initialSlideIndex,
-      centeredSlides: true, // Will be overridden by breakpoints if all cards fit
-      ...(isMayuraTemplate
-        ? {
-          scrollbar: {
-            el: '.swiper-scrollbar',
-            dragClass: 'swiper-pagination-handle',
-            dragSize: 33,
-            draggable: true,
-            snapOnRelease: true,
-          },
         }
-        : {
-          pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-            dynamicBullets: false,
-            type: 'bullets',
-          },
-        }),
-    };
-
-    if (isExperienceLife) {
-      // For experience-life cards: tighter spacing
-      swiperConfig.slidesPerView = 1.15; // ~287px cards at 360px viewport
-      swiperConfig.spaceBetween = 16;
-      swiperConfig.breakpoints = {
-        600: {
-          slidesPerView: Math.min(2, slideCount),
-          spaceBetween: 20,
-          centeredSlides: slideCount > 2, // Disable centering if all cards fit
-        },
-        900: {
-          slidesPerView: Math.min(3, slideCount),
-          spaceBetween: 36,
-          centeredSlides: slideCount > 3, // Disable centering if all cards fit
-        },
-      };
-      // Add class for CSS centering when fewer than 3 cards
-      if (slideCount === 1) {
-        block.classList.add('cards-single-slide');
-      } else if (slideCount === 2) {
-        block.classList.add('cards-two-slides');
-      }
-    } else if (isJoiningPerks) {
-      // For joining perks cards: show edges on both sides on mobile, 3 cards at larger breakpoints
-      swiperConfig.loop = false;
-      swiperConfig.watchSlidesProgress = true;
-      swiperConfig.watchSlidesVisibility = true;
-      swiperConfig.slidesPerView = 1.5; // ~198px cards at 360px viewport
-      swiperConfig.spaceBetween = 16;
-      swiperConfig.breakpoints = {
-        600: {
-          slidesPerView: 2,
-          spaceBetween: 30,
-          centeredSlides: slideCount > 2, // Disable centering if all cards fit
-        },
-        900: {
-          slidesPerView: 3,
-          spaceBetween: 60,
-          centeredSlides: slideCount > 3, // Disable centering if all cards fit
-        },
-      };
-      // Add class for CSS centering when fewer than 3 cards
-      if (slideCount === 1) {
-        block.classList.add('cards-single-slide');
-      } else if (slideCount === 2) {
-        block.classList.add('cards-two-slides');
-      }
-    } else if (isExploreOtherCards || isBlogPosts) {
-      // For explore-other-cards: show edges on mobile, 3 cards at larger breakpoints
-      swiperConfig.loop = false;
-      swiperConfig.watchSlidesProgress = true;
-      swiperConfig.watchSlidesVisibility = true;
-      swiperConfig.slidesPerView = 1; // Don't show edges of adjacent cards on mobile
-      swiperConfig.spaceBetween = 25;
-      swiperConfig.breakpoints = {
-        600: {
-          slidesPerView: 2,
-          spaceBetween: 20,
-          centeredSlides: slideCount > 2, // Disable centering if all cards fit
-        },
-        900: {
-          slidesPerView: 3,
-          spaceBetween: 42,
-          centeredSlides: slideCount > 3, // Disable centering if all cards fit
-        },
-      };
-      // Add class for CSS centering when fewer than 3 cards
-      if (slideCount === 1) {
-        block.classList.add('cards-single-slide');
-      } else if (slideCount === 2) {
-        block.classList.add('cards-two-slides');
-      }
-    } else if (isAllAboutCard) {
-      // For all-about-card: narrower cards at mobile (~198px)
-      swiperConfig.loop = false;
-      swiperConfig.watchSlidesProgress = true;
-      swiperConfig.watchSlidesVisibility = true;
-      swiperConfig.slidesPerView = 1.5; // ~198px cards at 360px viewport
-      swiperConfig.spaceBetween = 16;
-      swiperConfig.breakpoints = {
-        600: {
-          slidesPerView: 2,
-          spaceBetween: 20,
-          centeredSlides: slideCount > 2,
-        },
-        900: {
-          slidesPerView: 3,
-          spaceBetween: 42,
-          centeredSlides: slideCount > 3,
-        },
-      };
-      // Add class for CSS centering when fewer than 3 cards
-      if (slideCount === 1) {
-        block.classList.add('cards-single-slide');
-      } else if (slideCount === 2) {
-        block.classList.add('cards-two-slides');
-      }
-    } else {
-      // For benefit cards: standard breakpoints
-      swiperConfig.spaceBetween = 16;
-      swiperConfig.breakpoints = {
-        600: {
-          slidesPerView: Math.min(2, slideCount),
-          spaceBetween: 20,
-          centeredSlides: slideCount > 2, // Disable centering if all cards fit
-        },
-        900: {
-          slidesPerView: Math.min(3, slideCount),
-          spaceBetween: 36,
-          centeredSlides: slideCount > 3, // Disable centering if all cards fit
-        },
-      };
-      // Add class for CSS centering when fewer than 3 cards
-      if (slideCount === 1) {
-        block.classList.add('cards-single-slide');
-      } else if (slideCount === 2) {
-        block.classList.add('cards-two-slides');
-      }
+      }, 10);
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        resolve();
+      }, 2000);
     }
+  });
+  await waitForSwiper();
 
-    // Add autoplay configuration if enabled
-    if (isAutoplayEnabled) {
-      swiperConfig.autoplay = {
-        delay: 3000,
-        disableOnInteraction: false,
-        pauseOnMouseEnter: true,
-      };
-      swiperConfig.loop = false;
-    }
+  block.classList.add('swiper');
+  cardsContainer.classList.add('swiper-wrapper');
+  cardsContainer.classList.remove('grid-cards');
+  cardsContainer.querySelectorAll('.cards-card').forEach((cardItem) => {
+    cardItem.classList.add('swiper-slide');
+  });
 
-    // Initialize Swiper if available
-    if (typeof Swiper === 'undefined') {
-      // eslint-disable-next-line no-console
-      console.warn('Swiper library not available, cards will display without slider');
-      return;
-    }
+  const slideCount = cardsContainer.querySelectorAll('.cards-card').length;
+  const swiperResult = getSwiperConfig(block, slideCount, flags);
+  const { config: swiperConfig, initialSlideIndex, isMayuraTemplate } = swiperResult;
 
-    // eslint-disable-next-line no-undef
-    const swiper = new Swiper(block, swiperConfig);
-    window.requestAnimationFrame(() => releaseLayoutLock());
-    if (isAllAboutCard) {
-      block.style.visibility = '';
-    }
-    window.requestAnimationFrame(() => setRenderedImageDimensions());
-
-    // Store swiper instance for potential future use
-    block.swiperInstance = swiper;
-
-    // Correct slide if init ran in hidden tab (active/realIndex can be wrong)
-    const loggedInitialSlideIndex = initialSlideIndex;
-    const tryFixSlide = () => {
-      const active = swiper.activeIndex;
-      const real = swiper.realIndex;
-      const mismatch = (active !== loggedInitialSlideIndex) || (real !== loggedInitialSlideIndex);
-      if (mismatch && typeof swiper.slideTo === 'function' && loggedInitialSlideIndex >= 0) {
-        swiper.slideTo(loggedInitialSlideIndex, 0);
-      }
-    };
-    requestAnimationFrame(() => {
-      setTimeout(tryFixSlide, 50);
-      setTimeout(tryFixSlide, 350); // Retry after layout (e.g. fragment/tab visible)
-    });
-
-    // Recover scrollbar + handle when missing (Mayura; fragments/tabs)
-    if (isMayuraTemplate) {
-      checkAndRecoverMayuraScrollbarForBlock(block, swiper);
-      swiper.on('init', () => checkAndRecoverMayuraScrollbarForBlock(block, swiper));
-      if (!mayuraScrollbarResizeAttached) {
-        mayuraScrollbarResizeAttached = true;
-        window.addEventListener('resize', () => globalMayuraScrollbarResizeHandler());
-        // One-time passes after layout settles (fix first tab handle when it inits before others)
-        setTimeout(() => globalMayuraScrollbarResizeHandler(), 700);
-        setTimeout(() => globalMayuraScrollbarResizeHandler(), 1400);
-        // Run recovery after tab switch so newly visible panel gets scrollbar handle
-        document.addEventListener('click', (e) => {
-          const tab = e.target.closest('.mayura [role="tab"]');
-          if (!tab) return;
-          const panelId = tab.getAttribute('aria-controls');
-          setTimeout(() => globalMayuraScrollbarResizeHandler(), 150);
-          setTimeout(() => globalMayuraScrollbarResizeHandler(), 400);
-          // Slide to startingCard when tab is selected so the correct card is in the center slot
-          setTimeout(() => {
-            const panel = panelId ? document.getElementById(panelId) : null;
-            const tabBlock = panel?.querySelector('.cards.swiper');
-            const target = tabBlock
-              ? parseInt(tabBlock.dataset.startingCard || '0', 10) : null;
-            if (tabBlock?.swiperInstance && window.innerWidth >= 600 && target != null) {
-              tabBlock.swiperInstance.slideTo(target, 0);
-            }
-          }, 200);
-        });
-        // Run recovery when a tab panel becomes visible (aria-hidden -> false);
-        // handles Travel when block inits in hidden panel and panel is shown later
-        const mayuraRoot = document.querySelector('.mayura');
-        if (mayuraRoot) {
-          const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-              if (mutation.type === 'attributes' && mutation.attributeName === 'aria-hidden') {
-                const panel = mutation.target;
-                if (panel.getAttribute?.('role') === 'tabpanel'
-                  && panel.getAttribute('aria-hidden') === 'false') {
-                  const visibleBlock = panel.querySelector('.cards.swiper');
-                  requestAnimationFrame(() => {
-                    setTimeout(() => globalMayuraScrollbarResizeHandler(), 50);
-                    setTimeout(() => globalMayuraScrollbarResizeHandler(), 250);
-                  });
-                  // Slide to startingCard so correct card is in center (initial load or tab switch)
-                  if (visibleBlock && window.innerWidth >= 600) {
-                    setTimeout(() => {
-                      const swiperInst = visibleBlock.swiperInstance;
-                      const target = parseInt(visibleBlock.dataset.startingCard || '0', 10);
-                      if (swiperInst) {
-                        swiperInst.slideTo(target, 0);
-                      }
-                    }, 200);
-                  }
-                }
-              }
-            });
-          });
-          observer.observe(mayuraRoot, { attributes: true, subtree: true, attributeFilter: ['aria-hidden'] });
-        }
-      }
-      requestAnimationFrame(() => {
-        setTimeout(() => checkAndRecoverMayuraScrollbarForBlock(block, swiper), 150);
-        setTimeout(() => checkAndRecoverMayuraScrollbarForBlock(block, swiper), 450);
-      });
-    }
-  } else if (
-    !isImportantDocuments && !isRelatedSearch && !isImageAndTitle
-    && !isEarnRewards && !isJoiningPerks && !isInCsCards
-  ) {
-    // === View All / View Less Toggle (Mobile Only) - Only for benefit cards ===
-    const maxVisible = 3;
-
-    const isMobile = () => window.innerWidth <= 768;
-
-    const toggleView = (btn, expand) => {
-      // Use allCards instead of re-querying
-      allCards.forEach((card, index) => {
-        if (index >= maxVisible) {
-          card.style.display = expand ? 'flex' : 'none';
-        }
-      });
-      btn.textContent = expand ? 'View Less' : 'View All';
-    };
-
-    const setupToggleButton = () => {
-      if (allCards.length > maxVisible && isMobile()) {
-        // Hide extra cards
-        allCards.forEach((card, index) => {
-          card.style.display = index >= maxVisible ? 'none' : 'flex';
-        });
-
-        const toggleBtn = document.createElement('button');
-        toggleBtn.textContent = 'View All';
-        toggleBtn.className = 'view-toggle';
-        block.appendChild(toggleBtn);
-
-        toggleBtn.addEventListener('click', () => {
-          const isExpanded = toggleBtn.textContent === 'View Less';
-          toggleView(toggleBtn, !isExpanded);
-        });
-      }
-    };
-
-    // Initial setup
-    setupToggleButton();
-
-    // Debounced resize handler (performance optimization)
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        const existingBtn = block.querySelector('.view-toggle');
-        if (existingBtn) existingBtn.remove();
-        allCards.forEach((card) => { card.style.display = 'flex'; });
-        setupToggleButton();
-      }, 150); // Debounce resize events
-    });
+  if (isMayuraTemplate) {
+    const scrollbarEl = document.createElement('div');
+    scrollbarEl.className = 'swiper-scrollbar';
+    block.appendChild(scrollbarEl);
+  } else {
+    const swiperPagination = document.createElement('div');
+    swiperPagination.className = 'swiper-pagination';
+    block.appendChild(swiperPagination);
   }
 
-  if (!isSwipable) {
-    window.requestAnimationFrame(() => releaseLayoutLock());
-    if (isAllAboutCard) {
-      block.style.visibility = '';
+  applySlideCountClasses(block, slideCount);
+
+  if (typeof Swiper === 'undefined') {
+    // eslint-disable-next-line no-console
+    console.warn('Swiper library not available, cards will display without slider');
+    return;
+  }
+
+  // eslint-disable-next-line no-undef
+  const swiper = new Swiper(block, swiperConfig);
+  window.requestAnimationFrame(() => layout.release());
+  if (flags.isAllAboutCard) block.style.visibility = '';
+  window.requestAnimationFrame(() => layout.setRenderedImageDimensions());
+  block.swiperInstance = swiper;
+
+  const tryFixSlide = () => {
+    const active = swiper.activeIndex;
+    const real = swiper.realIndex;
+    const mismatch = (active !== initialSlideIndex) || (real !== initialSlideIndex);
+    if (mismatch && typeof swiper.slideTo === 'function' && initialSlideIndex >= 0) {
+      swiper.slideTo(initialSlideIndex, 0);
     }
-    window.requestAnimationFrame(() => setRenderedImageDimensions());
+  };
+  requestAnimationFrame(() => {
+    setTimeout(tryFixSlide, 50);
+    setTimeout(tryFixSlide, 350);
+  });
+
+  if (isMayuraTemplate) {
+    checkAndRecoverMayuraScrollbarForBlock(block, swiper);
+    swiper.on('init', () => checkAndRecoverMayuraScrollbarForBlock(block, swiper));
+    if (!mayuraScrollbarResizeAttached) {
+      mayuraScrollbarResizeAttached = true;
+      window.addEventListener('resize', () => globalMayuraScrollbarResizeHandler());
+      setTimeout(() => globalMayuraScrollbarResizeHandler(), 700);
+      setTimeout(() => globalMayuraScrollbarResizeHandler(), 1400);
+      document.addEventListener('click', (e) => {
+        const tab = e.target.closest('.mayura [role="tab"]');
+        if (!tab) return;
+        const panelId = tab.getAttribute('aria-controls');
+        setTimeout(() => globalMayuraScrollbarResizeHandler(), 150);
+        setTimeout(() => globalMayuraScrollbarResizeHandler(), 400);
+        setTimeout(() => {
+          const panel = panelId ? document.getElementById(panelId) : null;
+          const tabBlock = panel?.querySelector('.cards.swiper');
+          const target = tabBlock ? parseInt(tabBlock.dataset.startingCard || '0', 10) : null;
+          if (tabBlock?.swiperInstance && window.innerWidth >= 600 && target !== null) {
+            tabBlock.swiperInstance.slideTo(target, 0);
+          }
+        }, 200);
+      });
+      const mayuraRoot = document.querySelector('.mayura');
+      if (mayuraRoot) {
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'aria-hidden') {
+              const panel = mutation.target;
+              if (panel.getAttribute?.('role') === 'tabpanel' && panel.getAttribute('aria-hidden') === 'false') {
+                const visibleBlock = panel.querySelector('.cards.swiper');
+                // Intentional: Mayura tab-panel visibility uses observer + rAF + setTimeout chain
+                /* eslint-disable sonarjs/no-nested-functions */
+                requestAnimationFrame(() => {
+                  setTimeout(() => globalMayuraScrollbarResizeHandler(), 50);
+                  setTimeout(() => globalMayuraScrollbarResizeHandler(), 250);
+                });
+                /* eslint-enable sonarjs/no-nested-functions */
+                if (visibleBlock && window.innerWidth >= 600) {
+                  setTimeout(() => {
+                    const swiperInst = visibleBlock.swiperInstance;
+                    const target = parseInt(visibleBlock.dataset.startingCard || '0', 10);
+                    if (swiperInst) swiperInst.slideTo(target, 0);
+                  }, 200);
+                }
+              }
+            }
+          });
+        });
+        observer.observe(mayuraRoot, { attributes: true, subtree: true, attributeFilter: ['aria-hidden'] });
+      }
+    }
+    requestAnimationFrame(() => {
+      setTimeout(() => checkAndRecoverMayuraScrollbarForBlock(block, swiper), 150);
+      setTimeout(() => checkAndRecoverMayuraScrollbarForBlock(block, swiper), 450);
+    });
+  }
+}
+
+function setupViewAllViewLess(block, allCards) {
+  const maxVisible = 3;
+  const isMobile = () => window.innerWidth <= 768;
+  const toggleView = (btn, expand) => {
+    allCards.forEach((card, index) => {
+      if (index >= maxVisible) card.style.display = expand ? 'flex' : 'none';
+    });
+    btn.textContent = expand ? 'View Less' : 'View All';
+  };
+  const setupToggleButton = () => {
+    if (allCards.length <= maxVisible || !isMobile()) return;
+    allCards.forEach((card, index) => {
+      card.style.display = index >= maxVisible ? 'none' : 'flex';
+    });
+    const toggleBtn = document.createElement('button');
+    toggleBtn.textContent = 'View All';
+    toggleBtn.className = 'view-toggle';
+    block.appendChild(toggleBtn);
+    toggleBtn.addEventListener('click', () => {
+      const isExpanded = toggleBtn.textContent === 'View Less';
+      toggleView(toggleBtn, !isExpanded);
+    });
+  };
+  setupToggleButton();
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      const existingBtn = block.querySelector('.view-toggle');
+      if (existingBtn) existingBtn.remove();
+      allCards.forEach((card) => { card.style.display = 'flex'; });
+      setupToggleButton();
+    }, 150);
+  });
+}
+
+export default async function decorate(block) {
+  const layout = applyInitialLayoutLock(block);
+  const flags = getBlockVariantFlags(block);
+  if (shouldSkipRebuild(block)) return;
+
+  const {
+    rows, configRowCount, cardRows, numCells,
+  } = parseRowsAndConfig(block);
+  moveInstrumentationToBlock(block, rows, configRowCount);
+
+  const cardsContainer = document.createElement('div');
+  cardsContainer.classList.add('grid-cards');
+  buildCardsFromRows(cardRows, numCells, cardsContainer);
+
+  if (flags.supportsSemanticElements) {
+    cardsContainer.querySelectorAll('.cards-card').forEach((cardItem) => {
+      identifySemanticCardElements(cardItem);
+    });
+  }
+  optimizeCardPicturesInContainer(cardsContainer, block);
+  block.replaceChildren(cardsContainer);
+
+  const allCards = cardsContainer.querySelectorAll('.cards-card');
+  applyCardClassesAndInteractivity(block, allCards, flags);
+
+  const isSwipable = block.dataset.swipable === 'true';
+  if (isSwipable) {
+    await initSwiper(block, cardsContainer, flags, layout);
+  } else {
+    const showViewAllToggle = !flags.isImportantDocuments && !flags.isRelatedSearch
+      && !flags.isImageAndTitle && !flags.isEarnRewards && !flags.isJoiningPerks
+      && !flags.isInCsCards;
+    if (showViewAllToggle) {
+      setupViewAllViewLess(block, allCards);
+    }
+
+    layout.release();
+    if (flags.isAllAboutCard) block.style.visibility = '';
+    window.requestAnimationFrame(() => layout.setRenderedImageDimensions());
   }
 }
