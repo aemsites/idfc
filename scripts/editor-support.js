@@ -96,9 +96,11 @@ async function reloadCategoryNav(main) {
     console.error('[Category Nav Editor] Failed to load CSS:', error);
   }
 
-  // Load the category-nav blocks to trigger their decoration
+  // Load the category-nav blocks to trigger their decoration (capped to avoid CWE-606)
   const navBlocks = [...main.querySelectorAll('.category-nav.block')];
-  for (let i = 0; i < navBlocks.length; i += 1) {
+  const maxNavBlocks = 100;
+  const blockCount = Math.min(navBlocks.length, maxNavBlocks);
+  for (let i = 0; i < blockCount; i += 1) {
     // eslint-disable-next-line no-await-in-loop
     await loadBlock(navBlocks[i]);
   }
@@ -113,171 +115,152 @@ async function reloadCategoryNav(main) {
   }
 }
 
-async function applyChanges(event) {
-  // redecorate default content and blocks on patches (in the properties rail)
-  const { detail } = event;
+/** Reload category nav if container is inside a main; logs if main not found. */
+async function reloadCategoryNavIfPresent(container) {
+  const main = container.closest('main');
+  if (main) {
+    await reloadCategoryNav(main);
+  } else {
+    // eslint-disable-next-line no-console
+    console.error('[Category Nav Editor] Could not find main element for update');
+  }
+}
 
-  const resource = detail?.request?.target?.resource // update, patch components
-    || detail?.request?.target?.container?.resource // update, patch, add to sections
-    || detail?.request?.to?.container?.resource; // move in sections
+/** Decorate a cloned fragment section that contains a category-nav block. */
+function decorateCategoryNavSectionClone(sectionClone) {
+  const categoryNavBlock = sectionClone.querySelector('.category-nav');
+  if (!categoryNavBlock) return;
+  categoryNavBlock.removeAttribute('data-fragment-block');
+  categoryNavBlock.dataset.blockStatus = '';
+  sectionClone.classList.add('category-nav-section');
+  const titleWrapper = sectionClone.querySelector('.default-content-wrapper');
+  if (titleWrapper) {
+    titleWrapper.classList.add('category-title-wrapper');
+    const titleElement = titleWrapper.querySelector('p, h1, h2, h3, h4, h5, h6');
+    if (titleElement) {
+      titleElement.classList.add('category-title');
+      sectionClone.setAttribute('data-category-name', titleElement.textContent.trim());
+    }
+  }
+  const blockWrapper = sectionClone.querySelector('.category-nav-wrapper');
+  if (blockWrapper) blockWrapper.classList.add('category-nav-block-wrapper');
+}
+
+/** Load category-nav fragment from page metadata and inject sections into newMain. */
+async function injectCategoryNavFromFragment(newMain, parsedUpdate) {
+  const categoryNavPath = getMetadata('category-nav', parsedUpdate);
+  if (!categoryNavPath) return;
+  try {
+    const fragment = await loadFragment(categoryNavPath);
+    if (!fragment) return;
+    const fragmentSections = fragment.querySelectorAll(':scope > .section');
+    const { firstChild } = newMain;
+    fragmentSections.forEach((section) => {
+      const sectionClone = section.cloneNode(true);
+      decorateCategoryNavSectionClone(sectionClone);
+      if (firstChild) {
+        newMain.insertBefore(sectionClone, firstChild);
+      } else {
+        newMain.appendChild(sectionClone);
+      }
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('[Category Nav Editor] Error loading fragment:', error);
+  }
+}
+
+/** Apply a main-level content update; returns true if applied. */
+async function applyMainUpdate(element, parsedUpdate, resource) {
+  const newMain = parsedUpdate.querySelector(`[data-aue-resource="${resource}"]`);
+  if (!newMain) return false;
+  newMain.style.display = 'none';
+  element.insertAdjacentElement('afterend', newMain);
+  await injectCategoryNavFromFragment(newMain, parsedUpdate);
+  decorateMain(newMain);
+  decorateRichtext(newMain);
+  await loadSections(newMain);
+  await reloadCategoryNav(newMain);
+  element.remove();
+  newMain.style.display = null;
+  // eslint-disable-next-line no-use-before-define
+  attachEventListners(newMain);
+  return true;
+}
+
+/** Apply a block-level content update; returns true if applied. Call only when block exists. */
+async function applyBlockUpdate(block, parsedUpdate) {
+  const blockResource = block.getAttribute('data-aue-resource');
+  const newBlock = parsedUpdate.querySelector(`[data-aue-resource="${blockResource}"]`);
+  if (!newBlock) return false;
+  newBlock.style.display = 'none';
+  block.insertAdjacentElement('afterend', newBlock);
+  decorateButtons(newBlock);
+  decorateIcons(newBlock);
+  decorateBlock(newBlock);
+  decorateRichtext(newBlock);
+  await loadBlock(newBlock);
+  block.remove();
+  newBlock.style.display = null;
+  if (newBlock.classList.contains('category-nav')) {
+    await reloadCategoryNavIfPresent(newBlock);
+  }
+  return true;
+}
+
+/** Apply section or default content update; returns true if applied. */
+async function applySectionOrContentUpdate(element, parsedUpdate, resource) {
+  const newElements = parsedUpdate.querySelectorAll(`[data-aue-resource="${resource}"],[data-richtext-resource="${resource}"]`);
+  if (!newElements.length) return false;
+  const { parentElement } = element;
+  if (element.matches('.section')) {
+    const [newSection] = newElements;
+    newSection.style.display = 'none';
+    element.insertAdjacentElement('afterend', newSection);
+    decorateButtons(newSection);
+    decorateIcons(newSection);
+    decorateRichtext(newSection);
+    decorateSections(parentElement);
+    if (element.closest('.tabs')) moveAllAttributes(element, newSection);
+    decorateBlocks(parentElement);
+    await loadSections(parentElement);
+    element.remove();
+    newSection.style.display = null;
+    if (newSection.querySelector('.category-nav')) await reloadCategoryNavIfPresent(newSection);
+  } else {
+    element.replaceWith(...newElements);
+    decorateButtons(parentElement);
+    decorateIcons(parentElement);
+    decorateRichtext(parentElement);
+  }
+  return true;
+}
+
+async function applyChanges(event) {
+  const { detail } = event;
+  const resource = detail?.request?.target?.resource
+    || detail?.request?.target?.container?.resource
+    || detail?.request?.to?.container?.resource;
   if (!resource) return false;
   const updates = detail?.response?.updates;
-  if (!updates.length) return false;
+  if (!updates?.length) return false;
   const { content } = updates[0];
   if (!content) return false;
 
-  // load dompurify
   await loadScript(`${window.hlx.codeBasePath}/scripts/dompurify.min.js`);
-
   const sanitizedContent = window.DOMPurify.sanitize(content, { USE_PROFILES: { html: true } });
-  const parsedUpdate = new DOMParser().parseFromString(sanitizedContent, 'text/html');
+  const parsedUpdate = document.implementation.createHTMLDocument('');
+  parsedUpdate.open();
+  parsedUpdate.write(sanitizedContent);
+  parsedUpdate.close();
+
   const element = document.querySelector(`[data-aue-resource="${resource}"]`);
+  if (!element) return false;
 
-  if (element) {
-    if (element.matches('main')) {
-      const newMain = parsedUpdate.querySelector(`[data-aue-resource="${resource}"]`);
-      newMain.style.display = 'none';
-      element.insertAdjacentElement('afterend', newMain);
-
-      // Load category-nav fragment from page metadata BEFORE decorating
-      // This handles when content authors change the category-nav page property
-      const categoryNavPath = getMetadata('category-nav', parsedUpdate);
-      if (categoryNavPath) {
-        try {
-          const fragment = await loadFragment(categoryNavPath);
-          if (fragment) {
-            const fragmentSections = fragment.querySelectorAll(':scope > .section');
-            const { firstChild } = newMain;
-            fragmentSections.forEach((section) => {
-              const sectionClone = section.cloneNode(true);
-
-              // Add semantic classes to sections containing category-nav blocks
-              const categoryNavBlock = sectionClone.querySelector('.category-nav');
-              if (categoryNavBlock) {
-                // Remove the fragment-block marker so it can be loaded on the page
-                categoryNavBlock.removeAttribute('data-fragment-block');
-                // Reset block status so it can be loaded explicitly later
-                categoryNavBlock.dataset.blockStatus = '';
-
-                sectionClone.classList.add('category-nav-section');
-
-                const titleWrapper = sectionClone.querySelector('.default-content-wrapper');
-                if (titleWrapper) {
-                  titleWrapper.classList.add('category-title-wrapper');
-                  const titleElement = titleWrapper.querySelector('p, h1, h2, h3, h4, h5, h6');
-                  if (titleElement) {
-                    titleElement.classList.add('category-title');
-                    const categoryName = titleElement.textContent.trim();
-                    sectionClone.setAttribute('data-category-name', categoryName);
-                  }
-                }
-
-                const blockWrapper = sectionClone.querySelector('.category-nav-wrapper');
-                if (blockWrapper) {
-                  blockWrapper.classList.add('category-nav-block-wrapper');
-                }
-              }
-
-              if (firstChild) {
-                newMain.insertBefore(sectionClone, firstChild);
-              } else {
-                newMain.appendChild(sectionClone);
-              }
-            });
-          }
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error('[Category Nav Editor] Error loading fragment:', error);
-        }
-      }
-
-      decorateMain(newMain);
-      decorateRichtext(newMain);
-      await loadSections(newMain);
-
-      // Reload category navigation if present
-      await reloadCategoryNav(newMain);
-
-      element.remove();
-      newMain.style.display = null;
-      // eslint-disable-next-line no-use-before-define
-      attachEventListners(newMain);
-      return true;
-    }
-
-    const block = element.parentElement?.closest('.block[data-aue-resource]') || element?.closest('.block[data-aue-resource]');
-    if (block) {
-      const blockResource = block.getAttribute('data-aue-resource');
-      const newBlock = parsedUpdate.querySelector(`[data-aue-resource="${blockResource}"]`);
-      if (newBlock) {
-        newBlock.style.display = 'none';
-        block.insertAdjacentElement('afterend', newBlock);
-        decorateButtons(newBlock);
-        decorateIcons(newBlock);
-        decorateBlock(newBlock);
-        decorateRichtext(newBlock);
-        await loadBlock(newBlock);
-        block.remove();
-        newBlock.style.display = null;
-
-        // If this is a category-nav block, reload the unified navigation
-        if (newBlock.classList.contains('category-nav')) {
-          const main = newBlock.closest('main');
-          if (main) {
-            await reloadCategoryNav(main);
-          } else {
-            // eslint-disable-next-line no-console
-            console.error('[Category Nav Editor] Could not find main element for block update');
-          }
-        }
-
-        return true;
-      }
-    } else {
-      // sections and default content, may be multiple in the case of richtext
-      const newElements = parsedUpdate.querySelectorAll(`[data-aue-resource="${resource}"],[data-richtext-resource="${resource}"]`);
-      if (newElements.length) {
-        const { parentElement } = element;
-        if (element.matches('.section')) {
-          const [newSection] = newElements;
-          newSection.style.display = 'none';
-          element.insertAdjacentElement('afterend', newSection);
-          decorateButtons(newSection);
-          decorateIcons(newSection);
-          decorateRichtext(newSection);
-          decorateSections(parentElement);
-
-          // added for multi-section blocks
-          if (element.closest('.tabs')) {
-            moveAllAttributes(element, newSection);
-          }
-          decorateBlocks(parentElement);
-          await loadSections(parentElement);
-          element.remove();
-          newSection.style.display = null;
-
-          // If this section contains category-nav blocks, reload the navigation
-          if (newSection.querySelector('.category-nav')) {
-            const main = newSection.closest('main');
-            if (main) {
-              await reloadCategoryNav(main);
-            } else {
-              // eslint-disable-next-line no-console
-              console.error('[Category Nav Editor] Could not find main element for section update');
-            }
-          }
-        } else {
-          element.replaceWith(...newElements);
-          decorateButtons(parentElement);
-          decorateIcons(parentElement);
-          decorateRichtext(parentElement);
-        }
-        return true;
-      }
-    }
-  }
-
-  return false;
+  if (element.matches('main')) return applyMainUpdate(element, parsedUpdate, resource);
+  const block = element.parentElement?.closest('.block[data-aue-resource]') || element?.closest('.block[data-aue-resource]');
+  if (block) return applyBlockUpdate(block, parsedUpdate);
+  return applySectionOrContentUpdate(element, parsedUpdate, resource);
 }
 
 /**
