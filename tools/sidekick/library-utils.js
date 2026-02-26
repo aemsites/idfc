@@ -181,7 +181,7 @@ export function createElement(tagName, classes, props, html) {
       createElement('div', 'details-container', {}, [
         createElement('div', 'action-bar', {}, [
           createElement('h3', 'block-title'),
-          createElement('div', 'actions', {}),
+          createElement('div', 'actions', {}, createElement('sp-button', 'copy-button', {}, 'Copy Block')),
         ]),
         createElement('sp-divider', '', { size: 's' }),
         createElement('div', 'details'),
