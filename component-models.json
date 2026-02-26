@@ -1789,21 +1789,6 @@
     ]
   },
   {
-    "id": "form",
-    "fields": [
-      {
-        "component": "text",
-        "name": "form_title",
-        "label": "Form Title"
-      },
-      {
-        "component": "text",
-        "name": "form_description",
-        "label": "Form Description"
-      }
-    ]
-  },
-  {
     "id": "fragment",
     "fields": [
       {
@@ -2036,10 +2021,6 @@
         "label": "Image Alt Text"
       }
     ]
-  },
-  {
-    "id": "overview-rte-item",
-    "fields": []
   },
   {
     "id": "overview",
