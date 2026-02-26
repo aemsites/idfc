@@ -18,7 +18,6 @@
       "cards",
       "columns",
       "fragment",
-      "form",
       "accordion",
       "table",
       "tabs",
@@ -134,12 +133,6 @@
   {
     "id": "library-metadata",
     "components": []
-  },
-  {
-    "id": "overview-rte",
-    "components": [
-      "overview-rte-item"
-    ]
   },
   {
     "id": "steps",
