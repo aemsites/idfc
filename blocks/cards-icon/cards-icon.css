@@ -1,4 +1,5 @@
 /* stylelint-disable no-descending-specificity */
+
 /* Cards-icon: Important Documents, Related Search, Image and Title (no Swiper) */
 
 .cards-icon > .grid-cards {
@@ -152,7 +153,6 @@
 .cards-icon.important-documents .cards-card-body h3 {
   width: 100%;
   text-align: center;
-  word-wrap: break-word;
   overflow-wrap: break-word;
   font-size: var(--body-font-size-s);
 }
@@ -192,7 +192,7 @@
   margin-bottom: var(--spacing-s);
   background: var(--color-white);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0 0 0 / 8%);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
   width: 100%;
   gap: 16px;
   position: relative;

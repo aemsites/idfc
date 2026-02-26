@@ -29,6 +29,7 @@ and outer background value (such as rgb(0 0 0 / 60%) */
     transform: translateY(100%);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -71,7 +72,6 @@ div:empty {
 }
 
 .cta-sticky-mobile-content {
-
   > div {
   margin: var(--spacing-xs) 0;
   }
