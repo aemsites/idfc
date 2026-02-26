@@ -21,10 +21,10 @@ and outer background value (such as rgb(0 0 0 / 60%) */
 }
 
 .section.cta-sticky-container.slide-in {
-  animation: slideUp 0.3s ease-in-out;
+  animation: slide-up 0.3s ease-in-out;
 }
 
-@keyframes slideUp {
+@keyframes slide-up {
   from {
     transform: translateY(100%);
     opacity: 0;

@@ -142,7 +142,7 @@
 
 html {
  /* -webkit-font-smoothing: antialiased; */
-  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgb(0 0 0 / 0%);
 }
 
@@ -478,15 +478,6 @@ main:not([data-aue-resource]) .section.columns-container:not([data-section-statu
 
 main:not([data-aue-resource]) .cards:not([data-block-status="loaded"]) {
   visibility: hidden;
-}
-
-/* 3. Once section is loaded, use min-height instead of fixed height.
-      Keep black background to prevent white body showing through during transitions. */
-main not:dialog.section.cards-container[data-section-status="loaded"],
-main not:dialog.section.columns-container[data-section-status="loaded"] {
-  min-height: 450px;
-  height: auto;
-  overflow: visible;
 }
 
 /* sections */

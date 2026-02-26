@@ -58,7 +58,6 @@
   background: var(--gradient-silver);
 }
 
-.tabs-container.silver-blue-text .tabs-tab,
 .tabs-container.silver-blue-text .tabs-tab {
   background: rgb(255 255 255 / 70%);
 }

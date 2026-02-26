@@ -12,6 +12,13 @@
 /* UE editing mode indicator - tab label style at top of block */
 main[data-aue-resource] .hero-heritage-cc {
   position: relative;
+  min-height: auto;
+  height: auto;
+  overflow: visible;
+  padding: 16px;
+  background: #f5f5f5;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
 }
 
 main[data-aue-resource] .hero-heritage-cc::before {
@@ -58,16 +65,6 @@ main[data-aue-resource] .hero-heritage-cc-container .hero-heritage-cc-wrapper .b
   transform: none;
   order: -1;
   margin-bottom: 16px;
-}
-
-main[data-aue-resource] .hero-heritage-cc {
-  min-height: auto;
-  height: auto;
-  overflow: visible;
-  padding: 16px;
-  background: #f5f5f5;
-  border: 1px dashed #ccc;
-  border-radius: 8px;
 }
 
 /* Make block visible immediately in UE - override loaded check */

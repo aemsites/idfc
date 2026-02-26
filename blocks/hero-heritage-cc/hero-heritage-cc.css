@@ -1,9 +1,7 @@
-/* Mobile-first base styles */
-
 /* Section container - fixed height to prevent CLS */
 .hero-heritage-cc-container {
   position: relative;
-  min-height: calc(100vh - var(--spacing-xl));
+  min-height: calc(100vh - var(--spacing-xl)); /* fallback for older browsers */
   min-height: calc(100dvh - var(--spacing-xl));
   height: calc(100vh - var(--spacing-xl));
   height: calc(100dvh - var(--spacing-xl));
