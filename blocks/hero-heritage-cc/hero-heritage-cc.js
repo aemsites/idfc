@@ -1,6 +1,8 @@
 import { decorateButtons } from '../../scripts/aem.js';
 import { loadFragment } from '../../scripts/scripts.js';
 
+/* eslint-disable secure-coding/no-hardcoded-credentials -- CSS classes/style props only */
+
 /**
  * Checks if a string is a valid CSS color or gradient value
  * Accepts: hex, rgb/rgba, hsl/hsla, explicit gradients, design tokens, or web colors
@@ -66,443 +68,359 @@ function normalizeCssColorValue(value) {
   return trimmed;
 }
 
-export default function decorate(block) {
-  // Check if we're in Universal Editor
-  const mainElement = document.querySelector('main');
-  const hasAueResource = mainElement?.hasAttribute('data-aue-resource');
-
-  // Helper: collapse hero and show first hotspot block (when "The Concept" is clicked)
-  function showConceptHotspotBlock() {
-    const hero = document.querySelector('.hero-heritage-cc');
-    if (hero) hero.classList.toggle('hero-heritage-cc-collapsed');
-    const firstBlock = document.getElementById('the-concept-hotspot')
-      || document.querySelector('.hotspot-container .hotspot');
-    if (firstBlock?.classList.contains('hotspot')) {
-      firstBlock.style.display = 'block';
-    }
+/** Collapse hero and show first hotspot block (when "The Concept" is clicked). */
+function showConceptHotspotBlock() {
+  const hero = document.querySelector('.hero-heritage-cc');
+  if (hero) hero.classList.toggle('hero-heritage-cc-collapsed');
+  const firstBlock = document.getElementById('the-concept-hotspot')
+    || document.querySelector('.hotspot-container .hotspot');
+  if (firstBlock?.classList.contains('hotspot')) {
+    firstBlock.style.display = 'block';
   }
+}
 
-  // Handle "The Concept" link (hash anchor): collapse hero, show first hotspot block
-  if (!document.body.dataset.heroConceptLinkListener) {
-    document.body.dataset.heroConceptLinkListener = 'true';
-    document.addEventListener('click', (e) => {
-      const link = e.target.closest('a[href*="the-concept-hotspot"]');
-      if (!link) return;
-      const isHashLink = link.hash === '#the-concept-hotspot'
-        || link.getAttribute('href')?.includes('the-concept-hotspot');
-      if (!isHashLink) return;
-      showConceptHotspotBlock();
-    });
-  }
+/** Register global click listener for "The Concept" hash link (once per page). */
+function setupConceptLinkListener() {
+  if (document.body.dataset.heroConceptLinkListener) return;
+  document.body.dataset.heroConceptLinkListener = 'true';
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href*="the-concept-hotspot"]');
+    if (!link) return;
+    const isHashLink = link.hash === '#the-concept-hotspot'
+      || link.getAttribute('href')?.includes('the-concept-hotspot');
+    if (!isHashLink) return;
+    showConceptHotspotBlock();
+  });
+}
 
-  // Set modal theme for any modal links within this block (e.g., fees link)
-  // These match the styling used by the cards/key-benefits modals on Mayura pages
+/** Set modal theme and asset data on block for modal links (e.g. fees). */
+function setBlockModalTheme(block) {
   block.dataset.modalTheme = 'modal-mayura-blue';
   block.dataset.modalDialogBackgroundImageTexture = '/credit-card/metal-credit-card/media_15a8f844f87bf985cbf4471803bc87278ff6daa36.png';
   block.dataset.modalPageBackgroundImage = '/credit-card/metal-credit-card/media_1aa917044ef2aa165adb54e6ecc718b1cd83e80a4.png';
   block.dataset.modalPageDecorationImage = '/credit-card/metal-credit-card/media_13f68aa7e19d4532ae6d8a784fb5c4e140fb55d3e.svg';
+}
 
-  // Get all direct child divs (the three main sections)
-  const rows = [...block.children].filter((child) => child.tagName === 'DIV');
+/** Build header CTA link with arrow and fees link; then run decorateButtons. */
+function buildHeaderCtaLinks(block, row, ctaContent, ctaLink, linkP, textP, btnTxt) {
+  ctaLink.textContent = btnTxt;
+  ctaLink.classList.add('hero-heritage-cc-header-cta-link', 'button', 'primary');
+  linkP.classList.add('button-container');
 
-  // Section 1: Header CTA (Apply Now button + link)
-  if (rows[0]) {
-    rows[0].classList.add('hero-heritage-cc-header-cta');
+  const ctaArrowSpan = document.createElement('span');
+  ctaArrowSpan.className = 'icon icon-arrow-right-white';
+  const ctaArrowImg = document.createElement('img');
+  ctaArrowImg.setAttribute('data-icon-name', 'arrow-right-white');
+  ctaArrowImg.src = '/icons/arrow-right-white.svg';
+  ctaArrowImg.alt = '';
+  ctaArrowImg.loading = 'lazy';
+  ctaArrowSpan.appendChild(ctaArrowImg);
+  ctaLink.appendChild(ctaArrowSpan);
 
-    const ctaContent = rows[0].querySelector(':scope > div');
-    if (ctaContent) {
-      // Get the button text from the first paragraph (headerCta_text field)
-      const textParagraph = ctaContent.querySelector('p:not(:has(a))');
-      const buttonText = textParagraph?.textContent?.trim() || 'Apply Now';
+  if (textP) textP.remove();
 
-      // Find the link paragraph and the link itself
-      const linkParagraph = ctaContent.querySelector('p:has(a)');
-      const ctaLink = linkParagraph?.querySelector('a');
-
-      if (ctaLink && linkParagraph) {
-        // Set the link text to the button text (not the URL)
-        ctaLink.textContent = buttonText;
-        ctaLink.classList.add('hero-heritage-cc-header-cta-link');
-
-        // Apply primary button classes manually (decorateButtons skips links with images)
-        ctaLink.classList.add('button', 'primary');
-        linkParagraph.classList.add('button-container');
-
-        // Add arrow icon to Apply Now button (must be after button classes are set)
-        const ctaArrowSpan = document.createElement('span');
-        ctaArrowSpan.className = 'icon icon-arrow-right-white';
-        const ctaArrowImg = document.createElement('img');
-        ctaArrowImg.setAttribute('data-icon-name', 'arrow-right-white');
-        ctaArrowImg.src = '/icons/arrow-right-white.svg';
-        ctaArrowImg.alt = '';
-        ctaArrowImg.loading = 'lazy';
-        ctaArrowSpan.appendChild(ctaArrowImg);
-        ctaLink.appendChild(ctaArrowSpan);
-
-        // Remove the separate text paragraph since text is now in the button
-        if (textParagraph) textParagraph.remove();
-
-        // Add secondary "Fees and charges" link with arrow icon
-        const feesLink = document.createElement('a');
-        feesLink.href = '/credit-card/metal-credit-card/mayura/modals/fee-and-charges-modal';
-        feesLink.textContent = 'Fees and charges on Mayura Metal Card ';
-        feesLink.classList.add('hero-heritage-cc-header-cta-fees-link');
-
-        // Custom click handler to strip inline background from table-container
-        feesLink.addEventListener('click', async (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-
-          const { openModal } = await import(`${window.hlx.codeBasePath}/blocks/modal/modal.js`);
-          await openModal(feesLink.href, {
-            modalTheme: block.dataset.modalTheme,
-            textureImage: block.dataset.modalDialogBackgroundImageTexture,
-            pageBackgroundImage: block.dataset.modalPageBackgroundImage,
-            decorationImage: block.dataset.modalPageDecorationImage,
-          });
-
-          // After modal opens, strip inline background from table-container sections
-          setTimeout(() => {
-            const modalDialog = document.querySelector('dialog.modal-mayura-blue[open]');
-            if (modalDialog) {
-              modalDialog.querySelectorAll('.section.table-container').forEach((section) => {
-                section.style.removeProperty('background');
-              });
-            }
-          }, 50);
+  const feesLink = document.createElement('a');
+  feesLink.href = '/credit-card/metal-credit-card/mayura/modals/fee-and-charges-modal';
+  feesLink.textContent = 'Fees and charges on Mayura Metal Card ';
+  feesLink.classList.add('hero-heritage-cc-header-cta-fees-link');
+  feesLink.addEventListener('click', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const { openModal } = await import(`${window.hlx.codeBasePath}/blocks/modal/modal.js`);
+    await openModal(feesLink.href, {
+      modalTheme: block.dataset.modalTheme,
+      textureImage: block.dataset.modalDialogBackgroundImageTexture,
+      pageBackgroundImage: block.dataset.modalPageBackgroundImage,
+      decorationImage: block.dataset.modalPageDecorationImage,
+    });
+    setTimeout(() => {
+      const modalDialog = document.querySelector('dialog.modal-mayura-blue[open]');
+      if (modalDialog) {
+        modalDialog.querySelectorAll('.section.table-container').forEach((section) => {
+          section.style.removeProperty('background');
         });
-
-        // Create arrow icon
-        const arrowSpan = document.createElement('span');
-        arrowSpan.className = 'icon icon-arrow-right-white';
-        const arrowImg = document.createElement('img');
-        arrowImg.setAttribute('data-icon-name', 'arrow-right-white');
-        arrowImg.src = '/icons/arrow-right-white.svg';
-        arrowImg.alt = '';
-        arrowImg.loading = 'lazy';
-        arrowSpan.appendChild(arrowImg);
-        feesLink.appendChild(arrowSpan);
-
-        // Add to a new paragraph after the button
-        const feesP = document.createElement('p');
-        feesP.appendChild(feesLink);
-        linkParagraph.parentNode.appendChild(feesP);
-
-        // Call decorateButtons to apply button styling (runs after page decoration)
-        decorateButtons(rows[0]);
       }
+    }, 50);
+  });
+
+  const arrowSpan = document.createElement('span');
+  arrowSpan.className = 'icon icon-arrow-right-white';
+  const arrowImg = document.createElement('img');
+  arrowImg.setAttribute('data-icon-name', 'arrow-right-white');
+  arrowImg.src = '/icons/arrow-right-white.svg';
+  arrowImg.alt = '';
+  arrowImg.loading = 'lazy';
+  arrowSpan.appendChild(arrowImg);
+  feesLink.appendChild(arrowSpan);
+
+  const feesP = document.createElement('p');
+  feesP.appendChild(feesLink);
+  linkP.parentNode.appendChild(feesP);
+  decorateButtons(row);
+}
+
+/** Decorate Section 1: Header CTA (Apply Now button + fees link). */
+function decorateHeaderCta(block, row) {
+  row.classList.add('hero-heritage-cc-header-cta');
+  const ctaContent = row.querySelector(':scope > div');
+  if (!ctaContent) return;
+
+  const textParagraph = ctaContent.querySelector('p:not(:has(a))');
+  const buttonText = textParagraph?.textContent?.trim() || 'Apply Now';
+  const linkParagraph = ctaContent.querySelector('p:has(a)');
+  const ctaLink = linkParagraph?.querySelector('a');
+
+  if (!ctaLink || !linkParagraph) return;
+  buildHeaderCtaLinks(block, row, ctaContent, ctaLink, linkParagraph, textParagraph, buttonText);
+}
+
+/** Apply background image from first picture to section (or UE preview). */
+function applyIntroBackground(block, introContent, pictures) {
+  const bgPicture = pictures[0];
+  if (!bgPicture) return;
+
+  const bgPictureWrapper = bgPicture.closest('p');
+  const bgImg = bgPicture.querySelector('img');
+  const isInUE = !!document.querySelector('main[data-aue-resource]');
+
+  if (isInUE) {
+    bgPicture.classList.add('hero-heritage-cc-intro-bg-preview');
+    if (bgPictureWrapper) bgPictureWrapper.classList.add('hero-heritage-cc-intro-bg-preview-wrapper');
+    return;
+  }
+
+  const webpSource = bgPicture.querySelector('source[type="image/webp"]');
+  let bgUrl = webpSource?.srcset?.split(',')[0]?.trim()?.split(' ')[0] || bgImg?.src;
+  if (bgUrl?.includes('optimize=medium')) {
+    bgUrl = bgUrl.replace('optimize=medium', 'optimize=large');
+  }
+
+  if (bgUrl) {
+    const sectionContainer = block.closest('.section');
+    if (sectionContainer) {
+      sectionContainer.style.backgroundImage = `url(${bgUrl})`;
+      sectionContainer.style.backgroundSize = 'cover';
+      sectionContainer.style.backgroundRepeat = 'repeat';
+      sectionContainer.style.backgroundPosition = 'center center';
+      sectionContainer.style.backgroundAttachment = 'fixed';
+      const preloadLink = document.createElement('link');
+      preloadLink.rel = 'preload';
+      preloadLink.as = 'image';
+      preloadLink.href = bgUrl;
+      preloadLink.fetchPriority = 'high';
+      if (webpSource) preloadLink.type = 'image/webp';
+      document.head.appendChild(preloadLink);
     }
   }
 
-  // Section 2: Intro (text, background image, logos, credit card name)
-  if (rows[1]) {
-    rows[1].classList.add('hero-heritage-cc-intro');
+  bgPicture.remove();
+  if (bgPictureWrapper) bgPictureWrapper.remove();
+}
 
-    // Find elements within intro section
-    const introContent = rows[1].querySelector(':scope > div');
-    if (introContent) {
-      // First heading is the intro text
-      const introHeading = introContent.querySelector('h1, h2, h3, h4, h5, h6');
-      if (introHeading) {
-        introHeading.classList.add('hero-heritage-cc-intro-text-top');
-      }
+/** Apply decoration images from pictures[1] and pictures[2] to section. */
+function applyIntroDecorations(block, pictures) {
+  const sectionContainer = block.closest('.section');
+  if (!sectionContainer) return;
 
-      // Get all pictures in intro (order follows model field order)
-      const pictures = introContent.querySelectorAll('picture');
+  [1, 2].forEach((i) => {
+    const pic = pictures[i];
+    if (!pic) return;
+    const img = pic.querySelector('img');
+    const prop = i === 1 ? '--hero-heritage-cc-decoration-top-right' : '--hero-heritage-cc-decoration-bottom-left';
+    if (img?.src) sectionContainer.style.setProperty(prop, `url(${img.src})`);
+    pic.remove();
+    const wrapper = pic.closest('p');
+    if (wrapper) wrapper.remove();
+  });
+}
 
-      // First picture is the background image
-      if (pictures[0]) {
-        const bgPicture = pictures[0];
-        const bgPictureWrapper = bgPicture.closest('p');
-        const bgImg = bgPicture.querySelector('img');
+/** Wrap Hindi and English logo paragraphs in a single wrapper. */
+function wrapIntroLogos(pictures) {
+  const hindiLogoP = pictures[3]?.closest('p');
+  const englishLogoP = pictures[4]?.closest('p');
+  if (!hindiLogoP || !englishLogoP) return;
 
-        // Check if we're in Universal Editor
-        const isInUE = !!document.querySelector('main[data-aue-resource]');
+  hindiLogoP.classList.add('hero-heritage-cc-intro-logo-hindi');
+  englishLogoP.classList.add('hero-heritage-cc-intro-logo-english');
+  const logoWrapper = document.createElement('div');
+  logoWrapper.classList.add('hero-heritage-cc-intro-logo-wrapper');
+  hindiLogoP.parentNode.insertBefore(logoWrapper, hindiLogoP);
+  logoWrapper.appendChild(hindiLogoP);
+  logoWrapper.appendChild(englishLogoP);
+}
 
-        if (isInUE) {
-          // In UE: Show as a clickable thumbnail for easy content authoring
-          bgPicture.classList.add('hero-heritage-cc-intro-bg-preview');
-          if (bgPictureWrapper) {
-            bgPictureWrapper.classList.add('hero-heritage-cc-intro-bg-preview-wrapper');
-          }
-        } else {
-          // On live pages: Apply as section background and remove from DOM
-          const webpSource = bgPicture.querySelector('source[type="image/webp"]');
-          let bgUrl = webpSource?.srcset?.split(',')[0]?.trim()?.split(' ')[0]
-            || bgImg?.src;
+/** Find gradient/color paragraph, set block data and CSS var; hide or show preview in UE. */
+function processIntroGradientParagraphs(block, introContent, hasAueResource) {
+  const paragraphs = introContent.querySelectorAll('p');
+  paragraphs.forEach((p) => {
+    if (p.querySelector('picture, a')) return;
+    const text = p.textContent.trim();
+    if (!isCssColorOrGradient(text)) return;
 
-          // Use large optimization for desktop background image
-          if (bgUrl && bgUrl.includes('optimize=medium')) {
-            bgUrl = bgUrl.replace('optimize=medium', 'optimize=large');
-          }
-
-          if (bgUrl) {
-            const sectionContainer = block.closest('.section');
-            if (sectionContainer) {
-              sectionContainer.style.backgroundImage = `url(${bgUrl})`;
-              sectionContainer.style.backgroundSize = 'cover';
-              sectionContainer.style.backgroundRepeat = 'repeat';
-              sectionContainer.style.backgroundPosition = 'center center';
-              sectionContainer.style.backgroundAttachment = 'fixed';
-
-              // Add preload link for LCP optimization with WebP
-              const preloadLink = document.createElement('link');
-              preloadLink.rel = 'preload';
-              preloadLink.as = 'image';
-              preloadLink.href = bgUrl;
-              preloadLink.fetchPriority = 'high';
-              if (webpSource) preloadLink.type = 'image/webp';
-              document.head.appendChild(preloadLink);
-            }
-          }
-
-          // Remove from DOM on live pages
-          bgPicture.remove();
-          if (bgPictureWrapper) bgPictureWrapper.remove();
-        }
-      }
-
-      // Second picture is decoration image top-right
-      if (pictures[1]) {
-        const decorTopRight = pictures[1];
-        const decorTopRightImg = decorTopRight.querySelector('img');
-        if (decorTopRightImg?.src) {
-          const sectionContainer = block.closest('.section');
-          if (sectionContainer) {
-            sectionContainer.style.setProperty(
-              '--hero-heritage-cc-decoration-top-right',
-              `url(${decorTopRightImg.src})`,
-            );
-          }
-        }
-        const decorTopRightWrapper = decorTopRight.closest('p');
-        decorTopRight.remove();
-        if (decorTopRightWrapper) decorTopRightWrapper.remove();
-      }
-
-      // Third picture is decoration image bottom-left
-      if (pictures[2]) {
-        const decorBottomLeft = pictures[2];
-        const decorBottomLeftImg = decorBottomLeft.querySelector('img');
-        if (decorBottomLeftImg?.src) {
-          const sectionContainer = block.closest('.section');
-          if (sectionContainer) {
-            sectionContainer.style.setProperty(
-              '--hero-heritage-cc-decoration-bottom-left',
-              `url(${decorBottomLeftImg.src})`,
-            );
-          }
-        }
-        const decorBottomLeftWrapper = decorBottomLeft.closest('p');
-        decorBottomLeft.remove();
-        if (decorBottomLeftWrapper) decorBottomLeftWrapper.remove();
-      }
-
-      // Fourth and fifth pictures are the logos - wrap them in a container for stacking
-      const hindiLogoP = pictures[3]?.closest('p');
-      const englishLogoP = pictures[4]?.closest('p');
-
-      if (hindiLogoP && englishLogoP) {
-        hindiLogoP.classList.add('hero-heritage-cc-intro-logo-hindi');
-        englishLogoP.classList.add('hero-heritage-cc-intro-logo-english');
-
-        // Create wrapper to contain both logos in document flow
-        const logoWrapper = document.createElement('div');
-        logoWrapper.classList.add('hero-heritage-cc-intro-logo-wrapper');
-        hindiLogoP.parentNode.insertBefore(logoWrapper, hindiLogoP);
-        logoWrapper.appendChild(hindiLogoP);
-        logoWrapper.appendChild(englishLogoP);
-      }
-
-      // Find the gradient/color text (plain text paragraph that's not a picture/button)
-      const paragraphs = introContent.querySelectorAll('p');
-      paragraphs.forEach((p) => {
-        // Skip paragraphs that contain pictures or links
-        if (p.querySelector('picture, a')) return;
-
-        const text = p.textContent.trim();
-        if (isCssColorOrGradient(text)) {
-          // Normalize the value (convert design tokens to var(--token) format)
-          const normalizedValue = normalizeCssColorValue(text);
-          // Store the value as a data attribute and CSS custom property
-          block.dataset.gradientColor = normalizedValue;
-          block.style.setProperty('--hero-heritage-cc-intro-gradient', normalizedValue);
-
-          // In UE mode, keep visible for editing; on live pages, remove
-          if (hasAueResource) {
-            p.classList.add('hero-heritage-cc-intro-gradient-preview');
-          } else {
-            p.remove();
-          }
-        }
-      });
-
-      // Remaining headings are the credit card name
-      const allHeadings = introContent.querySelectorAll('h1, h2, h3, h4, h5, h6');
-      allHeadings.forEach((heading, index) => {
-        if (index > 0) {
-          heading.classList.add('hero-heritage-cc-intro-credit-card-name');
-        }
-      });
+    const normalizedValue = normalizeCssColorValue(text);
+    block.dataset.gradientColor = normalizedValue;
+    block.style.setProperty('--hero-heritage-cc-intro-gradient', normalizedValue);
+    if (hasAueResource) {
+      p.classList.add('hero-heritage-cc-intro-gradient-preview');
+    } else {
+      p.remove();
     }
-  }
+  });
+}
 
-  // Section 3: Banner (logo, text, image, CTAs)
-  if (rows[2]) {
-    rows[2].classList.add('hero-heritage-cc-banner');
+/** Add credit card name class to headings after the first. */
+function styleIntroCreditCardHeadings(introContent) {
+  const allHeadings = introContent.querySelectorAll('h1, h2, h3, h4, h5, h6');
+  allHeadings.forEach((heading, index) => {
+    if (index > 0) heading.classList.add('hero-heritage-cc-intro-credit-card-name');
+  });
+}
 
-    const bannerContent = rows[2].querySelector(':scope > div');
-    if (bannerContent) {
-      // First picture is the top logo
-      const pictures = bannerContent.querySelectorAll('picture');
-      if (pictures[0]) pictures[0].closest('p')?.classList.add('hero-heritage-cc-banner-top-logo');
-      if (pictures[1]) pictures[1].closest('p')?.classList.add('hero-heritage-cc-banner-image');
+/** Decorate Section 2: Intro (text, background, logos, gradient, credit card name). */
+function decorateIntro(block, row, hasAueResource) {
+  row.classList.add('hero-heritage-cc-intro');
+  const introContent = row.querySelector(':scope > div');
+  if (!introContent) return;
 
-      // Heading is the banner text
-      const bannerHeading = bannerContent.querySelector('h1, h2, h3, h4, h5, h6');
-      if (bannerHeading) {
-        bannerHeading.classList.add('hero-heritage-cc-banner-text');
-      }
+  const introHeading = introContent.querySelector('h1, h2, h3, h4, h5, h6');
+  if (introHeading) introHeading.classList.add('hero-heritage-cc-intro-text-top');
 
-      // Button containers are the CTAs - wrap them for side-by-side layout
-      const buttonContainers = bannerContent.querySelectorAll('.button-container');
-      if (buttonContainers.length > 0) {
-        const ctaWrapper = document.createElement('div');
-        ctaWrapper.classList.add('hero-heritage-cc-banner-cta-group');
-        buttonContainers[0].parentNode.insertBefore(ctaWrapper, buttonContainers[0]);
-        buttonContainers.forEach((btn) => {
-          btn.classList.add('hero-heritage-cc-banner-cta');
-          ctaWrapper.appendChild(btn);
-        });
-      }
-    }
+  const pictures = introContent.querySelectorAll('picture');
+  applyIntroBackground(block, introContent, pictures);
+  applyIntroDecorations(block, pictures);
+  wrapIntroLogos(pictures);
+  processIntroGradientParagraphs(block, introContent, hasAueResource);
+  styleIntroCreditCardHeadings(introContent);
+}
 
-    // Add click handler for "The Concept" button to swap banner content
-    const bannerDiv = rows[2];
-    const bannerInner = bannerDiv.querySelector(':scope > div');
+/** Setup banner curtain, concept container, and click handler for "The Concept" / Go back. */
+function setupBannerConceptSwap(block, row) {
+  const bannerDiv = row;
+  const bannerInner = bannerDiv.querySelector(':scope > div');
+  let conceptContainer = null;
 
-    // Create a separate container for concept content (keeps original intact)
-    let conceptContainer = null;
+  const bannerCurtain = document.createElement('div');
+  bannerCurtain.classList.add('hero-heritage-cc-banner-curtain');
+  bannerCurtain.style.clipPath = 'inset(0 0 0 0)';
+  bannerCurtain.style.transition = 'clip-path 0.35s ease-out 0s forwards';
+  bannerInner.appendChild(bannerCurtain);
 
-    // Create div to hide/show the banner content
-    const bannerCurtain = document.createElement('div');
-    bannerCurtain.classList.add('hero-heritage-cc-banner-curtain');
+  const bannerImage = bannerInner.querySelector('.hero-heritage-cc-banner-image');
+  const bannerCtaGroup = bannerInner.querySelector('.hero-heritage-cc-banner-cta-group');
+  bannerCurtain.appendChild(bannerImage);
+  bannerCurtain.appendChild(bannerCtaGroup);
+
+  const showOriginalBanner = () => {
+    if (!conceptContainer) return;
+    bannerInner.style.animation = 'none';
+    bannerInner.style.opacity = '1';
+    bannerInner.style.visibility = 'visible';
+    conceptContainer.style.transform = 'translateY(100%)';
+    conceptContainer.style.visibility = 'hidden';
+    conceptContainer.style.opacity = '0';
     bannerCurtain.style.clipPath = 'inset(0 0 0 0)';
-    bannerCurtain.style.transition = 'clip-path 0.35s ease-out 0s forwards';
-    bannerInner.appendChild(bannerCurtain);
+    setTimeout(() => {
+      conceptContainer.style.display = 'none';
+      conceptContainer.style.opacity = '';
+      conceptContainer.style.transform = '';
+      bannerDiv.classList.remove('hero-heritage-cc-banner-swapped');
+    }, 350);
+  };
 
-    const bannerImage = bannerInner.querySelector('.hero-heritage-cc-banner-image');
-    const bannerCtaGroup = bannerInner.querySelector('.hero-heritage-cc-banner-cta-group');
-    bannerCurtain.appendChild(bannerImage);
-    bannerCurtain.appendChild(bannerCtaGroup);
+  const showConceptView = () => {
+    conceptContainer.style.display = '';
+    conceptContainer.style.visibility = 'hidden';
+    conceptContainer.style.opacity = '0';
+    conceptContainer.style.transform = 'translateY(100%)';
+    bannerCurtain.style.clipPath = 'inset(0 0 0 0)';
+    // Force reflow so transition runs
+    // eslint-disable-next-line no-unused-expressions -- intentional reflow
+    conceptContainer.offsetHeight;
+    conceptContainer.style.visibility = 'visible';
+    conceptContainer.style.opacity = '1';
+    conceptContainer.style.transform = 'translateY(0)';
+    bannerCurtain.style.clipPath = 'inset(0 0 100% 0)';
+    bannerDiv.classList.add('hero-heritage-cc-banner-swapped');
+  };
 
-    // Function to show original banner, hide concept
-    const showOriginalBanner = () => {
-      if (!conceptContainer) return;
-
-      // Show banner elements first (before concept slides down)
-      // Override the CSS animation on bannerInner to prevent 6s delay
-      bannerInner.style.animation = 'none';
-      bannerInner.style.opacity = '1';
-      bannerInner.style.visibility = 'visible';
-
-      // Slide down concept
-      conceptContainer.style.transform = 'translateY(100%)';
-      conceptContainer.style.visibility = 'hidden';
-      conceptContainer.style.opacity = '0';
-      bannerCurtain.style.clipPath = 'inset(0 0 0 0)';
-
-      setTimeout(() => {
-        conceptContainer.style.display = 'none';
-        conceptContainer.style.opacity = '';
-        conceptContainer.style.transform = '';
-        bannerDiv.classList.remove('hero-heritage-cc-banner-swapped');
-      }, 350);
-    };
-
-    // Function to show concept, hide original banner
-    const showConceptView = () => {
-      // Show concept starting below (banner stays visible underneath)
-      conceptContainer.style.display = '';
-      conceptContainer.style.visibility = 'hidden';
-      conceptContainer.style.opacity = '0';
-      conceptContainer.style.transform = 'translateY(100%)';
-      bannerCurtain.style.clipPath = 'inset(0 0 0 0)';
-
-      // Force reflow
-      // eslint-disable-next-line no-unused-expressions
-      conceptContainer.offsetHeight;
-
-      // Slide up over the banner
-      conceptContainer.style.visibility = 'visible';
-      conceptContainer.style.opacity = '1';
-      conceptContainer.style.transform = 'translateY(0)';
-      bannerCurtain.style.clipPath = 'inset(0 0 100% 0)';
-      bannerDiv.classList.add('hero-heritage-cc-banner-swapped');
-    };
-
-    bannerDiv.addEventListener('click', async (e) => {
-      const link = e.target.closest('a');
-      if (!link) return;
-
-      // Handle "Go back" button (href="#")
-      if (link.href.endsWith('#') || link.getAttribute('href') === '#') {
-        e.preventDefault();
-        e.stopPropagation();
-        showOriginalBanner();
-        return;
-      }
-
-      // Only handle modal links for concept swap
-      if (!link.href.includes('/modals/')) return;
-
-      // Only handle non-primary buttons (The Concept is secondary)
-      if (link.classList.contains('primary')) return;
-
+  bannerDiv.addEventListener('click', async (e) => {
+    const link = e.target.closest('a');
+    if (!link) return;
+    if (link.href.endsWith('#') || link.getAttribute('href') === '#') {
       e.preventDefault();
       e.stopPropagation();
+      showOriginalBanner();
+      return;
+    }
+    if (!link.href.includes('/modals/')) return;
+    if (link.classList.contains('primary')) return;
 
-      // Collapse hero and show first hotspot block (hidden initially to prevent CLS)
-      showConceptHotspotBlock();
+    e.preventDefault();
+    e.stopPropagation();
+    showConceptHotspotBlock();
 
-      // If concept is already loaded, just show it
-      if (conceptContainer) {
-        showConceptView();
-        return;
-      }
+    if (conceptContainer) {
+      showConceptView();
+      return;
+    }
 
-      // Fetch the content from the modal page
-      const path = new URL(link.href).pathname;
-      const fragment = await loadFragment(path);
+    const path = new URL(link.href).pathname;
+    const fragment = await loadFragment(path);
+    if (!fragment) return;
 
-      if (fragment) {
-        // Get ALL sections from the fragment (modal may have multiple concept sections)
-        const fragmentSections = fragment.querySelectorAll('.section');
-        if (fragmentSections.length > 0) {
-          // Create concept container
-          conceptContainer = document.createElement('div');
-          conceptContainer.classList.add('hero-heritage-cc-concept-container');
-          conceptContainer.style.display = 'none';
+    const fragmentSections = fragment.querySelectorAll('.section');
+    if (fragmentSections.length === 0) return;
 
-          fragmentSections.forEach((section, index) => {
-            // Hide all sections except the first one
-            if (index > 0) {
-              section.style.display = 'none';
-            }
-            conceptContainer.appendChild(section);
-          });
+    conceptContainer = document.createElement('div');
+    conceptContainer.classList.add('hero-heritage-cc-concept-container');
+    conceptContainer.style.display = 'none';
 
-          // Add concept container to banner
-          bannerDiv.appendChild(conceptContainer);
-
-          // Setup modal interactivity (hotspots, connectors, etc.)
-          const { setupModalInteractivity } = await import('../modal/modal.js');
-          await setupModalInteractivity(conceptContainer);
-
-          // Show concept view with transition
-          showConceptView();
-        }
-      }
+    fragmentSections.forEach((section, index) => {
+      if (index > 0) section.style.display = 'none';
+      conceptContainer.appendChild(section);
     });
+    bannerDiv.appendChild(conceptContainer);
+
+    const { setupModalInteractivity } = await import('../modal/modal.js');
+    await setupModalInteractivity(conceptContainer);
+    showConceptView();
+  });
+}
+
+/** Decorate Section 3: Banner (logo, text, image, CTAs and concept swap). */
+function decorateBanner(block, row) {
+  row.classList.add('hero-heritage-cc-banner');
+  const bannerContent = row.querySelector(':scope > div');
+  if (bannerContent) {
+    const pictures = bannerContent.querySelectorAll('picture');
+    if (pictures[0]) pictures[0].closest('p')?.classList.add('hero-heritage-cc-banner-top-logo');
+    if (pictures[1]) pictures[1].closest('p')?.classList.add('hero-heritage-cc-banner-image');
+    const bannerHeading = bannerContent.querySelector('h1, h2, h3, h4, h5, h6');
+    if (bannerHeading) bannerHeading.classList.add('hero-heritage-cc-banner-text');
+    const buttonContainers = bannerContent.querySelectorAll('.button-container');
+    if (buttonContainers.length > 0) {
+      const ctaWrapper = document.createElement('div');
+      ctaWrapper.classList.add('hero-heritage-cc-banner-cta-group');
+      buttonContainers[0].parentNode.insertBefore(ctaWrapper, buttonContainers[0]);
+      buttonContainers.forEach((btn) => {
+        btn.classList.add('hero-heritage-cc-banner-cta');
+        ctaWrapper.appendChild(btn);
+      });
+    }
   }
+
+  setupBannerConceptSwap(block, row);
+}
+
+export default function decorate(block) {
+  const mainElement = document.querySelector('main');
+  const hasAueResource = mainElement?.hasAttribute('data-aue-resource');
+
+  setupConceptLinkListener();
+  setBlockModalTheme(block);
+
+  const rows = [...block.children].filter((child) => child.tagName === 'DIV');
+  if (rows[0]) decorateHeaderCta(block, rows[0]);
+  if (rows[1]) decorateIntro(block, rows[1], hasAueResource);
+  if (rows[2]) decorateBanner(block, rows[2]);
 }
