@@ -1,9 +1,9 @@
 # Your Project's Title...
-Your project's description...
+IFDC on Edge Delivery Services
 
 ## Environments
-- Preview: https://main--internal-aem-eds-poc-en--Tekno-Point.aem.page/
-- Live: https://main--internal-aem-eds-poc-en--Tekno-Point.aem.live/
+- Preview: https://main--idfc--aemsites.aem.page/
+- Live: https://main--idfc--aemsites.aem.live/
 
 ## Documentation
 
@@ -22,15 +22,20 @@ Furthremore, we encourage you to watch the recordings of any of our previous pre
 - AEM Cloud Service release 2024.8 or newer (>= `17465`)
 
 ## Installation
+For the first build (and anytime package.json is updated), run:
 
 ```sh
 npm i
 ```
 
-## Linting
-This project is using StyleLint and ESLint (including the SonarJS code quality and the Interlace secure-coding security +  browser-security plugins for ESLint).
-https://dev.to/ofri-peretz/sonarjs-has-269-rules-it-still-misses-65-of-security-vulnerabilities-3jh
-https://eslint.interlace.tools/docs/security/plugin-browser-security/rules
+## Linting and security
+This project is using StyleLint and ESLint for Javascript. Our ESLint configuration includes 3 popular and reputable Javascript code quality and security plugins:
+- SonarSource eslint-plugin-sonarjs, a code quality analyzer for JavaScript and TypeScript within the Sonar ecosystem (https://github.com/SonarSource/SonarJS/blob/master/packages/jsts/src/rules/README.md#eslint-rules)
+- Interlace secure-coding plugin for general secure coding practices and OWASP compliance for JavaScript/TypeScript (https://eslint.interlace.tools/docs/security/plugin-secure-coding/rules)
+- Interlace browser-security for XSS, cookie, and DOM security rules for client-side JavaScript (https://eslint.interlace.tools/docs/security/plugin-browser-security/rules).
+
+
+They are included in this command, which is run automatically via a github action on every pull request:
 
 ```sh
 npm run lint
@@ -44,3 +49,4 @@ If for Stylelint you only see "No rules found within configuration", check by go
 1. Install the [AEM CLI](https://github.com/adobe/helix-cli): `npm install -g @adobe/aem-cli`
 1. Start AEM Proxy: `aem up` (opens your browser at `http://localhost:3000`)
 1. Open the `{repo}` directory in your favorite IDE and start coding :)
+1. Be sure to add the StyleLint and ESLint extensions in your IDE to see problems as you code.
