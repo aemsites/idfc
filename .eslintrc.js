@@ -17,7 +17,8 @@ module.exports = {
     requireConfigFile: false,
   },
   rules: {
-    // secure-coding: preset is flat-config only; rules enabled manually for legacy config
+    // Note: sonarjs rules are pulled automatically via plugin:sonarjs/recommended-legacy.
+    // Below secure-coding rules are enabled manually for legacy ESLint 8 config,
     // see https://eslint.interlace.tools/docs/security/plugin-secure-coding/rules
     'secure-coding/no-hardcoded-credentials': 'error',
     'secure-coding/no-redos-vulnerable-regex': 'error',
@@ -39,8 +40,8 @@ module.exports = {
     'secure-coding/no-missing-authentication': 'warn',
     'secure-coding/no-sensitive-data-exposure': 'warn',
     'secure-coding/no-pii-in-logs': 'warn',
-    // browser-security: configs.recommended is flat-config only; rules enabled manually for
-    // legacy config.see https://eslint.interlace.tools/docs/security/plugin-browser-security
+    // Below browser-security rules are enabled manually for legacy ESLint 8 config,
+    // see https://eslint.interlace.tools/docs/security/plugin-browser-security
     'browser-security/no-innerhtml': ['error', {
       trustedSanitizers: [
         'DOMPurify.sanitize', 'sanitize', 'sanitizeHtml', 'xss', 'purify',
@@ -79,10 +80,11 @@ module.exports = {
     'import/extensions': ['error', { js: 'always' }], // require js file extensions in imports
     'linebreak-style': ['error', 'unix'], // enforce unix linebreaks
     'no-param-reassign': [2, { props: false }], // allow modifying properties of param
+    // Below are rules for AEM Crosswalk component model definitions, see https://www.aem.live/developer/component-model-definitions#type-inference
     'xwalk/max-cells': ['error', {
       section: 30, // section is a key-value block and over 4 is OK
       'multi-section': 30,
-      accordion: 5, // the rest of these need adjustments per https://www.aem.live/developer/component-model-definitions#type-inference
+      accordion: 5,
       cards: 8,
       card: 7,
       'category-nav-item': 10,
