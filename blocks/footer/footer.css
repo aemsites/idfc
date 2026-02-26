@@ -355,6 +355,7 @@ footer .footer>div .section:nth-child(4)>div p a {
 footer .footer>div .section>div {
   margin: 0;
   max-width: 100%;
+  padding: 0 15px;
 }
 
   .footer .section.accordion-container:first-of-type .accordion details summary {
@@ -373,10 +374,6 @@ footer .footer>div .section>div {
   footer .footer>div {
     display: flex;
     flex-direction: column;
-  }
-
-  footer .footer>div .section>div {
-    padding: 0 15px;
   }
   
   .footer>div>div:nth-child(3)>div {

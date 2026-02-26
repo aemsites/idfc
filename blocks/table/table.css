@@ -72,7 +72,7 @@
 
 .table.block#fees-and-charges table td {
   max-width: 100%;
-  word-wrap: break-word;
+  overflow-wrap: break-word;
   color: var(--color-white);
   position: relative;
 }

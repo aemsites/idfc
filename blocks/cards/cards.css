@@ -1,5 +1,3 @@
-/* stylelint-disable no-descending-specificity */
-
 /* =================================================================
    BASE STYLING (mobile first)
    Note: CLS prevention rules are in styles.css (loads earlier)
@@ -95,11 +93,6 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.cards .card-clickable:focus {
-  outline: 2px solid #B31B1B;
-  outline-offset: 2px;
-}
-
 .cards .card-clickable:active {
   transform: translateY(0);
 }
@@ -112,7 +105,7 @@
   padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  clip-path: rect(0 0 0 0);
   white-space: nowrap;
   border: 0;
 }

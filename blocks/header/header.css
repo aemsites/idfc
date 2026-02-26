@@ -1,5 +1,4 @@
 /* stylelint-disable selector-class-pattern */
-/* stylelint-disable no-descending-specificity */
 
 /* header and nav layout */
 header .nav-wrapper {
@@ -1745,6 +1744,7 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     overflow-y: visible;
     transition: padding 0.3s ease;
 
+
       /* Gray button styling for odometer on desktop */
   .nav-tools .default-content-wrapper>ul>li:first-child {
     background-color: var(--color-gray-100);
@@ -1752,6 +1752,81 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     border-color: var(--color-gray-500);
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   }
+
+    .nav-tools .default-content-wrapper>p:first-child .search-input {
+      margin-left: var(--spacing-xxs);
+      font-weight: 400;
+      flex: 1;
+    }
+  
+    .nav-tools .default-content-wrapper .icon-search {
+      display: inline-flex;
+      align-items: center;
+    }
+  
+    .nav-tools .default-content-wrapper .icon-search img {
+      width: 20px;
+      height: 20px;
+    }
+  
+    .nav-tools .default-content-wrapper>ul {
+      display: flex;
+      gap: var(--spacing-xxs);
+      padding: 0;
+      margin: 0;
+      list-style: none;
+      align-items: center;
+    }
+  
+    .nav-tools .default-content-wrapper>ul>li {
+      padding: var(--spacing-xxs) 16px;
+      font-weight: 400;
+      font-size: var(--body-font-size-xs);
+      line-height: 20px;
+      letter-spacing: -0.6px;
+      color: #353535;
+      border: 1px solid #353535;
+      border-radius: 50px;
+      background: transparent;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+  
+    /* Desktop: Pay and Login button shared styling */
+    .nav-tools .default-content-wrapper>ul>li#pay-button,
+    .nav-tools .default-content-wrapper>ul>li#login-button {
+      padding: var(--spacing-xxs) 16px;
+      line-height: 20px;
+    }
+  
+    /* Desktop: Pay button specific styling */
+    .nav-tools .default-content-wrapper>ul>li#pay-button {
+      color: #902a2c;
+      background-color: transparent;
+      border: 1px solid #902a2c;
+    }
+  
+    /* Desktop: Login button specific styling */
+    .nav-tools .default-content-wrapper>ul>li#login-button {
+      color: var(--color-white);
+      background-color: #902a2c;
+      border-color: #902a2c;
+    }
+  
+    .nav-tools .default-content-wrapper .icon-login-lock {
+      width: 14px;
+      height: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  
+    .nav-tools .default-content-wrapper .icon-login-lock img {
+      width: 14px;
+      height: 14px;
+    }
   }
 
   header nav[aria-expanded="true"] {
@@ -2446,82 +2521,7 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     white-space: nowrap;
   }
 
-header nav {
-  .nav-tools .default-content-wrapper>p:first-child .search-input {
-    margin-left: var(--spacing-xxs);
-    font-weight: 400;
-    flex: 1;
-  }
 
-  .nav-tools .default-content-wrapper .icon-search {
-    display: inline-flex;
-    align-items: center;
-  }
-
-  .nav-tools .default-content-wrapper .icon-search img {
-    width: 20px;
-    height: 20px;
-  }
-
-  .nav-tools .default-content-wrapper>ul {
-    display: flex;
-    gap: var(--spacing-xxs);
-    padding: 0;
-    margin: 0;
-    list-style: none;
-    align-items: center;
-  }
-
-  .nav-tools .default-content-wrapper>ul>li {
-    padding: var(--spacing-xxs) 16px;
-    font-weight: 400;
-    font-size: var(--body-font-size-xs);
-    line-height: 20px;
-    letter-spacing: -0.6px;
-    color: #353535;
-    border: 1px solid #353535;
-    border-radius: 50px;
-    background: transparent;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-  }
-
-  /* Desktop: Pay and Login button shared styling */
-  .nav-tools .default-content-wrapper>ul>li#pay-button,
-  .nav-tools .default-content-wrapper>ul>li#login-button {
-    padding: var(--spacing-xxs) 16px;
-    line-height: 20px;
-  }
-
-  /* Desktop: Pay button specific styling */
-  .nav-tools .default-content-wrapper>ul>li#pay-button {
-    color: #902a2c;
-    background-color: transparent;
-    border: 1px solid #902a2c;
-  }
-
-  /* Desktop: Login button specific styling */
-  .nav-tools .default-content-wrapper>ul>li#login-button {
-    color: var(--color-white);
-    background-color: #902a2c;
-    border-color: #902a2c;
-  }
-
-  .nav-tools .default-content-wrapper .icon-login-lock {
-    width: 14px;
-    height: 14px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .nav-tools .default-content-wrapper .icon-login-lock img {
-    width: 14px;
-    height: 14px;
-  }
-}
 
   .cs-dropdown {
     top: calc(var(--nav-height) - 3px);
