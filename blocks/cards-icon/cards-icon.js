@@ -134,7 +134,6 @@ export default async function decorate(block) {
   const { classList } = block;
   const isImportantDocuments = classList.contains('important-documents');
   const isRelatedSearch = classList.contains('related-search');
-  // const isImageAndTitle = classList.contains('image-and-title');
 
   const rows = [...block.children];
   const cardRows = rows;
@@ -173,7 +172,7 @@ export default async function decorate(block) {
       optimizedImg.setAttribute('width', width);
       optimizedImg.setAttribute('height', height);
     } else {
-      const staticSize = getStaticImageDimensions(img);
+      const staticSize = getStaticImageDimensions();
       if (staticSize) {
         optimizedImg.setAttribute('width', staticSize.width);
         optimizedImg.setAttribute('height', staticSize.height);
