@@ -159,7 +159,7 @@
     margin-right: auto;
   }
 
-  .cards-testimonial.swiper .swiper-slide { to 
+  .cards-testimonial.swiper .swiper-slide {
     max-width: 350px;
     min-height: 350px;
   }
@@ -183,7 +183,7 @@
   background-color: var(--color-gray-300);
   border-radius: 20px;
   box-shadow: 0 4px 8px 2px rgb(37 36 59 / 15%);
-  padding: 20px 20px;
+  padding: 20px;
   flex-direction: column;
   margin-right: 0;
   box-sizing: border-box;
@@ -223,7 +223,7 @@
 .cards-testimonial .swiper-pagination-bullet {
   width: 10px;
   height: 10px;
-  background: rgba(255 255 255 / 50%);
+  background: rgb(255 255 255 / 50%);
   opacity: 1;
   transition: all 0.3s ease;
   border-radius: 50%;

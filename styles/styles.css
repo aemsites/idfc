@@ -13,7 +13,7 @@
 
  /* fallback fonts */
     @font-face {
-      font-family: "inter-fallback";
+      font-family: Inter-fallback;
       size-adjust: 106.001%;
       src: local("Arial");
     }
@@ -44,15 +44,14 @@
   --color-black: #000;
   --color-boxshadow-10: 0 0 10px 0 rgb(0 0 0 / 25%);
   --color-boxshadow-20: 0 0 20px 0 rgb(0 0 0 / 25%);
-
-  --gradient-translucent: linear-gradient(180deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.24) 100%);
+  --gradient-translucent: linear-gradient(180deg, rgb(255 255 255 / 32%) 0%, rgb(255 255 255 / 24%) 100%);
   --gradient-pearl: linear-gradient(73deg, #C7C6C6 -74.4%, #F1F1F1 23.15%);
   --gradient-red-purple: linear-gradient(165deg, #D94751 0%, #8C2034 40%, #732C53 80%, #513873 100%);
   --gradient-red-black: radial-gradient(at top left, #AC2A34 0%, #661E2A 50%, #140F23 100%);
   --gradient-pink-red: linear-gradient(to bottom, #C5767D, #9E1E29);
   --gradient-earn-rewards: radial-gradient(231% 135.8% at 0.9% 2.98%, #FFF6 0%, #FFF0 100%);
   --gradient-red: linear-gradient(92deg, #5D2227 36.27%, #982B35 70.68%, #5D2227 85.89%);
-  --gradient-light-red: linear-gradient(97.67deg, rgba(55, 10, 14, 0.8) 6.64%, rgba(157, 29, 39, 0.8) 90.39%);
+  --gradient-light-red: linear-gradient(97.67deg, rgb(55 10 14 / 80%) 6.64%, rgb(157 29 39 / 80%) 90.39%);
   --gradient-blue: linear-gradient(137deg, #08133C 4.07%, #2E3E79 75.46%);
   --gradient-indigo: linear-gradient(308deg, #110140 4.16%, #1E2A8E 44.91%, #010740 88.8%);
   --gradient-black-90: linear-gradient(90deg, rgb(0 0 0 / 0%) 0%, #000 65%);
@@ -62,7 +61,6 @@
   --gradient-metal-blue: linear-gradient(308deg, #110140 4.16%, #1E2A8E 44.91%, #010740 88.8%);
   --gradient-metal-silver: linear-gradient(138deg, #999 -15.44%, #EFEFEF 0.15%, #CACACA 18.04%, #EFEFEF 37.09%, #CACACA 58.44%, #999 76.91%, #EFEFEF 87.3%);
   --modal-backdrop-gradient: linear-gradient(to bottom, rgb(200 198 198 / 70%) 0, rgb(200 198 198 / 95%) 1px, #C8C6C6 250px, #F1F0F0 50%, #C8C6C6 100%);
-
   --background-color: var(--color-white);
   --text-color: var(--color-gray-700);
   --text-link-color: var(--text-color);
@@ -145,7 +143,7 @@
 html {
  /* -webkit-font-smoothing: antialiased; */
   -webkit-text-size-adjust: 100%;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -webkit-tap-highlight-color: rgb(0 0 0 / 0%);
 }
 
 body {
@@ -278,7 +276,7 @@ button {
 a {
   color: var(--text-link-color);
   text-decoration: underline;
-  word-break: break-word;
+  word-break: normal;
 }
 
 a:hover {
@@ -409,7 +407,7 @@ main img {
   color: var(--text-color);
 
   .swiper-pagination-bullet {
-    background: rgba(0 0 0 / 50%);
+    background: rgb(0 0 0 / 50%);
   }
 
   .swiper-pagination-bullet-active {
@@ -437,7 +435,7 @@ main img {
   }  
 
   .swiper-pagination-bullet {
-    background: rgba(255 255 255 / 50%);
+    background: rgb(255 255 255 / 50%);
   }
 
   .swiper-pagination-bullet-active {
@@ -582,6 +580,7 @@ main>.section:first-of-type {
   &.gap-xxl {
     --gap-spacing: var(--spacing-xxl);
   }
+
 /* all section spacing classes are set to l in Mobile */
   &.spacing-xxs,
   &.spacing-xs,
@@ -668,7 +667,6 @@ main>.section:first-of-type {
   }
 
   .icon-icon-plus {
-
     img {
       filter: invert(100%);
       transform: rotate(45deg);
@@ -1063,6 +1061,7 @@ The height and width are set to 200 assuming the decorations won't be larger. */
     header {
       height: var(--nav-height);
     }
+    
     /* Reserve space for category-nav BEFORE it loads to prevent CLS.
      The has-category-nav class is added by scripts.js based on page metadata.
      This runs BEFORE body.appear, ensuring correct header height from the start. */

@@ -113,7 +113,6 @@
   width: 100%;
   margin: 0 auto;
   font-size: var(--body-font-size-s);
-  
   font-weight: 600;
   font-style: normal;
   text-align: center;
@@ -124,7 +123,6 @@
 
 .upi-steps-red-bg .steps-item-body {
   font-size: var(--body-font-size-l);
-  
   font-weight: 600;
   font-style: normal;
   line-height: 1.2;
@@ -219,7 +217,6 @@
     width: 50%;
     margin: 0 auto;
     font-size: var(--body-font-size-s);
-    
     font-weight: 600;
     font-style: normal;
     text-align: center;
@@ -235,7 +232,6 @@
 
   .upi-steps-red-bg .steps-item-body {
     font-size: var(--body-font-size-m);
-    
     font-weight: 600;
     font-style: normal;
     line-height: 1.2;
@@ -326,7 +322,6 @@
   .upi-steps-red-bg .steps-item-body {
     font-size: var(--body-font-size-m);
     width: 70%;
-    
     font-weight: 600;
     font-style: normal;
     line-height: 1.2;

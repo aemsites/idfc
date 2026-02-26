@@ -123,7 +123,6 @@
 
   /* new tab-section styles */
 .section.multi.tabs-container {
-
     .tabs-list {
       flex: 0 0 150px;
     }
@@ -135,9 +134,8 @@
 
 .section[data-category="tabs-vertical"].multi.tabs-container .tabs {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+  flex-flow: row wrap;
   align-items: flex-start;
   gap: var(--spacing-s);
-}
+ }
 }

@@ -22,10 +22,13 @@ footer .footer ul {
   flex-direction: column;
 }
 
-.footer .section.accordion-container:first-child > .default-content {width: 100%;padding-left: 15px;padding-right: 15px;padding-top: 35px;padding-bottom: 15px;}
+.footer .section.accordion-container:first-child > .default-content {
+  width: 100%;
+  padding: 35px 15px 15px;
+}
 
 .footer .section.accordion-container:first-child > .default-content > h5 {
-  color: rgb(188, 59, 69);
+  color: rgb(188 59 69);
   font-size: var(--heading-font-size-xl);
   font-style: normal;
   font-weight: 600;
@@ -35,8 +38,7 @@ footer .footer ul {
 }
 
 .footer .section.accordion-container:first-child > .default-content > h6 {
-  color: rgb(188, 59, 69);
-  font-family: Inter;
+  color: rgb(188 59 69);
   font-size: 77px;
   font-style: normal;
   font-weight: 900;
@@ -74,22 +76,14 @@ footer .footer ul {
   content: "\e903";
   color: #525252;
   font-size: var(--body-font-size-xl);
-  font-family: 'icomoon';
+  font-family: icomoon, var(--body-font-family);
   line-height: 0.5;
   -webkit-font-smoothing: antialiased;
-}
-
-/* Only show TOP button on screens wider than 1200px */
-@media (min-width: 1200px) {
-  .footer .section.accordion-container:first-child > .default-content > p {
-    display: flex;
-  }
 }
 
 /* Added for desktop view */
 footer .footer>div .section>div {
   margin: 0 auto;
-	align-items: anchor-center;
   max-width: var(--grid-container-width);
 }
 
@@ -134,7 +128,7 @@ footer .footer>div .section>div {
 .footer>div>div .accordion-wrapper .accordion>div>div:first-child,
 .footer>div>div .accordion-wrapper .accordion .accordion-item-label {
   padding: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.21);
+  border-bottom: 1px solid rgb(255 255 255 / 21%);
   padding-bottom: 16px;
   letter-spacing: .5px;
   margin-bottom: 10px;
@@ -145,7 +139,7 @@ footer .footer>div .section>div {
 }
 
 .footer .section.accordion-container:first-of-type .accordion-wrapper .accordion .accordion-item-label {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.21);
+  border-bottom: 1px solid rgb(255 255 255 / 21%);
   background: transparent;
 }
 
@@ -153,7 +147,7 @@ footer .footer>div .section>div {
 .footer>div>div .accordion-wrapper .accordion .accordion-item-label::after {
   display: block;
   top: 30%;
-  background: url(/icons/icon-plus.svg);
+  background: url("/icons/icon-plus.svg");
   background-position: center;
   background-repeat: no-repeat;
   transform: translateY(-50%);
@@ -163,7 +157,7 @@ footer .footer>div .section>div {
 .footer>div>div .accordion-wrapper .accordion .accordion-item[open]>div>div:first-child ::after,
 .footer .accordion-wrapper .accordion .accordion-item[open] .accordion-item-label::after {
   display: block;
-  background: url(/icons/icon-minus.svg);
+  background: url("/icons/icon-minus.svg");
   background-position: center;
   background-repeat: no-repeat;
 }
@@ -171,7 +165,6 @@ footer .footer>div .section>div {
 .footer>div>div .accordion-wrapper .accordion>div>div:first-child p,
 .footer>div>div .accordion-wrapper .accordion .accordion-item-label p {
   font-size: var(--body-font-size-s);
-  font: 14px "Inter", sans-serif;
   font-weight: 600;
   letter-spacing: 0.6px;
   margin: 0;
@@ -201,7 +194,6 @@ footer .footer>div .section>div {
 .footer>div>div .accordion-wrapper .accordion>div>div:nth-child(2) ul li a,
 .footer>div>div .accordion-wrapper .accordion .accordion-item-body ul li a {
   color: var(--color-white);
-  font: 14px "Inter", sans-serif;
   font-weight: 300;
   word-break: unset;
   text-decoration: none;
@@ -209,7 +201,7 @@ footer .footer>div .section>div {
 
 .footer>div>div:nth-child(2),
 .footer .accordion-item-body {
-  background: rgba(17, 17, 17, 0.1);
+  background: rgb(17 17 17 / 10%);
   padding: 40px 0;
   max-width: 100%;
 }
@@ -279,7 +271,7 @@ footer .footer>div .section>div {
 
 .footer>div>div:nth-child(3) h3 {
   line-height: 1;
-  font: 24px Inter, sans-serif;
+  font-size: 24px;
   font-weight: 300;
   margin: 0;
 }
@@ -300,7 +292,7 @@ footer .footer>div .section>div {
 }
 
 footer .footer>div .section:nth-child(4) {
-  padding: 30px 0 160px 0;
+  padding: 30px 0 160px ;
 }
 
 .footer>div>div:nth-child(3) .accordion-wrapper .accordion .accordion-item .accordion-item-label::after {
@@ -308,7 +300,7 @@ footer .footer>div .section:nth-child(4) {
 }
 
 .footer .accordion-wrapper .accordion .accordion-item[open] .accordion-item-label {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.21);
+  border-bottom: 1px solid rgb(255 255 255 / 21%);
 }
 
 footer .footer>div .section:nth-child(4)>div {
@@ -352,7 +344,7 @@ footer .footer>div .section:nth-child(4)>div p a {
   display: none;
 }
 
-@media (max-width: 767px) {
+@media (width <= 767px) {
   .footer>div>div {
     padding: 0;
     order: 1;
@@ -423,7 +415,7 @@ footer .footer>div .section>div {
     border: none;
     border-radius: unset;
     font-weight: 700;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.21);
+    border-bottom: 1px solid rgb(255 255 255 / 21%);
     letter-spacing: .5px;
     padding: 18px 0;
   }
@@ -551,7 +543,6 @@ footer .footer>div .section>div {
   .footer>div>div:nth-child(3) h3 {
     display: none;
   }
-
 }
 
 @media (width >= 768px) {
@@ -566,5 +557,11 @@ footer .footer>div .section>div {
   footer .footer>div .section:nth-child(4) > div > p {
     margin-top: 0;
   }
-  
+}
+
+/* Only show TOP button on screens wider than 1200px */
+@media (width >= 1200px) {
+  .footer .section.accordion-container:first-child > .default-content > p {
+    display: flex;
+  }
 }

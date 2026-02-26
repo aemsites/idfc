@@ -91,7 +91,7 @@
 /* Header CTA - dedicated 70px space at top */
 .hero-heritage-cc-header-cta {
   position: relative;
-  background-color: rgba(255 255 255 / 15%);
+  background-color: rgb(255 255 255 / 15%);
   z-index: 10;
   height: 70px;
   width: 100%;

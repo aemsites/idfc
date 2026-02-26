@@ -20,11 +20,10 @@
 
 .accordion details summary {
   position: relative;
-  padding-right: 46px;
   cursor: pointer;
   list-style: none;
   transition: all 0.5s ease-in-out;
-  padding: 20px 30px 0 var(--spacing-s);
+  padding: 20px 46px 0 var(--spacing-s);
   margin: 0 5px;
   font-size: var(--body-font-size-s);
   font-weight: 600;
@@ -118,7 +117,7 @@
 }
 
 .accordion details p {
-  margin: 0 0 0.8em 0;
+  margin: 0 0 0.8em;
 }
 
 .accordion details[open],
@@ -138,7 +137,6 @@
 }
 
 .dark-scheme {
-
   .accordion details[open] a {
     color: var(--text-color);
   }
@@ -175,7 +173,6 @@
 
   /* section.dark-scheme overrides */
   .dark-scheme .light-scheme {
-
     .accordion details summary {
       color: var(--color-gray-100);
     }

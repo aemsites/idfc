@@ -28,7 +28,7 @@ body.modal-open {
 }
 
 .modal dialog::backdrop {
-	background: rgba(0, 0, 0, 0.8);
+	background: rgb(0 0 0 / 80%);
 	backdrop-filter: blur(2.5px);
 }
 
@@ -115,7 +115,7 @@ body.modal-open {
   display: flex;
   position: fixed;
   justify-self: center;
-  align-self: center;
+  place-self: center;
   width: fit-content;
   max-width: 1060px;
   height: 100%;
@@ -146,6 +146,7 @@ body.modal-open {
   text-align: center;
   margin: 0 0 var(--spacing-s);
 }
+
 .modal dialog h2 {
   font-size: var(--heading-font-size-l);
   text-align: center;
@@ -636,7 +637,7 @@ body.modal-open {
   }
 
   .modal .section[data-id="mayura-card-modal"] > div > div:nth-child(3) > div > div {
-    padding: 10px 10px;
+    padding: 10px;
   }
 
 	
@@ -765,6 +766,7 @@ body.modal-open {
   margin:0;
   position: relative;
 }
+
 .section[data-id="mayura-metal-concept-2"] > div > div > div > div:first-child {
   margin-top: 13%;
   margin-left: 5%;
@@ -774,13 +776,12 @@ body.modal-open {
 .section[data-id="mayura-metal-concept-3"] > div > div > div > div:first-child {
   margin-top: -10%;
   position: relative;
-  width: 100;
 }
 
 .section[data-id^="mayura-metal-concept-"] p {
   background: linear-gradient(308.18deg, #110140 4.16%, #1E2A8E 44.91%, #010740 88.8%);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: rgba(0, 0, 0, 0);
+  -webkit-text-fill-color: rgb(0 0 0 / 0%);
   background-clip: text;
   font-size: var(--body-font-size-m);
   font-weight: 500;
@@ -974,7 +975,6 @@ body.modal-open {
 }
 
 @media (width < 900px) {
-
   .section[data-id="mayura-metal-concept-1"] > div > div > div > div:first-child {
   margin-top: 5%;
   }

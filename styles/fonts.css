@@ -1,8 +1,9 @@
 /* stylelint-disable max-line-length */
+
 /* Individual Inter fonts are only 17k, total 119k */
 
 @font-face {
-  font-family: 'Inter'; /* aka Inter-Light */
+  font-family: Inter; /* aka Inter-Light */
   src: url('../fonts/inter-v8-latin-300.woff2') format('woff2');
   font-weight: 300;
   font-style: normal;
@@ -10,7 +11,7 @@
 }
 
 @font-face {
-  font-family: 'Inter'; /* aka Inter-Regular */
+  font-family: Inter; /* aka Inter-Regular */
   src: url('../fonts/inter-v8-latin-regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
@@ -18,7 +19,7 @@
 }
 
 @font-face {
-  font-family: 'Inter'; /* aka Inter-Medium */
+  font-family: Inter; /* aka Inter-Medium */
   src: url('../fonts/inter-v8-latin-500.woff2') format('woff2');
   font-weight: 500;
   font-style: normal;
@@ -26,7 +27,7 @@
 }
 
 @font-face {
-  font-family: 'Inter'; /* aka Inter SemiBold */
+  font-family: Inter; /* aka Inter SemiBold */
   src: url('../fonts/inter-v12-latin-600.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
@@ -34,7 +35,7 @@
 }
 
 @font-face {
-  font-family: 'Inter'; /* aka Inter-Bold */
+  font-family: Inter; /* aka Inter-Bold */
   src: url('../fonts/inter-v8-latin-700.woff2') format('woff2');
   font-weight: bold;
   font-style: normal;
@@ -42,7 +43,7 @@
 }
 
 @font-face {
-  font-family: 'Inter'; /* aka Inter28pt-ExtraBold */
+  font-family: Inter; /* aka Inter28pt-ExtraBold */
   src: url('../fonts/inter-v8-latin-800.woff2') format('woff2');
   font-weight: 800;
   font-style: normal;
@@ -50,7 +51,7 @@
 }
 
 @font-face {
-  font-family: 'Inter'; /* aka Inter28pt-Black */
+  font-family: Inter; /* aka Inter28pt-Black */
   src: url('../fonts/inter-v8-latin-900.woff2') format('woff2');
   font-weight: 900;
   font-style: normal;

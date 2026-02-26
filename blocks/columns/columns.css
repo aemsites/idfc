@@ -62,7 +62,7 @@
   bottom: 2% ;
 }
 
-@media (max-width:767px){
+@media (width <= 767px){
   .columns.block.feature-cards > div > div{
   display: flex;
   align-items: center;

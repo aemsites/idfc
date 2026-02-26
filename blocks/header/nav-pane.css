@@ -1,5 +1,4 @@
-@media (max-width:991px) {
-
+@media (width <= 991px) {
   .top-nav {
     height: 70px;
     align-items: center
@@ -32,7 +31,7 @@
 }
 
 .top-nav .logo {
-    padding: 0 0 0 0
+    padding: 0;
 }
 
 .top-nav .logo img {
@@ -54,7 +53,7 @@
  }
 }
 
-@media (max-width:1024px) {
+@media (width <= 1024px) {
   .top-nav .logo {
     padding: 10px 10px 0 30px
   }
@@ -81,7 +80,7 @@
 }
 }
 
-@media (max-width:1280px) {
+@media (width <= 1280px) {
   .top-nav-left>li.hide-1024 {
     display: none
 }
@@ -101,7 +100,6 @@ header .header {
   top: 0;
   left: 0;
   z-index: 4;
-  /* height: 110px; */
   background: var(--color-white);
   transition: all .1s ease
 }
@@ -223,7 +221,7 @@ header .header {
 
 .top-nav-left>li>a {
     display: block;
-    border-bottom: 3px solid rgba(0, 0, 0, 0);
+    border-bottom: 3px solid rgb(0 0 0 / 0%);
     padding: var(--spacing-xs) 0;
     color: var(--text-color);
     white-space: nowrap;

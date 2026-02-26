@@ -332,7 +332,6 @@ header nav .nav-sections .nav-fragment-section-content p:not(.button-container, 
   height: auto;
   line-height: 1.3;
   white-space: normal;
-  word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
@@ -343,7 +342,6 @@ header nav .nav-sections .nav-fragment-section-content p:not(.button-container, 
 /* H4 section content items */
 header nav .nav-sections .nav-fragment-section-content .nav-h4-section-content p.button-container a {
   white-space: normal;
-  word-wrap: break-word;
   overflow-wrap: break-word;
   font-weight: 400;
 }
@@ -482,7 +480,6 @@ header nav .nav-sections .nav-fragment-section-content .nav-h4-section-content p
   height: auto;
   line-height: 1.3;
   white-space: normal;
-  word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
@@ -1109,7 +1106,7 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
   }
 
   .section#cscards .cards .card-clickable:hover {
-    box-shadow: 0 2px 8px rgba(0 0 0 / 8%);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
     transform: none;
   }
 
@@ -1412,7 +1409,7 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
   border-radius: 20px;
   padding: 5px 20px;
   margin-bottom: 20px;
-  box-shadow: 3px 3px 8px rgba(0 0 0 / 20%);
+  box-shadow: 3px 3px 8px rgb(0 0 0 / 20%);
 }
 
 .search-dropdown .search-results-list li:last-child {
@@ -1420,7 +1417,7 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
   border-radius: 20px;
   padding: 5px 20px;
   margin-bottom: 20px;
-  box-shadow: 3px 3px 8px rgba(0 0 0 / 20%);
+  box-shadow: 3px 3px 8px rgb(0 0 0 / 20%);
 }
 
 .search-dropdown .search-results-list li a {
@@ -1716,7 +1713,6 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
 }
 
 .login-dropdown.open {
-
   .cards .benefit-cards .cards-card-body p {
     font-size: var(--body-font-size-xxs);
   }
@@ -1724,7 +1720,6 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
 }
 
 @media (width >= 990px) {
-
   /* Header wrapper is now a container for both nav and secondary navbar */
   header .nav-wrapper {
     position: fixed;
@@ -1869,7 +1864,7 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
 
   header nav .nav-sections .default-content-wrapper>ul>li p {
     font-size: var(--body-font-size-xxs);
-    padding: 5px 0 0 0;
+    padding: 5px 0 0;
     min-width: unset;
   }
 
@@ -1969,12 +1964,6 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     border-left: 3px solid transparent;
     cursor: pointer;
   }
-/*
-  header nav .nav-sections .nav-fragment-section:hover .nav-fragment-section-title {
-    background-color: var(--color-white-200);
-    border-radius: 24px 0 0 24px;
-  }
-*/
 
   header nav .nav-sections .nav-fragment-section[aria-expanded='true'] p.nav-fragment-section-title {
     background-color: var(--color-white-100);
@@ -2242,7 +2231,6 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     line-height: 1.3;
     display: block;
     white-space: normal;
-    word-wrap: break-word;
     overflow-wrap: break-word;
     cursor: auto;
   }
@@ -2267,7 +2255,6 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     margin: 0;
     display: inline;
     white-space: normal;
-    word-wrap: break-word;
     overflow-wrap: break-word;
     cursor: pointer;
   }
@@ -2458,19 +2445,8 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     overflow: hidden;
     white-space: nowrap;
   }
-/*
-  .nav-tools .default-content-wrapper>p:first-child>strong {
-    margin-left: var(--spacing-xxs);
-    color: #353535;
-    font-weight: 400;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-*/
 
 header nav {
-
   .nav-tools .default-content-wrapper>p:first-child .search-input {
     margin-left: var(--spacing-xxs);
     font-weight: 400;
@@ -2878,7 +2854,6 @@ border-radius: 0;
    DESKTOP STYLES (1200px+)
    ================================================================= */
 @media (width >= 1200px) {
-
   /* Nav sections - allow natural growth within parent container */
   header nav .nav-sections {
     max-width: 100%;
@@ -2973,7 +2948,6 @@ border-radius: 0;
    EXTRA LARGE DESKTOP STYLES (1400px+)
    ================================================================= */
 @media (width >= 1400px) {
-
     /* Nav spacing - generous on desktop */
     header nav {
       gap: 16px;
