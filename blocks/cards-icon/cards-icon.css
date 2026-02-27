@@ -2,37 +2,25 @@
    CARDS-ICON BLOCK
    Simpler icon-card block for three layout variants:
      - image-left        : icon on left, no border/background
-     - important-documents : icon on top, grid of white-bg cards
-     - related-search    : icon on left with right-arrow indicator
+     - image-top          : icon on top, grid of white-bg cards
+     - image-left-arrow   : icon on left with right-arrow indicator
    Mobile-first.
    ================================================================= */
-
-/* --- Shared utilities --- */
-
-.cards-icon .sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* --- Base grid reset --- */
 
 .cards-icon .cards-icon-grid {
   margin: 0;
   padding: 0;
 }
 
-/* --- Shared image defaults --- */
+.cards-icon .cards-icon-card-link {
+  display: block;
+  text-decoration: none;
+}
 
 .cards-icon .cards-icon-image {
   line-height: 0;
   flex-shrink: 0;
+  height: 70px;
 }
 
 .cards-icon .cards-icon-image img {
@@ -40,15 +28,23 @@
   border-radius: 0;
 }
 
-/* --- Clickable card interaction --- */
-
-.cards-icon .cards-icon-clickable {
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.cards-icon .cards-icon-body h3 {
+  font-size: var(--body-font-size-s);
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0;
 }
 
-.cards-icon .cards-icon-clickable:hover {
-  transform: translateY(-2px);
+.cards-icon .cards-icon-body p {
+  font-size: var(--body-font-size-xs);
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.cards-icon .cards-icon-card:focus-visible {
+  outline: 1px solid var(--text-color);
+  outline-offset: 1px;
 }
 
 /* =================================================================
@@ -57,33 +53,32 @@
    ================================================================= */
 
 .cards-icon.image-left .cards-icon-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
 }
 
 .cards-icon.image-left .cards-icon-card {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 0.75rem;
-  width: 100%;
-  background: transparent;
-  border: none;
-  box-sizing: border-box;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-top: var(--spacing-s);
 }
 
 .cards-icon.image-left .cards-icon-image {
-  width: 48px;
-  height: 48px;
+  flex-shrink: 0;
+  width: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .cards-icon.image-left .cards-icon-image img {
-  width: 48px;
-  height: 48px;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .cards-icon.image-left .cards-icon-body {
@@ -91,31 +86,13 @@
   min-width: 0;
 }
 
-.cards-icon.image-left .cards-icon-body h3 {
-  color: var(--text-color);
-  font-size: var(--body-font-size-s);
-  font-weight: 600;
-  line-height: 1.4;
-  margin: 0 0 4px;
-}
-
-.cards-icon.image-left .cards-icon-body p {
-  color: var(--text-color);
-  font-size: var(--body-font-size-xs);
-  font-weight: 400;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.cards-icon.image-left .cards-icon-body a {
-  color: inherit;
+.cards-icon.image-left a h3 {
+  color: var(--color-purple-800);
   text-decoration: none;
 }
 
-.cards-icon.image-left .cards-icon-clickable:hover {
-  box-shadow: none;
-  transform: none;
-  opacity: 0.85;
+.dark-scheme .cards-icon.image-left a.cards-icon-link {
+  color: var(--color-white);
 }
 
 /* =================================================================
@@ -123,11 +100,12 @@
    Icon on top, centered text, white card with shadow, grid layout.
    ================================================================= */
 
-.cards-icon.important-documents {
+.cards-icon.image-top {
   margin: var(--spacing-s) 0;
+  min-height: 175px;
 }
 
-.cards-icon.important-documents .cards-icon-grid {
+.cards-icon.image-top .cards-icon-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
@@ -135,14 +113,15 @@
   margin-bottom: var(--spacing-m);
 }
 
-.cards-icon.important-documents .cards-icon-card {
+.cards-icon.image-top .cards-icon-card {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 16px 10px;
-  background: var(--color-white);
-  border-radius: 8px;
-  box-shadow: 0 0 8px 0 rgb(37 36 59 / 15%);
+  background: var(--gradient-earn-rewards);
+  box-shadow: none;
+  border: 1px var(--text-color) solid;
+  border-radius: 12px;
   width: 100%;
   gap: 10px;
   min-height: 140px;
@@ -151,7 +130,7 @@
   box-sizing: border-box;
 }
 
-.cards-icon.important-documents .cards-icon-image {
+.cards-icon.image-top .cards-icon-image {
   width: 100%;
   display: flex;
   justify-content: center;
@@ -159,38 +138,32 @@
   margin-bottom: 4px;
 }
 
-.cards-icon.important-documents .cards-icon-image img {
+.cards-icon.image-top .cards-icon-image img {
   width: 64px;
   height: 64px;
   object-fit: contain;
 }
 
-.cards-icon.important-documents .cards-icon-body {
+.cards-icon.image-top .cards-icon-body {
   width: 100%;
   text-align: center;
 }
 
-.cards-icon.important-documents .cards-icon-body p,
-.cards-icon.important-documents .cards-icon-body h3 {
+.cards-icon.image-top .cards-icon-body p,
+.cards-icon.image-top .cards-icon-body h3 {
   width: 100%;
   text-align: center;
   overflow-wrap: break-word;
-  font-size: var(--body-font-size-s);
   margin: 0;
 }
 
-.cards-icon.important-documents .cards-icon-body h3 {
+.cards-icon.image-top .cards-icon-body h3 {
   font-weight: 600;
 }
 
-.cards-icon.important-documents .cards-icon-body a {
+.cards-icon.image-top .cards-icon-body a {
   color: inherit;
   text-decoration: none;
-}
-
-.cards-icon.important-documents .cards-icon-clickable:hover {
-  box-shadow: 0 4px 12px rgb(37 36 59 / 25%);
-  transform: translateY(-2px);
 }
 
 /* =================================================================
@@ -198,20 +171,13 @@
    Row cards: icon left, text middle, arrow-circle on right.
    ================================================================= */
 
-.section:has(.cards-icon.related-search) .default-content-wrapper h2 {
-  color: #54565b;
-  font-size: 21px;
-  font-weight: 600;
-  margin: 0 0 var(--spacing-s);
-}
-
-.cards-icon.related-search .cards-icon-grid {
+.cards-icon.image-left-arrow .cards-icon-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0;
 }
 
-.cards-icon.related-search .cards-icon-card {
+.cards-icon.image-left-arrow .cards-icon-card {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -228,37 +194,29 @@
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.cards-icon.related-search .cards-icon-image {
+.cards-icon.image-left-arrow .cards-icon-image {
   flex-shrink: 0;
   width: 70px;
-  height: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.cards-icon.related-search .cards-icon-image img {
+.cards-icon.image-left-arrow .cards-icon-image img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   border-radius: 4px;
 }
 
-.cards-icon.related-search .cards-icon-body {
+.cards-icon.image-left-arrow .cards-icon-body {
   flex: 1;
   margin: 0;
   padding-right: 40px;
   min-width: 0;
 }
 
-.cards-icon.related-search .cards-icon-body h3 {
-  font-size: var(--body-font-size-s);
-  font-weight: 600;
-  line-height: 1.4;
-  margin: 0;
-}
-
-.cards-icon.related-search .cards-icon-body p {
+.cards-icon.image-left-arrow .cards-icon-body p {
   font-size: var(--body-font-size-xs);
   font-weight: 400;
   line-height: 1.5;
@@ -266,13 +224,18 @@
   color: var(--text-color);
 }
 
-.cards-icon.related-search .cards-icon-body a {
+.cards-icon.image-left-arrow .cards-icon-body a {
   color: inherit;
   text-decoration: none;
 }
 
+.cards-icon.image-left-arrow a h3:hover {
+  color: var(--color-red-400);
+  text-decoration: none;
+}
+
 /* Arrow circle indicator (CSS only, no JS) */
-.cards-icon.related-search .cards-icon-card::after {
+.cards-icon.image-left-arrow .cards-icon-card::after {
   content: '';
   position: absolute;
   right: 16px;
@@ -290,7 +253,7 @@
   flex-shrink: 0;
 }
 
-.cards-icon.related-search .cards-icon-clickable:hover {
+.cards-icon.image-left-arrow .cards-icon-clickable:hover {
   box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
   transform: translateY(-2px);
 }
@@ -300,105 +263,82 @@
    ================================================================= */
 
 @media (width >= 600px) {
-  /* Image-left: 2-column grid */
-  .cards-icon.image-left .cards-icon-grid {
-    display: grid;
-    flex-direction: unset;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+  .cards-icon.image-left .cards-icon-card {
+    flex-direction: row;
+    text-align: left;
+    gap: var(--spacing-s); 
   }
 
   /* Important Documents: tighter grid, constrained width */
-  .cards-icon.important-documents .cards-icon-grid {
-    gap: 10px;
+  .cards-icon.image-top .cards-icon-grid {
+    gap: var(--spacing-xs) var(--spacing-s);
     max-width: 80%;
     margin-left: auto;
     margin-right: auto;
   }
 
-  .cards-icon.important-documents .cards-icon-card {
+  .cards-icon.image-top .cards-icon-card {
     padding: 20px var(--spacing-xs);
     gap: 6px;
   }
 
-  .cards-icon.important-documents .cards-icon-image {
+  .cards-icon.image-top .cards-icon-image {
     margin-bottom: 3px;
   }
 
-  .cards-icon.important-documents .cards-icon-image img {
+  .cards-icon.image-top .cards-icon-image img {
     width: 56px;
     height: 56px;
   }
 
   /* Related Search: 2-column grid */
-  .cards-icon.related-search .cards-icon-grid {
+  .cards-icon.image-left-arrow .cards-icon-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px 30px;
   }
 
-  .cards-icon.related-search .cards-icon-card {
+  .cards-icon.image-left-arrow .cards-icon-card {
     margin-bottom: 0;
   }
 
-  .cards-icon.related-search .cards-icon-image {
+  .cards-icon.image-left-arrow .cards-icon-image {
     width: 80px;
     height: 70px;
   }
-
-  .section:has(.cards-icon.related-search) .default-content-wrapper h2 {
-    font-size: var(--heading-font-size-s);
-    margin-bottom: 32px;
-  }
 }
 
-/* =================================================================
-   DESKTOP (900px+)
-   ================================================================= */
-
 @media (width >= 900px) {
-  /* Image-left: 3-column grid */
+  .cards-icon.image-top .cards-icon-body h3 {
+    font-size: var(--body-font-size-xs);
+  }
+
   .cards-icon.image-left .cards-icon-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
   }
 
-  .cards-icon.image-left .cards-icon-image {
-    width: 56px;
-    height: 56px;
-  }
-
-  .cards-icon.image-left .cards-icon-image img {
-    width: 56px;
-    height: 56px;
-  }
-
-  .cards-icon.image-left .cards-icon-body h3 {
-    font-size: var(--body-font-size-m);
-  }
-
   /* Important Documents: 4-column fixed-size grid */
-  .cards-icon.important-documents .cards-icon-grid {
+  .cards-icon.image-top .cards-icon-grid {
     grid-template-columns: repeat(4, 175px);
     grid-auto-rows: 175px;
-    gap: 40px;
-    max-width: unset;
-    justify-content: center;
+    max-width: 900px;
+    justify-content: space-between;
     margin-left: auto;
     margin-right: auto;
   }
 
-  .cards-icon.important-documents .cards-icon-card {
+  .cards-icon.image-top .cards-icon-card {
     width: 175px;
     height: 175px;
     padding: var(--spacing-s) 26px;
   }
 
-  .cards-icon.important-documents .cards-icon-image img {
+  .cards-icon.image-top .cards-icon-image img {
     width: 64px;
     height: 64px;
   }
 
-  .cards-icon.important-documents .cards-icon-body {
+  .cards-icon.image-top .cards-icon-body {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -407,28 +347,15 @@
   }
 
   /* Related Search: 3-column grid, constrained max-width */
-  .section:has(.cards-icon.related-search) .default-content-wrapper h2 {
+  .section:has(.cards-icon.image-left-arrow) .default-content-wrapper h2 {
     font-size: var(--heading-font-size-m);
     margin-bottom: 40px;
   }
 
-  .cards-icon.related-search .cards-icon-grid {
+  .cards-icon.image-left-arrow .cards-icon-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px 30px;
+    gap: 20px;
     max-width: 1120px;
     margin: 0 auto;
-  }
-
-  .cards-icon.related-search .cards-icon-card {
-    padding: 0 20px;
-  }
-
-  .cards-icon.related-search .cards-icon-image {
-    width: 90px;
-    height: 75px;
-  }
-
-  .cards-icon.related-search .cards-icon-body h3 {
-    font-size: var(--body-font-size-m);
   }
 }

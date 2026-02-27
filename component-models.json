@@ -1098,12 +1098,12 @@
             "value": "image-left"
           },
           {
-            "name": "Image on top (Imp. Docs)",
-            "value": "important-documents"
+            "name": "Image on top (square)",
+            "value": "image-top"
           },
           {
-            "name": "Image on left w/ arrow (Related Search)",
-            "value": "related-search"
+            "name": "Image on left w/ arrow",
+            "value": "image-left-arrow"
           }
         ]
       }
