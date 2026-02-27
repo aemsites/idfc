@@ -215,15 +215,15 @@
           }
         },
         {
-          "title": "Card",
-          "id": "card-icon-item",
+          "title": "Card Icon",
+          "id": "card-icon",
           "plugins": {
             "xwalk": {
               "page": {
                 "resourceType": "core/franklin/components/block/v1/block/item",
                 "template": {
-                  "name": "Card",
-                  "model": "card-icon-item"
+                  "name": "Card Icon",
+                  "model": "card-icon"
                 }
               }
             }

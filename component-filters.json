@@ -82,7 +82,7 @@
   {
     "id": "cards-icon",
     "components": [
-      "card-icon-item"
+      "card-icon"
     ]
   },
   {
