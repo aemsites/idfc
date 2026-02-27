@@ -1094,23 +1094,23 @@
         "label": "Style",
         "options": [
           {
-            "name": "Important Documents",
+            "name": "Image on left, no border/bg",
+            "value": "image-left"
+          },
+          {
+            "name": "Image on top (Imp. Docs)",
             "value": "important-documents"
           },
           {
-            "name": "Related Search",
+            "name": "Image on left w/ arrow (Related Search)",
             "value": "related-search"
-          },
-          {
-            "name": "Image and Title",
-            "value": "image-and-title"
           }
         ]
       }
     ]
   },
   {
-    "id": "card-icon-item",
+    "id": "card-icon",
     "fields": [
       {
         "component": "reference",
@@ -1125,27 +1125,17 @@
         "label": "Alt Text"
       },
       {
-        "component": "text",
-        "name": "card-tag",
-        "label": "Card Tag (optional)"
-      },
-      {
         "component": "richtext",
-        "name": "card_text",
+        "name": "text",
         "value": "",
         "label": "Text",
         "valueType": "string"
       },
       {
         "component": "aem-content",
-        "name": "card_link",
-        "label": "Card Link (optional)",
+        "name": "cardlink",
+        "label": "Card Link",
         "valueType": "string"
-      },
-      {
-        "component": "text",
-        "name": "card_linkText",
-        "label": "Card Link Text (optional)"
       }
     ]
   },
