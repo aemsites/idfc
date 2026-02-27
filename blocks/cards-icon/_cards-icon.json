@@ -47,11 +47,11 @@
               },
               {
                 "name": "Image on top (Imp. Docs)",
-                "value": "important-documents"
+                "value": "image-top"
               },
               {
                 "name": "Image on left w/ arrow (Related Search)",
-                "value": "related-search"
+                "value": "image-left-arrow"
               }
             ]
           }
