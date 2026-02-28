@@ -59,7 +59,7 @@
   --gradient-black: linear-gradient(to bottom, transparent 0%, black 100%);
   --gradient-pewter: linear-gradient(270deg, #332B28 0%, #514A44 21.11%, #8B837D 50.14%, #625A50 71.74%, var(--color-pewter) 90.18%, #433C32 100%);
   --gradient-silver: linear-gradient(208deg, #C8C6C6 0%, #F1F0F0 53.5%, #C8C6C6 100%);
-  --gradient-conic-silver: conic-gradient(from 0deg at 50% 50%, rgb(157 157 157 / 100%) 1%, rgb(255 255 255 / 100%) 10%, rgb(157 157 157 / 100%) 35%, rgb(255 255 255 / 100%) 53%, rgb(206 206 206 / 100%) 71%, rgb(255 255 255 / 100%) 80%, rgb(157 157 157 / 100%) 100%);
+  --gradient-conic-silver: conic-gradient(from 0deg at 50% 50%, rgb(194 194 194 / 100%) 0%, rgb(181 181 181 / 100%) 7%, rgb(238 238 238 / 100%) 14%, rgb(157 157 157 / 100%) 35%, rgb(255 255 255 / 100%) 58%, rgb(206 206 206 / 100%) 63%, rgb(235 234 234 / 100%) 80%, rgb(194 194 194 / 100%) 99%);
   --gradient-metal-blue: linear-gradient(308deg, #110140 4.16%, #1E2A8E 44.91%, #010740 88.8%);
   --gradient-metal-silver: linear-gradient(138deg, #999 -15.44%, #EFEFEF 0.15%, #CACACA 18.04%, #EFEFEF 37.09%, #CACACA 58.44%, #999 76.91%, #EFEFEF 87.3%);
   --modal-backdrop-gradient: linear-gradient(to bottom, rgb(200 198 198 / 70%) 0, rgb(200 198 198 / 95%) 1px, #C8C6C6 250px, #F1F0F0 50%, #C8C6C6 100%);
