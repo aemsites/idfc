@@ -30,7 +30,7 @@
   --color-blue-800: #2d3679;
   --color-blue-900: #182659;
   --color-purple-400: #563b80;
-  --color-purple-800: #293871;
+  --color-purple-800: #293871; /* mayura */
   --color-white: #fff;
   --color-white-100: #f5f5f5;
   --color-white-200: #eee; /* #e9e9e9 */
@@ -210,7 +210,7 @@ h3 {
 }
 
 h4 {
-  font-size: var(--heading-font-size-m);
+  font-size: var(--heading-font-size-s);
 }
 
 h5 {
@@ -498,7 +498,6 @@ main>.section:first-of-type {
   margin-top: 0;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .section {
   --top-bottom-spacing: 0;
   --section-container-width: var(--grid-container-width);
@@ -600,12 +599,24 @@ main>.section:first-of-type {
       margin: 0 auto;
     }
 
+    &.container-1 {
+      --section-container-width: calc(var(--grid-column-width) * 2);
+    }
+
     &.container-2 {
       --section-container-width: calc(var(--grid-column-width) * 4);
     }
 
+    &.container-3 {
+      --section-container-width: calc(var(--grid-column-width) * 6);
+    }
+
     &.container-4 {
       --section-container-width: calc(var(--grid-column-width) * 8);
+    }
+
+    &.container-5 {
+      --section-container-width: calc(var(--grid-column-width) * 10);
     }
 
     &.container-6 {
@@ -681,7 +692,6 @@ header:has(nav[aria-expanded="true"]) #grnt-app-mob {
 .has-bg-images {
   position: relative;
 
-  /* stylelint-disable-next-line no-descending-specificity */
   > div {
     position: relative;
   }
@@ -831,7 +841,7 @@ The height and width are set to 200 assuming the decorations won't be larger. */
 .section.has-decorations::after {
   content: '';
   position: absolute;
-  bottom: -80px;
+  bottom: -30px;
   right: 0;
   width: 200px;
   height: 200px;
@@ -839,7 +849,6 @@ The height and width are set to 200 assuming the decorations won't be larger. */
   background-size: contain;
   background-repeat: no-repeat;
   background-position: bottom right;
-  z-index: 1;
   pointer-events: none;
 }
 
@@ -932,7 +941,7 @@ The height and width are set to 200 assuming the decorations won't be larger. */
   }
 
   main>.section>div {
-    padding: 0 32px;
+    padding: 0 var(--spacing-m);
   }
   
   main .breadcrumbs {

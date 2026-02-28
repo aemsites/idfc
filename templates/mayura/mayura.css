@@ -4,6 +4,7 @@
   --btn-tertiary-border: var(--color-transparent);
   --btn-tertiary-text: var(--text-color);
 }
+
 /*
  * Scrollbar with custom handle (mayura template only).
  * Uses native Swiper scrollbar; handle image via scrollbar-handle.svg.
@@ -34,7 +35,7 @@
   top: 50%;
   transform: translateY(-50%);
   height: 2px;
-  background: rgba(120 110 100 / 50%);
+  background: rgb(120 110 100 / 50%);
   border-radius: 2px;
   pointer-events: none;
 }
@@ -56,7 +57,7 @@
   height: 10px;
   flex-shrink: 0;
   background: url('/icons/scrollbar-handle.svg') center / contain no-repeat;
-  filter: brightness(0.4) drop-shadow(0 1px 2px rgba(0 0 0 / 20%));
+  filter: brightness(0.4) drop-shadow(0 1px 2px rgb(0 0 0 / 20%));
 }
 
 .mayura .cards .swiper-pagination-handle:active {
@@ -67,7 +68,7 @@
 
 /* Dark scheme - track line */
 .mayura .dark-scheme .cards .swiper-scrollbar::before {
-  background: rgba(255 255 255 / 30%);
+  background: rgb(255 255 255 / 30%);
 }
 
 /* Dark scheme - unset filter on handle */
@@ -81,7 +82,8 @@
 }
 
 .mayura .cards-container h2,
-.mayura .tabs-container h2 {
+.mayura .tabs-container h2,
+.mayura .cards-icon-container h2 {
     text-align: center;
     font-style: normal;
     font-weight: 700;
@@ -89,7 +91,7 @@
     background: var(--gradient-red);
     background-clip: text;
     -webkit-background-clip: text;
-    -webkit-text-fill-color: rgba(0 0 0 / 0%);
+    -webkit-text-fill-color: rgb(0 0 0 / 0%);
 }
 
 .mayura .columns-container h2 {
@@ -101,14 +103,14 @@
   background: var(--gradient-silver);
   background-clip: text;
   -webkit-background-clip: text;
-  -webkit-text-fill-color: rgba(0 0 0 / 0%);
+  -webkit-text-fill-color: rgb(0 0 0 / 0%);
 }
 
 .mayura .banner-container .banner-heading h2 {
   background: #fbf8f2;
   background-clip: text;
   -webkit-background-clip: text;
-  -webkit-text-fill-color: rgba(0 0 0 / 0%);
+  -webkit-text-fill-color: rgb(0 0 0 / 0%);
   text-align: left;
   font-size: var(--heading-font-size-xl);
 }
@@ -116,41 +118,6 @@
 .mayura .table-container .button-container:first-child {
   text-align: center;
   padding-top: 20px;
-}
-
-.mayura .cards.related-search .benefit-cards .cards-card-body h3 a:hover {
-color: var(--dark-red-color);
-}
-
-.mayura .section[data-id="get-in-touch"] h3 {
-  font-size: var(--heading-font-size-s); 
-}
-
-.mayura .section[data-id="get-in-touch"] .cards.related-search {
-  .grid-cards {
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 4px;
-  }
-
-.benefit-cards {
-  background-color: transparent;
-  box-shadow: none;
-
-  &::after {
-    display: none;
-  }
-  
-  h3 {
-    font-weight: 700;
-    color: #293871;
-  }
-}
-}
-
-.mayura .cards.important-documents .important-documents-card {
-  background: var(--gradient-earn-rewards);
-  box-shadow: none;
-  border: 1px var(--text-color) solid;
 }
 
 .mayura .accordion .accordion-cta.button{
@@ -167,43 +134,12 @@ color: var(--dark-red-color);
   line-height: 1.5;
 }
 
-.mayura .sticky-cta.block {
-  background: rgba(239 239 239 / 60%)
-}
-
-.mayura .sticky-cta-subtitle-content {
-  color: rgb(26 26 26);
-  padding-top: 10px;
-  font-size: var(--body-font-size-s);
-}
-
-.mayura .sticky-cta-container .sticky-cta-content .button,
 .mayura .cta-sticky-container .cta-sticky.block .button {
   background: var(--gradient-pewter);
   border: none;
 }
 
-@media (width >= 768px) {
-  .mayura .sticky-cta-container {
-    display: none;
-  }
-}
-
   @media (width <= 900px) {
-    .mayura .section[data-id="get-in-touch"] .cards.related-search .benefit-cards {
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding-right:0;
-      height: unset;
-      margin-top: var(--spacing-s);
-
-      .cards-card-body {
-        padding-right: 0;
-      }
-    }
-
 .mayura .cards-container h2,
 .mayura .tabs-container h2 {
     text-align: center;

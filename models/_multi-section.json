@@ -85,10 +85,16 @@
             "collapsible": true,
             "fields": [
           {
-            "component": "text",
+            "component": "select",
             "name": "grid",
-            "label": "Grid layout (enter # of columns, 2-6)",
-            "valueType": "string"
+            "label": "Grid layout - # of columns (for device widths > 600px)",
+            "valueType": "string",
+            "description": "hint: 3 = 3 blocks, each 33% wide side-by-side",
+            "options": [
+              {
+                "...": "./partials/_widths.json#/options"
+              }
+            ]
           },
           {
             "component": "select",
@@ -104,21 +110,12 @@
           {
             "component": "select",
             "name": "containerwidth",
-            "label": "Inner div width",
+            "label": "Inner section container max-width (unrelated to grid layout)",
             "valueType": "string",
-            "description": "unrelated to grid layout",
+            "description": "hint: 6 = default (full content width), 3 = half of that, etc.",
             "options": [
               {
-                "name": "33%",
-                "value": "2"
-              },
-              {
-                "name": "66%",
-                "value": "4"
-              },
-              {
-                "name": "100%",
-                "value": "6"
+                "...": "./partials/_widths.json#/options"
               }
             ]
           }

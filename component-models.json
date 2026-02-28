@@ -358,27 +358,31 @@
           },
           {
             "name": "XXL",
-            "value": "size-xxl"
+            "value": "xxl"
           },
           {
             "name": "XL",
-            "value": "size-xl"
+            "value": "xl"
           },
           {
             "name": "L",
-            "value": "size-l"
+            "value": "l"
           },
           {
             "name": "M",
-            "value": "size-m"
+            "value": "m"
           },
           {
             "name": "S",
-            "value": "size-s"
+            "value": "s"
           },
           {
             "name": "XS",
-            "value": "size-xs"
+            "value": "xs"
+          },
+          {
+            "name": "XXS",
+            "value": "xxs"
           }
         ]
       },
@@ -441,10 +445,37 @@
         "collapsible": true,
         "fields": [
           {
-            "component": "text",
+            "component": "select",
             "name": "grid",
-            "label": "Grid layout (enter # of columns, 2-6)",
-            "valueType": "string"
+            "label": "Grid layout - # of columns (for device widths > 600px)",
+            "valueType": "string",
+            "description": "hint: 3 = 3 blocks, each 33% wide side-by-side",
+            "options": [
+              {
+                "name": "1",
+                "value": "1"
+              },
+              {
+                "name": "2",
+                "value": "2"
+              },
+              {
+                "name": "3",
+                "value": "3"
+              },
+              {
+                "name": "4",
+                "value": "4"
+              },
+              {
+                "name": "5",
+                "value": "5"
+              },
+              {
+                "name": "6",
+                "value": "6"
+              }
+            ]
           },
           {
             "component": "select",
@@ -458,47 +489,63 @@
               },
               {
                 "name": "XXL",
-                "value": "size-xxl"
+                "value": "xxl"
               },
               {
                 "name": "XL",
-                "value": "size-xl"
+                "value": "xl"
               },
               {
                 "name": "L",
-                "value": "size-l"
+                "value": "l"
               },
               {
                 "name": "M",
-                "value": "size-m"
+                "value": "m"
               },
               {
                 "name": "S",
-                "value": "size-s"
+                "value": "s"
               },
               {
                 "name": "XS",
-                "value": "size-xs"
+                "value": "xs"
+              },
+              {
+                "name": "XXS",
+                "value": "xxs"
               }
             ]
           },
           {
             "component": "select",
             "name": "containerwidth",
-            "label": "Inner div width",
+            "label": "Inner section container max-width (unrelated to grid layout)",
             "valueType": "string",
-            "description": "unrelated to grid layout",
+            "description": "hint: 6 = default (full content width), 3 = half of that, etc.",
             "options": [
               {
-                "name": "33%",
+                "name": "1",
+                "value": "1"
+              },
+              {
+                "name": "2",
                 "value": "2"
               },
               {
-                "name": "66%",
+                "name": "3",
+                "value": "3"
+              },
+              {
+                "name": "4",
                 "value": "4"
               },
               {
-                "name": "100%",
+                "name": "5",
+                "value": "5"
+              },
+              {
+                "name": "6",
                 "value": "6"
               }
             ]
@@ -552,6 +599,10 @@
           {
             "name": "none",
             "value": "none"
+          },
+          {
+            "name": "fill (default)",
+            "value": "fill"
           }
         ]
       },
@@ -672,6 +723,10 @@
               {
                 "name": "none",
                 "value": "none"
+              },
+              {
+                "name": "fill (default)",
+                "value": "fill"
               }
             ]
           },
@@ -774,10 +829,37 @@
         "collapsible": true,
         "fields": [
           {
-            "component": "text",
+            "component": "select",
             "name": "grid",
-            "label": "Grid layout (enter # of columns, 2-6)",
-            "valueType": "string"
+            "label": "Grid layout - # of columns (for device widths > 600px)",
+            "valueType": "string",
+            "description": "hint: 3 = 3 blocks, each 33% wide side-by-side",
+            "options": [
+              {
+                "name": "1",
+                "value": "1"
+              },
+              {
+                "name": "2",
+                "value": "2"
+              },
+              {
+                "name": "3",
+                "value": "3"
+              },
+              {
+                "name": "4",
+                "value": "4"
+              },
+              {
+                "name": "5",
+                "value": "5"
+              },
+              {
+                "name": "6",
+                "value": "6"
+              }
+            ]
           },
           {
             "component": "select",
@@ -812,26 +894,42 @@
               {
                 "name": "XS",
                 "value": "xs"
+              },
+              {
+                "name": "XXS",
+                "value": "xxs"
               }
             ]
           },
           {
             "component": "select",
             "name": "containerwidth",
-            "label": "Inner div width",
+            "label": "Inner section container max-width (unrelated to grid layout)",
             "valueType": "string",
-            "description": "unrelated to grid layout",
+            "description": "hint: 6 = default (full content width), 3 = half of that, etc.",
             "options": [
               {
-                "name": "33%",
+                "name": "1",
+                "value": "1"
+              },
+              {
+                "name": "2",
                 "value": "2"
               },
               {
-                "name": "66%",
+                "name": "3",
+                "value": "3"
+              },
+              {
+                "name": "4",
                 "value": "4"
               },
               {
-                "name": "100%",
+                "name": "5",
+                "value": "5"
+              },
+              {
+                "name": "6",
                 "value": "6"
               }
             ]
@@ -885,6 +983,10 @@
           {
             "name": "none",
             "value": "none"
+          },
+          {
+            "name": "fill (default)",
+            "value": "fill"
           }
         ]
       },

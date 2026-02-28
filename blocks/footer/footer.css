@@ -543,6 +543,10 @@ footer .footer>div .section>div {
 }
 
 @media (width >= 768px) {
+  .footer > div > div {
+    padding: 0 36px;
+  }
+  
   .footer>div>div:nth-child(2)>div>ul>li:nth-child(2) {
     text-align: center;
   }

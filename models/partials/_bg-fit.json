@@ -11,6 +11,10 @@
         {
           "name": "none",
           "value": "none"
+        },
+        {
+          "name": "fill (default)",
+          "value": "fill"
         }
       ]
 }
