@@ -11,9 +11,9 @@ import { createModal } from '../modal/modal.js';
  */
 
 /**
- * Block and card field order (strict index-based parsing).
+ * Block and card structure (strict index-based parsing).
  * Cards block: 7 config rows (no "classes" – applied as CSS class on element only).
- * Card item: 9 cells per card.
+ * Card item: always 7 cells per row; mapping matches _cards.json card model from line 164.
  */
 
 /** Block config: 7 rows, one per field. "classes" is not a model field. */
@@ -26,11 +26,8 @@ const CARDS_FIELDS = [
   'modalPageDecorationImage', 'swipable', 'autoplayEnabled', 'startingCard',
 ];
 
-/** Card model field names in order (markdown/config). */
-const CARD_FIELDS = [
-  'image', 'imageAlt', 'dividerImage', 'cardTag', 'backgroundImageTexture',
-  'text', 'cardLink', 'cardLinkText', 'modalContent',
-];
+/** Cells per card row; order matches _cards.json card model (line 164). */
+const CARD_CELL_COUNT = 7;
 
 /** Set of allowed block config keys (avoids prototype pollution when setting dataset). */
 const CARDS_FIELDS_SET = new Set(CARDS_FIELDS);
@@ -347,61 +344,6 @@ function setupCardInteractivity(cardItem, shouldAddArrow = false, modalTheme = '
 }
 
 /**
- * Splits the cardContent cell (third cell) into cardTag, cards-card-body, and cards-modal-content.
- * @param {HTMLElement} cardItem The card element to append to
- * @param {HTMLElement} contentCell The third cell (cardContent)
- */
-function splitCardContentCell(cardItem, contentCell) {
-  const wrapper = contentCell.querySelector('div') || contentCell;
-  const nodes = [...wrapper.children];
-  const headingIndices = [];
-  nodes.forEach((el, i) => {
-    if (el.matches?.('h1, h2, h3, h4, h5, h6')) headingIndices.push(i);
-  });
-  let tagNodes; let bodyNodes; let modalNodes;
-  if (headingIndices.length > 0) {
-    const first = headingIndices[0];
-    const second = headingIndices[1] ?? nodes.length;
-    tagNodes = first > 0 ? nodes.slice(0, first) : [];
-    bodyNodes = nodes.slice(first, second);
-    modalNodes = second < nodes.length ? nodes.slice(second) : [];
-  } else {
-    if (nodes.length === 0) return;
-    if (nodes.length === 1) {
-      tagNodes = [];
-      bodyNodes = nodes;
-      modalNodes = [];
-    } else if (nodes.length === 2) {
-      tagNodes = [nodes[0]];
-      bodyNodes = [nodes[1]];
-      modalNodes = [];
-    } else {
-      tagNodes = [nodes[0]];
-      bodyNodes = nodes.slice(1, -1);
-      modalNodes = [nodes.at(-1)];
-    }
-  }
-  if (tagNodes.length > 0) {
-    const tagDiv = document.createElement('div');
-    tagDiv.className = 'cards-card-tag';
-    tagNodes.forEach((n) => tagDiv.appendChild(n));
-    cardItem.appendChild(tagDiv);
-  }
-  if (bodyNodes.length > 0) {
-    const bodyDiv = document.createElement('div');
-    bodyDiv.className = 'cards-card-body';
-    bodyNodes.forEach((n) => bodyDiv.appendChild(n));
-    cardItem.appendChild(bodyDiv);
-  }
-  if (modalNodes.length > 0) {
-    const modalDiv = document.createElement('div');
-    modalDiv.className = 'cards-card-body cards-modal-content';
-    modalNodes.forEach((n) => modalDiv.appendChild(n));
-    cardItem.appendChild(modalDiv);
-  }
-}
-
-/**
  * Returns the first picture or img from a cell (from inner div if present).
  * @param {HTMLElement} cell Cell element
  * @returns {HTMLPictureElement|HTMLImageElement|null} picture or img or null
@@ -412,19 +354,20 @@ function getCellPictureOrImg(cell) {
   return inner.querySelector?.('picture') || inner.querySelector?.('img') || null;
 }
 
-/**
- * Appends a cell's inner content (clone) into a wrapper and appends wrapper to cardItem.
- * @param {HTMLElement} cardItem Card element
- * @param {HTMLElement} cell Cell element
- * @param {string} wrapperClass Class name for the wrapper div
- */
-function appendCellContentAs(cardItem, cell, wrapperClass) {
-  const inner = cell?.querySelector('div') || cell;
-  if (!inner || !inner.children.length) return;
-  const wrap = document.createElement('div');
-  wrap.className = wrapperClass;
-  [...inner.children].forEach((child) => wrap.appendChild(child.cloneNode(true)));
-  cardItem.appendChild(wrap);
+/** Returns alt text from a cell that contains an image: img.alt or first paragraph text. */
+function getCellAltText(cell) {
+  if (!cell) return '';
+  const inner = cell.querySelector('div') || cell;
+  const img = inner.querySelector?.('img') || (inner.tagName === 'IMG' ? inner : null);
+  if (img?.alt) return img.alt;
+  const p = inner.querySelector?.('p');
+  if (p?.textContent?.trim()) return p.textContent.trim();
+  return '';
+}
+
+function isCellEmpty(cell) {
+  if (!cell) return true;
+  return !getCellPictureOrImg(cell) && !getCellValue(cell)?.trim();
 }
 
 function appendCardImageWithAlt(cardItem, pic, altText) {
@@ -466,6 +409,21 @@ function appendCardTexture(cardItem, pic) {
   cardItem.appendChild(textureWrap);
 }
 
+/**
+ * Appends a cell's inner content (clone) into a wrapper and appends wrapper to cardItem.
+ * @param {HTMLElement} cardItem Card element
+ * @param {HTMLElement} cell Cell element
+ * @param {string} wrapperClass Class name for the wrapper div
+ */
+function appendCellContentAs(cardItem, cell, wrapperClass) {
+  const inner = cell?.querySelector('div') || cell;
+  if (!inner || !inner.children.length) return;
+  const wrap = document.createElement('div');
+  wrap.className = wrapperClass;
+  [...inner.children].forEach((child) => wrap.appendChild(child.cloneNode(true)));
+  cardItem.appendChild(wrap);
+}
+
 function appendCardLinkButton(cardItem, linkEl, linkText, onlySetTextIfDifferentFromHref) {
   if (!linkEl?.href) return;
   const btnWrap = document.createElement('p');
@@ -492,154 +450,64 @@ function initCardItemWithRows(cardItem, rowOrRows) {
 }
 
 /**
- * Builds a single card from 9 cells in CARD_FIELDS order (strict index-based).
- * @param {HTMLElement[]} cells Array of 9 cell elements (image, imageAlt, dividerImage,
- *   cardTag, backgroundImageTexture, text, cardLink, cardLinkText, modalContent)
- * @param {HTMLElement|HTMLElement[]} rowOrRows Source row(s) for UE instrumentation
- * @returns {HTMLElement} The card element
+ * 7-cell order: 0 image+imageAlt, 1 divider, 2 cardTag, 3 texture, 4 body, 5 link, 6 modal.
+ * Returns main/divider/texture from cells 0, 1, 3.
  */
-function buildCardFromCells(cells, rowOrRows) {
-  if (!cells || cells.length < 9) return null;
-
-  const cardItem = document.createElement('div');
-  cardItem.classList.add('cards-card');
-  initCardItemWithRows(cardItem, rowOrRows);
-
-  const pic0 = getCellPictureOrImg(cells[0]);
-  const dividerPic = getCellPictureOrImg(cells[2]);
-  appendCardImageWithAlt(cardItem, pic0, cells[1] ? getCellValue(cells[1]) : '');
-  appendCardDivider(cardItem, dividerPic);
-  if (!pic0 && !dividerPic && cells[1]) {
-    appendFallbackCardImageFromCell(cardItem, cells, 1);
-  }
-  appendCellContentAs(cardItem, cells[3], 'cards-card-tag');
-  appendCardTexture(cardItem, getCellPictureOrImg(cells[4]));
-  appendCellContentAs(cardItem, cells[5], 'cards-card-body');
-  const linkEl9 = (cells[6]?.querySelector('div') || cells[6])?.querySelector?.('a[href]');
-  const linkText9 = cells[7] ? getCellValue(cells[7]) : getCellValue(cells[6]);
-  appendCardLinkButton(cardItem, linkEl9, linkText9, false);
-  appendCellContentAs(cardItem, cells[8], 'cards-card-body cards-modal-content');
-  return cardItem;
+function getCardPictures(cells) {
+  if (!cells || cells.length < 4) return { main: null, divider: null, texture: null };
+  return {
+    main: getCellPictureOrImg(cells[0]) || null,
+    divider: getCellPictureOrImg(cells[1]) || null,
+    texture: getCellPictureOrImg(cells[3]) || null,
+  };
 }
 
 /**
- * Builds a single card from 7 cells (sheet order: image, imageAlt, dividerImage,
- * backgroundImageTexture, text, cardLink, modalContent). Used when card row has 7 cells.
+ * Builds a single card from 7 cells. Order: 0 image+imageAlt, 1 divider, 2 cardTag,
+ * 3 texture, 4 body text, 5 cardLink, 6 modal content. For blog-posts, divider is
+ * skipped when cell 2 (cardTag) is empty.
  */
-function buildCardFromSevenCells(cells, rowOrRows) {
-  if (!cells || cells.length < 7) return null;
+function buildCardFromCells(cells, rowOrRows, flags = {}) {
+  if (!cells || cells.length < CARD_CELL_COUNT) return null;
 
   const cardItem = document.createElement('div');
   cardItem.classList.add('cards-card');
   initCardItemWithRows(cardItem, rowOrRows);
 
-  const pic0 = getCellPictureOrImg(cells[0]);
-  const dividerPic = getCellPictureOrImg(cells[2]);
-  appendCardImageWithAlt(cardItem, pic0, cells[1] ? getCellValue(cells[1]) : '');
-  appendCardDivider(cardItem, dividerPic);
-  if (!pic0 && !dividerPic && cells[1]) {
+  const { main: pic0, divider: dividerPic, texture: texturePic } = getCardPictures(cells);
+  const altText = getCellAltText(cells[0]);
+  appendCardImageWithAlt(cardItem, pic0, altText);
+  const skipDivider = flags.isBlogPosts && isCellEmpty(cells[2]);
+  if (!skipDivider) appendCardDivider(cardItem, dividerPic);
+  if (!pic0 && getCellPictureOrImg(cells[1])) {
     appendFallbackCardImageFromCell(cardItem, cells, 1);
   }
-  appendCardTexture(cardItem, getCellPictureOrImg(cells[3]));
+  appendCardTexture(cardItem, texturePic);
+  appendCellContentAs(cardItem, cells[2], 'cards-card-tag');
   appendCellContentAs(cardItem, cells[4], 'cards-card-body');
-  const linkEl7 = (cells[5]?.querySelector('div') || cells[5])?.querySelector?.('a[href]');
-  appendCardLinkButton(cardItem, linkEl7, getCellValue(cells[5]), true);
+  const linkEl = (cells[5]?.querySelector('div') || cells[5])?.querySelector?.('a[href]');
+  appendCardLinkButton(cardItem, linkEl, getCellValue(cells[5]), true);
   appendCellContentAs(cardItem, cells[6], 'cards-card-body cards-modal-content');
   return cardItem;
 }
 
 /**
- * Builds a single card from one row with 3 cells (legacy: image | decor | content).
- * @param {HTMLElement} row Row element with 3 child cells
- * @returns {HTMLElement} The card element
- */
-function buildCardFromThreeCells(row) {
-  const cells = [...row.children];
-  if (cells.length < 3) return null;
-  const cardItem = document.createElement('div');
-  cardItem.classList.add('cards-card');
-  moveInstrumentation(row, cardItem);
-  cardItem.removeAttribute('data-aue-prop');
-  cardItem.setAttribute('data-aue-type', 'container');
-  cardItem.setAttribute('data-aue-label', 'Card');
-
-  const imageCell = cells[0].querySelector('div') || cells[0];
-  const picture = imageCell.querySelector?.('picture');
-  if (picture) {
-    const imageWrap = document.createElement('div');
-    imageWrap.className = 'cards-card-image';
-    imageWrap.appendChild(picture);
-    cardItem.appendChild(imageWrap);
-  }
-  const decorCell = cells[1].querySelector('div') || cells[1];
-  const pictures = [...decorCell.querySelectorAll?.('picture') || []];
-  if (pictures.length >= 1) {
-    const dividerWrap = document.createElement('div');
-    dividerWrap.className = 'cards-card-divider';
-    dividerWrap.appendChild(pictures[0]);
-    cardItem.appendChild(dividerWrap);
-  }
-  if (pictures.length >= 2) {
-    const textureWrap = document.createElement('div');
-    textureWrap.className = 'cards-card-bg-texture';
-    textureWrap.appendChild(pictures[1]);
-    cardItem.appendChild(textureWrap);
-  }
-  splitCardContentCell(cardItem, cells[2]);
-  return cardItem;
-}
-
-/**
- * Identifies and marks semantic elements within a card:
- * - dividerImage: thin horizontal image (cards-card-divider)
- * - backgroundImageTexture: large texture image (cards-card-bg-texture)
- * - cardTag: simple text tag before main content (cards-card-tag)
+ * Identifies cardTag when two body divs exist: first tag (no headings), second main content.
+ * Divider/texture are set by buildCardFromCells from cell indices; no image heuristics.
  * @param {HTMLElement} cardItem The card element
  */
 function identifySemanticCardElements(cardItem) {
-  const children = [...cardItem.children];
+  const bodyDivs = [...cardItem.children].filter((div) => div.classList.contains('cards-card-body'));
+  if (bodyDivs.length < 2) return;
 
-  // Process all cards-card-image elements to identify dividers and textures
-  children.forEach((div) => {
-    if (!div.classList.contains('cards-card-image')) return;
+  const firstBody = bodyDivs[0];
+  const secondBody = bodyDivs[1];
+  const firstHasHeading = firstBody.querySelector('h1, h2, h3, h4, h5, h6');
+  const secondHasHeading = secondBody.querySelector('h1, h2, h3, h4, h5, h6');
 
-    const img = div.querySelector('img');
-    if (!img) return;
-
-    const width = parseInt(img.getAttribute('width'), 10) || 0;
-    const height = parseInt(img.getAttribute('height'), 10) || 0;
-
-    // Divider: thin horizontal image (height < 50px, width much greater than height)
-    if (height > 0 && height < 50 && width > height * 3) {
-      div.classList.remove('cards-card-image');
-      div.classList.add('cards-card-divider');
-      return;
-    }
-
-    // Texture: large image (both dimensions > 100px)
-    if (width > 100 && height > 100) {
-      div.classList.remove('cards-card-image');
-      div.classList.add('cards-card-bg-texture');
-    }
-  });
-
-  // Identify cardTag: a simple text body that appears before the main content body
-  // The cardTag has just text (p tag) without headings, and the next body has headings
-  const bodyDivs = children.filter((div) => div.classList.contains('cards-card-body'));
-  if (bodyDivs.length >= 2) {
-    const firstBody = bodyDivs[0];
-    const secondBody = bodyDivs[1];
-
-    // Check if first body is a simple tag (no headings, just text)
-    // and second body has headings (the main content)
-    const firstHasHeading = firstBody.querySelector('h1, h2, h3, h4, h5, h6');
-    const secondHasHeading = secondBody.querySelector('h1, h2, h3, h4, h5, h6');
-
-    if (!firstHasHeading && secondHasHeading) {
-      // First body is the cardTag
-      firstBody.classList.remove('cards-card-body');
-      firstBody.classList.add('cards-card-tag');
-    }
+  if (!firstHasHeading && secondHasHeading) {
+    firstBody.classList.remove('cards-card-body');
+    firstBody.classList.add('cards-card-tag');
   }
 }
 
@@ -718,7 +586,6 @@ function globalMayuraScrollbarResizeHandler() {
 
 function getStaticImageDimensionsForBlock(block, img) {
   if (block.classList.contains('all-about-card')) return { width: 280, height: 350 };
-  if (block.classList.contains('important-documents')) return { width: 175, height: 175 };
   if (img.closest('.swiper-slide')) return { width: 232, height: 358 };
   return null;
 }
@@ -778,9 +645,6 @@ function getBlockVariantFlags(block) {
     || isExperienceLife
     || classList.contains('reward-points');
   return {
-    isImportantDocuments: classList.contains('important-documents'),
-    isRelatedSearch: classList.contains('related-search'),
-    isImageAndTitle: classList.contains('image-and-title'),
     isExperienceLife,
     isBlogPosts: classList.contains('blog-posts'),
     isEarnRewards: classList.contains('earn-rewards'),
@@ -824,61 +688,19 @@ function moveInstrumentationToBlock(block, rows, configRowCount) {
   block.setAttribute('data-aue-label', 'Cards');
 }
 
-function appendCardsFromFourCellRows(cardRows, cardsContainer) {
-  for (let i = 0; i < cardRows.length; i += 3) {
-    const group = cardRows.slice(i, i + 3);
-    if (group.length === 3) {
-      const cells = [...group[0].children, ...group[1].children, ...group[2].children];
-      const cardItem = buildCardFromCells(cells, group);
-      if (cardItem) cardsContainer.append(cardItem);
-    } else if (group.length > 0) {
+function buildCardsFromRows(cardRows, numCells, cardsContainer, flags = {}) {
+  if (numCells !== CARD_CELL_COUNT) {
+    if (cardRows.length > 0) {
       // eslint-disable-next-line no-console
-      console.error('Cards block: card rows group has unexpected length (expected 3, got %d). Index: %d.', group.length, i);
+      console.error('Cards block: unexpected card row cell count (%d). Expected %d.', numCells, CARD_CELL_COUNT);
     }
-  }
-}
-
-function buildCardsFromRows(cardRows, numCells, cardsContainer) {
-  if (numCells === CARD_FIELDS.length) {
-    cardRows.forEach((row) => {
-      const cells = [...row.children];
-      const cardItem = buildCardFromCells(cells, row);
-      if (cardItem) cardsContainer.append(cardItem);
-    });
     return;
   }
-  if (numCells === 4) {
-    appendCardsFromFourCellRows(cardRows, cardsContainer);
-    return;
-  }
-  if (numCells === 3) {
-    cardRows.forEach((row) => {
-      const cardItem = buildCardFromThreeCells(row);
-      if (cardItem) cardsContainer.append(cardItem);
-    });
-    return;
-  }
-  if (numCells === 7) {
-    cardRows.forEach((row) => {
-      const cells = [...row.children];
-      const cardItem = buildCardFromSevenCells(cells, row);
-      if (cardItem) cardsContainer.append(cardItem);
-    });
-    return;
-  }
-  if (numCells === 8) {
-    cardRows.forEach((row) => {
-      const cells = [...row.children];
-      cells.push(document.createElement('div'));
-      const cardItem = buildCardFromCells(cells, row);
-      if (cardItem) cardsContainer.append(cardItem);
-    });
-    return;
-  }
-  if (cardRows.length > 0) {
-    // eslint-disable-next-line no-console
-    console.error('Cards block: unexpected card row cell count (%d). Expected 3, 4, 7, 8, or 9.', numCells);
-  }
+  cardRows.forEach((row) => {
+    const cells = [...row.children];
+    const cardItem = buildCardFromCells(cells, row, flags);
+    if (cardItem) cardsContainer.append(cardItem);
+  });
 }
 
 function optimizeCardPicturesInContainer(cardsContainer, block) {
@@ -903,10 +725,8 @@ function optimizeCardPicturesInContainer(cardsContainer, block) {
 }
 
 function getCardVariantClass(flags) {
-  if (flags.isImportantDocuments) return 'important-documents-card';
   if (flags.isBlogPosts) return 'blog-post-card';
-  const isBenefit = !flags.isEarnRewards && !flags.isJoiningPerks
-    && !flags.isImageAndTitle && !flags.isAllAboutCard;
+  const isBenefit = !flags.isEarnRewards && !flags.isJoiningPerks && !flags.isAllAboutCard;
   if (!isBenefit) return null;
   return flags.isExploreOtherCards ? 'explore-other-cards' : 'benefit-cards';
 }
@@ -1227,7 +1047,7 @@ export default async function decorate(block) {
 
   const cardsContainer = document.createElement('div');
   cardsContainer.classList.add('grid-cards');
-  buildCardsFromRows(cardRows, numCells, cardsContainer);
+  buildCardsFromRows(cardRows, numCells, cardsContainer, flags);
 
   if (flags.supportsSemanticElements) {
     cardsContainer.querySelectorAll('.cards-card').forEach((cardItem) => {
@@ -1244,9 +1064,7 @@ export default async function decorate(block) {
   if (isSwipable) {
     await initSwiper(block, cardsContainer, flags, layout);
   } else {
-    const showViewAllToggle = !flags.isImportantDocuments && !flags.isRelatedSearch
-      && !flags.isImageAndTitle && !flags.isEarnRewards && !flags.isJoiningPerks
-      && !flags.isInCsCards;
+    const showViewAllToggle = !flags.isEarnRewards && !flags.isJoiningPerks && !flags.isInCsCards;
     if (showViewAllToggle) {
       setupViewAllViewLess(block, allCards);
     }

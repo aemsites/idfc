@@ -1356,10 +1356,6 @@
             "value": "all-about-card"
           },
           {
-            "name": "Important Documents",
-            "value": "important-documents"
-          },
-          {
             "name": "Key Benefits",
             "value": "key-benefits"
           },
@@ -1380,20 +1376,12 @@
             "value": "earn-rewards"
           },
           {
-            "name": "Related Search",
-            "value": "related-search"
-          },
-          {
             "name": "Joining Perks",
             "value": "joining-perks"
           },
           {
             "name": "Explore Other Cards",
             "value": "explore-other-cards"
-          },
-          {
-            "name": "Image and Title",
-            "value": "image-and-title"
           }
         ]
       },
@@ -1463,6 +1451,12 @@
           "numberMin": 0,
           "customErrorMsg": "Starting card index must be 0 or greater"
         }
+      },
+      {
+        "component": "reference",
+        "name": "dividerImage",
+        "label": "Card divider image",
+        "valueType": "string"
       }
     ]
   },
@@ -1514,7 +1508,8 @@
       {
         "component": "text",
         "name": "cardLinkText",
-        "label": "Card Link Text (optional)"
+        "label": "Card Link Text (optional)",
+        "hidden": "true"
       },
       {
         "component": "richtext",
