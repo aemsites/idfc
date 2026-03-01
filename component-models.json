@@ -1451,12 +1451,6 @@
           "numberMin": 0,
           "customErrorMsg": "Starting card index must be 0 or greater"
         }
-      },
-      {
-        "component": "reference",
-        "name": "dividerImage",
-        "label": "Card divider image",
-        "valueType": "string"
       }
     ]
   },
