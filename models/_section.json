@@ -82,32 +82,7 @@
           "valueType": "string",
           "options": [
             {
-              "name": "Default",
-              "value": ""
-            },
-            {
-              "name": "XXL",
-              "value": "size-xxl"
-            },
-            {
-              "name": "XL",
-              "value": "size-xl"
-            },
-            {
-              "name": "L",
-              "value": "size-l"
-            },
-            {
-              "name": "M",
-              "value": "size-m"
-            },
-            {
-              "name": "S",
-              "value": "size-s"
-            },
-            {
-              "name": "XS",
-              "value": "size-xs"
+              "...": "./partials/_sizes.json#/options"
             }
           ]
         },
@@ -170,10 +145,16 @@
           "collapsible": true,
           "fields": [
             {
-              "component": "text",
+              "component": "select",
               "name": "grid",
-              "label": "Grid layout (enter # of columns, 2-6)",
-              "valueType": "string"
+              "label": "Grid layout - # of columns (for device widths > 600px)",
+              "valueType": "string",
+              "description": "hint: 3 = 3 blocks, each 33% wide side-by-side",
+              "options": [
+                {
+                  "...": "./partials/_widths.json#/options"
+                }
+              ]
             },
             {
               "component": "select",
@@ -182,53 +163,19 @@
               "valueType": "string",
               "options": [
                 {
-                  "name": "Default",
-                  "value": ""
-                },
-                {
-                  "name": "XXL",
-                  "value": "size-xxl"
-                },
-                {
-                  "name": "XL",
-                  "value": "size-xl"
-                },
-                {
-                  "name": "L",
-                  "value": "size-l"
-                },
-                {
-                  "name": "M",
-                  "value": "size-m"
-                },
-                {
-                  "name": "S",
-                  "value": "size-s"
-                },
-                {
-                  "name": "XS",
-                  "value": "size-xs"
+                  "...": "./partials/_sizes.json#/options"
                 }
               ]
             },
             {
               "component": "select",
               "name": "containerwidth",
-              "label": "Inner div width",
+              "label": "Inner section container max-width (unrelated to grid layout)",
               "valueType": "string",
-              "description": "unrelated to grid layout",
+              "description": "hint: 6 = default (full content width), 3 = half of that, etc.",
               "options": [
                 {
-                  "name": "33%",
-                  "value": "2"
-                },
-                {
-                  "name": "66%",
-                  "value": "4"
-                },
-                {
-                  "name": "100%",
-                  "value": "6"
+                  "...": "./partials/_widths.json#/options"
                 }
               ]
             }
@@ -271,16 +218,7 @@
           "value": "cover",
           "options": [
             {
-              "name": "cover",
-              "value": "cover"
-            },
-            {
-              "name": "contain",
-              "value": "contain"
-            },
-            {
-              "name": "none",
-              "value": "none"
+              "...": "./partials/_bg-fit.json#/options"
             }
           ]
         },
@@ -292,24 +230,7 @@
           "value": "center",
           "options": [
             {
-              "name": "center",
-              "value": "center"
-            },
-            {
-              "name": "top left",
-              "value": "top left"
-            },
-            {
-              "name": "top right",
-              "value": "top right"
-            },
-            {
-              "name": "bottom left",
-              "value": "bottom left"
-            },
-            {
-              "name": "bottom right",
-              "value": "bottom right"
+              "...": "./partials/_bg-position.json#/options"
             }
           ]
         },
@@ -391,16 +312,7 @@
               "value": "cover",
               "options": [
                 {
-                  "name": "cover",
-                  "value": "cover"
-                },
-                {
-                  "name": "contain",
-                  "value": "contain"
-                },
-                {
-                  "name": "none",
-                  "value": "none"
+                  "...": "./partials/_bg-fit.json#/options"
                 }
               ]
             },
@@ -412,24 +324,7 @@
               "value": "center",
               "options": [
                 {
-                  "name": "center",
-                  "value": "center"
-                },
-                {
-                  "name": "top left",
-                  "value": "top left"
-                },
-                {
-                  "name": "top right",
-                  "value": "top right"
-                },
-                {
-                  "name": "bottom left",
-                  "value": "bottom left"
-                },
-                {
-                  "name": "bottom right",
-                  "value": "bottom right"
+                  "...": "./partials/_bg-position.json#/options"
                 }
               ]
             }

@@ -8,8 +8,7 @@
    ================================================================= */
 
 .cards-icon .cards-icon-grid {
-  margin: 0;
-  padding: 0;
+  padding: var(--spacing-xs) 0;
 }
 
 .cards-icon .cards-icon-card-link {
@@ -19,13 +18,11 @@
 
 .cards-icon .cards-icon-image {
   line-height: 0;
-  flex-shrink: 0;
-  height: 70px;
 }
 
 .cards-icon .cards-icon-image img {
   object-fit: contain;
-  border-radius: 0;
+  aspect-ratio: 1/1;
 }
 
 .cards-icon .cards-icon-body h3 {
@@ -86,12 +83,13 @@
   min-width: 0;
 }
 
-.cards-icon.image-left a h3 {
+.cards-icon.image-left .cards-icon-card-link {
   color: var(--color-purple-800);
   text-decoration: none;
 }
 
-.dark-scheme .cards-icon.image-left a.cards-icon-link {
+.dark-scheme .cards-icon.image-left .cards-icon-card-link,
+.dark-scheme .cards-icon.image-top .cards-icon-card-link {
   color: var(--color-white);
 }
 
@@ -101,16 +99,13 @@
    ================================================================= */
 
 .cards-icon.image-top {
-  margin: var(--spacing-s) 0;
   min-height: 175px;
 }
 
 .cards-icon.image-top .cards-icon-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  padding: 0;
-  margin-bottom: var(--spacing-m);
+  gap: var(--spacing-xxs) 16px;
 }
 
 .cards-icon.image-top .cards-icon-card {
@@ -123,8 +118,7 @@
   border: 1px var(--text-color) solid;
   border-radius: 12px;
   width: 100%;
-  gap: 10px;
-  min-height: 140px;
+  min-height: 146px;
   justify-content: flex-start;
   position: relative;
   box-sizing: border-box;
@@ -135,13 +129,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 4px;
-}
-
-.cards-icon.image-top .cards-icon-image img {
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
 }
 
 .cards-icon.image-top .cards-icon-body {
@@ -182,7 +169,7 @@
   flex-direction: row;
   align-items: center;
   height: 90px;
-  padding: 0 16px;
+  padding: 0 20px;
   margin-bottom: var(--spacing-s);
   background: var(--color-white);
   border-radius: 12px;
@@ -196,17 +183,9 @@
 
 .cards-icon.image-left-arrow .cards-icon-image {
   flex-shrink: 0;
-  width: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.cards-icon.image-left-arrow .cards-icon-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  border-radius: 4px;
 }
 
 .cards-icon.image-left-arrow .cards-icon-body {
@@ -258,10 +237,6 @@
   transform: translateY(-2px);
 }
 
-/* =================================================================
-   TABLET (600px+)
-   ================================================================= */
-
 @media (width >= 600px) {
   .cards-icon.image-left .cards-icon-card {
     flex-direction: row;
@@ -270,26 +245,15 @@
   }
 
   /* Important Documents: tighter grid, constrained width */
-  .cards-icon.image-top .cards-icon-grid {
-    gap: var(--spacing-xs) var(--spacing-s);
-    max-width: 80%;
-    margin-left: auto;
-    margin-right: auto;
-  }
 
   .cards-icon.image-top .cards-icon-card {
     padding: 20px var(--spacing-xs);
     gap: 6px;
   }
 
-  .cards-icon.image-top .cards-icon-image {
-    margin-bottom: 3px;
-  }
-
-  .cards-icon.image-top .cards-icon-image img {
-    width: 56px;
-    height: 56px;
-  }
+  .cards-icon.image-top .cards-icon-grid {
+    gap: var(--spacing-xxs) var(--spacing-s);
+}
 
   /* Related Search: 2-column grid */
   .cards-icon.image-left-arrow .cards-icon-grid {
@@ -299,11 +263,6 @@
 
   .cards-icon.image-left-arrow .cards-icon-card {
     margin-bottom: 0;
-  }
-
-  .cards-icon.image-left-arrow .cards-icon-image {
-    width: 80px;
-    height: 70px;
   }
 }
 
@@ -321,21 +280,13 @@
   .cards-icon.image-top .cards-icon-grid {
     grid-template-columns: repeat(4, 175px);
     grid-auto-rows: 175px;
-    max-width: 900px;
-    justify-content: space-between;
-    margin-left: auto;
-    margin-right: auto;
+    justify-content: space-evenly;
   }
 
   .cards-icon.image-top .cards-icon-card {
     width: 175px;
     height: 175px;
-    padding: var(--spacing-s) 26px;
-  }
-
-  .cards-icon.image-top .cards-icon-image img {
-    width: 64px;
-    height: 64px;
+    padding: var(--spacing-s);
   }
 
   .cards-icon.image-top .cards-icon-body {
@@ -356,6 +307,5 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     max-width: 1120px;
-    margin: 0 auto;
   }
 }

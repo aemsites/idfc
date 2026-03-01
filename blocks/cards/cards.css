@@ -2008,4 +2008,8 @@
     justify-content: center;
   }
 
+  .explore-other-cards .swiper-slide .cards-card-body h3 {
+    font-size: var(--heading-font-size-xs);
+    color: var(--color-gray-200);
+  }
 }

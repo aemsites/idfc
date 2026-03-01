@@ -27,6 +27,10 @@
         {
           "name": "XS",
           "value": "xs"
+        },
+        {
+          "name": "XXS",
+          "value": "xxs"
         }
       ]
 }

@@ -30,7 +30,7 @@
   --color-blue-800: #2d3679;
   --color-blue-900: #182659;
   --color-purple-400: #563b80;
-  --color-purple-800: #293871;
+  --color-purple-800: #293871; /* mayura */
   --color-white: #fff;
   --color-white-100: #f5f5f5;
   --color-white-200: #eee; /* #e9e9e9 */
@@ -59,6 +59,7 @@
   --gradient-black: linear-gradient(to bottom, transparent 0%, black 100%);
   --gradient-pewter: linear-gradient(270deg, #332B28 0%, #514A44 21.11%, #8B837D 50.14%, #625A50 71.74%, var(--color-pewter) 90.18%, #433C32 100%);
   --gradient-silver: linear-gradient(208deg, #C8C6C6 0%, #F1F0F0 53.5%, #C8C6C6 100%);
+  --gradient-conic-silver: conic-gradient(from 0deg at 50% 50%, rgb(194 194 194 / 100%) 0%, rgb(181 181 181 / 100%) 7%, rgb(238 238 238 / 100%) 14%, rgb(157 157 157 / 100%) 35%, rgb(255 255 255 / 100%) 58%, rgb(206 206 206 / 100%) 63%, rgb(235 234 234 / 100%) 80%, rgb(194 194 194 / 100%) 99%);
   --gradient-metal-blue: linear-gradient(308deg, #110140 4.16%, #1E2A8E 44.91%, #010740 88.8%);
   --gradient-metal-silver: linear-gradient(138deg, #999 -15.44%, #EFEFEF 0.15%, #CACACA 18.04%, #EFEFEF 37.09%, #CACACA 58.44%, #999 76.91%, #EFEFEF 87.3%);
   --modal-backdrop-gradient: linear-gradient(to bottom, rgb(200 198 198 / 70%) 0, rgb(200 198 198 / 95%) 1px, #C8C6C6 250px, #F1F0F0 50%, #C8C6C6 100%);
@@ -210,7 +211,7 @@ h3 {
 }
 
 h4 {
-  font-size: var(--heading-font-size-m);
+  font-size: var(--heading-font-size-s);
 }
 
 h5 {
@@ -498,7 +499,6 @@ main>.section:first-of-type {
   margin-top: 0;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .section {
   --top-bottom-spacing: 0;
   --section-container-width: var(--grid-container-width);
@@ -600,12 +600,24 @@ main>.section:first-of-type {
       margin: 0 auto;
     }
 
+    &.container-1 {
+      --section-container-width: calc(var(--grid-column-width) * 2);
+    }
+
     &.container-2 {
       --section-container-width: calc(var(--grid-column-width) * 4);
     }
 
+    &.container-3 {
+      --section-container-width: calc(var(--grid-column-width) * 6);
+    }
+
     &.container-4 {
       --section-container-width: calc(var(--grid-column-width) * 8);
+    }
+
+    &.container-5 {
+      --section-container-width: calc(var(--grid-column-width) * 10);
     }
 
     &.container-6 {
@@ -681,7 +693,6 @@ header:has(nav[aria-expanded="true"]) #grnt-app-mob {
 .has-bg-images {
   position: relative;
 
-  /* stylelint-disable-next-line no-descending-specificity */
   > div {
     position: relative;
   }
@@ -831,7 +842,7 @@ The height and width are set to 200 assuming the decorations won't be larger. */
 .section.has-decorations::after {
   content: '';
   position: absolute;
-  bottom: -80px;
+  bottom: -30px;
   right: 0;
   width: 200px;
   height: 200px;
@@ -839,7 +850,6 @@ The height and width are set to 200 assuming the decorations won't be larger. */
   background-size: contain;
   background-repeat: no-repeat;
   background-position: bottom right;
-  z-index: 1;
   pointer-events: none;
 }
 
@@ -932,7 +942,7 @@ The height and width are set to 200 assuming the decorations won't be larger. */
   }
 
   main>.section>div {
-    padding: 0 32px;
+    padding: 0 var(--spacing-m);
   }
   
   main .breadcrumbs {
