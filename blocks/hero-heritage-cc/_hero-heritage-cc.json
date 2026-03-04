@@ -37,6 +37,20 @@
         {
           "component": "richtext",
           "valueType": "string",
+          "name": "headerCta_text2",
+          "label": "Header CTA Text 2",
+          "value": ""
+        },
+        {
+          "component": "aem-content",
+          "valueType": "string",
+          "name": "headerCta_link2",
+          "label": "Header CTA Link 2",
+          "multi": false
+        },
+        {
+          "component": "richtext",
+          "valueType": "string",
           "name": "intro_textTop",
           "label": "Intro Text Top",
           "value": ""

@@ -1,5 +1,25 @@
-import { decorateButtons } from '../../scripts/aem.js';
+import { decorateButtons, readBlockConfig } from '../../scripts/aem.js';
 import { loadFragment } from '../../scripts/scripts.js';
+
+/** Get plain text from optional richtext/html string (strips tags, no script execution). */
+function textFromRichtext(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const s = String(value).trim();
+  if (!s) return '';
+  let out = '';
+  let i = 0;
+  while (i < s.length) {
+    const start = s.indexOf('<', i);
+    if (start === -1) {
+      out += s.slice(i);
+      break;
+    }
+    out += s.slice(i, start);
+    const end = s.indexOf('>', start);
+    i = end === -1 ? s.length : end + 1;
+  }
+  return out.trim();
+}
 
 /* eslint-disable secure-coding/no-hardcoded-credentials -- CSS classes/style props only */
 
@@ -119,43 +139,59 @@ function buildHeaderCtaLinks(block, row, ctaContent, ctaLink, linkP, textP, btnT
 
   if (textP) textP.remove();
 
-  const feesLink = document.createElement('a');
-  feesLink.href = '/credit-card/metal-credit-card/mayura/modals/fee-and-charges-modal';
-  feesLink.textContent = 'Fees and charges on Mayura Metal Card ';
-  feesLink.classList.add('hero-heritage-cc-header-cta-fees-link');
-  feesLink.addEventListener('click', async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const { openModal } = await import(`${window.hlx.codeBasePath}/blocks/modal/modal.js`);
-    await openModal(feesLink.href, {
-      modalTheme: block.dataset.modalTheme,
-      textureImage: block.dataset.modalDialogBackgroundImageTexture,
-      pageBackgroundImage: block.dataset.modalPageBackgroundImage,
-      decorationImage: block.dataset.modalPageDecorationImage,
+  const config = readBlockConfig(block);
+  const ctaText2 = textFromRichtext(
+    config['header-cta-text-2']
+    ?? block.getAttribute('data-headercta-text2')
+    ?? block.getAttribute('data-header-cta-text2'),
+  );
+  const ctaLink2Raw = config['header-cta-link-2']
+    ?? block.getAttribute('data-headercta-link2')
+    ?? block.getAttribute('data-header-cta-link2');
+  const ctaLink2 = (typeof ctaLink2Raw === 'string' && ctaLink2Raw.trim()) || (Array.isArray(ctaLink2Raw) && ctaLink2Raw[0]) || '';
+
+  if (ctaText2 && ctaLink2) {
+    const secondLink = document.createElement('a');
+    secondLink.href = ctaLink2.trim();
+    secondLink.textContent = ctaText2;
+    secondLink.title = ctaText2;
+    secondLink.classList.add('hero-heritage-cc-header-cta-fees-link');
+    secondLink.addEventListener('click', async (e) => {
+      if (!secondLink.href.includes('/modals/')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const { openModal } = await import(`${window.hlx.codeBasePath}/blocks/modal/modal.js`);
+      await openModal(secondLink.href, {
+        modalTheme: block.dataset.modalTheme,
+        textureImage: block.dataset.modalDialogBackgroundImageTexture,
+        pageBackgroundImage: block.dataset.modalPageBackgroundImage,
+        decorationImage: block.dataset.modalPageDecorationImage,
+      });
+      setTimeout(() => {
+        const modalDialog = document.querySelector('dialog.modal-mayura-blue[open]');
+        if (modalDialog) {
+          modalDialog.querySelectorAll('.section.table-container').forEach((section) => {
+            section.style.removeProperty('background');
+          });
+        }
+      }, 50);
     });
-    setTimeout(() => {
-      const modalDialog = document.querySelector('dialog.modal-mayura-blue[open]');
-      if (modalDialog) {
-        modalDialog.querySelectorAll('.section.table-container').forEach((section) => {
-          section.style.removeProperty('background');
-        });
-      }
-    }, 50);
-  });
 
-  const arrowSpan = document.createElement('span');
-  arrowSpan.className = 'icon icon-arrow-right-white';
-  const arrowImg = document.createElement('img');
-  arrowImg.setAttribute('data-icon-name', 'arrow-right-white');
-  arrowImg.src = '/icons/arrow-right-white.svg';
-  arrowImg.alt = '';
-  arrowImg.loading = 'lazy';
-  arrowSpan.appendChild(arrowImg);
-  feesLink.appendChild(arrowSpan);
+    const arrowSpan = document.createElement('span');
+    arrowSpan.className = 'icon icon-arrow-right-white';
+    const arrowImg = document.createElement('img');
+    arrowImg.setAttribute('data-icon-name', 'arrow-right-white');
+    arrowImg.src = '/icons/arrow-right-white.svg';
+    arrowImg.alt = '';
+    arrowImg.loading = 'lazy';
+    arrowSpan.appendChild(arrowImg);
+    secondLink.appendChild(arrowSpan);
 
-  const feesP = document.createElement('p');
-  feesP.appendChild(feesLink);
-  linkP.parentNode.appendChild(feesP);
+    const secondP = document.createElement('p');
+    secondP.appendChild(secondLink);
+    linkP.parentNode.appendChild(secondP);
+  }
+
   decorateButtons(row);
 }
 
