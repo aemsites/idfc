@@ -53,15 +53,14 @@
   min-height: 100dvh;
 }
 
-/* Position breadcrumbs to overlay on top of header-cta bar (left-aligned, 70px height) */
+/* Position breadcrumbs to overlay on top of header-cta bar (centered in 70px height) */
 .hero-heritage-cc-container .hero-heritage-cc-wrapper .breadcrumbs {
   position: absolute;
   top: 35px;
-  left: 16px;
   z-index: 20;
   transform: translateY(-50%);
   margin: 0;
-  right: auto;
+  right: calc(50% + 6%);
 }
 
 .hero-heritage-cc {
