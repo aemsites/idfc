@@ -139,6 +139,11 @@ function buildHeaderCtaLinks(block, row, ctaContent, ctaLink, linkP, textP, btnT
 
   if (textP) textP.remove();
 
+  // Remove any author-rendered second CTA paragraphs (button or raw URL) to avoid duplicates
+  ctaContent.querySelectorAll('p:has(a)').forEach((p) => {
+    if (p !== linkP) p.remove();
+  });
+
   const config = readBlockConfig(block);
   const ctaText2 = textFromRichtext(
     config['header-cta-text-2']
