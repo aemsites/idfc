@@ -168,13 +168,28 @@ function attachModalClickHandler(block, link) {
 
 /** Build header CTA (arrow + second CTA from DOM or config), then decorateButtons. */
 function buildHeaderCtaLinks(block, row, ctaContent, ctaLink, linkP, textP, btnTxt) {
+  const config = readBlockConfig(block);
+  const firstCtaLink = config['header-cta-link']
+    ?? block.getAttribute('data-headercta-link')
+    ?? block.getAttribute('data-header-cta-link');
+  const firstCtaLinkHref = (typeof firstCtaLink === 'string' && firstCtaLink.trim())
+    || (Array.isArray(firstCtaLink) && firstCtaLink[0])
+    || '';
+
   const linkParagraphs = [...ctaContent.querySelectorAll('p:has(a)')];
-  linkParagraphs.forEach((p) => {
+  linkParagraphs.forEach((p, index) => {
+    if (index === 0) return;
     const a = p.querySelector('a');
     if (a && isLinkTextUrl(a)) p.remove();
   });
 
-  ctaLink.textContent = btnTxt;
+  const firstLinkWasUrlOnly = isLinkTextUrl(ctaLink);
+  ctaLink.textContent = (firstCtaLinkHref && firstLinkWasUrlOnly)
+    ? (textFromRichtext(config['header-cta-text']
+        ?? block.getAttribute('data-headercta-text')
+        ?? block.getAttribute('data-header-cta-text')) || btnTxt)
+    : btnTxt;
+  if (firstCtaLinkHref && firstLinkWasUrlOnly) ctaLink.href = firstCtaLinkHref.trim();
   ctaLink.classList.add('hero-heritage-cc-header-cta-link', 'button', 'primary');
   linkP.classList.add('button-container');
   appendArrowIcon(ctaLink);
