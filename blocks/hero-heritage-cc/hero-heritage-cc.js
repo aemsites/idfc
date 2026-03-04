@@ -166,54 +166,123 @@ function attachModalClickHandler(block, link) {
   });
 }
 
-/** Build header CTA (arrow + second CTA from DOM or config), then decorateButtons. */
-function buildHeaderCtaLinks(block, row, ctaContent, ctaLink, linkP, textP, btnTxt) {
-  const config = readBlockConfig(block);
-  const firstCtaLink = config['header-cta-link']
-    ?? block.getAttribute('data-headercta-link')
-    ?? block.getAttribute('data-header-cta-link');
-  const firstCtaLinkHref = (typeof firstCtaLink === 'string' && firstCtaLink.trim())
-    || (Array.isArray(firstCtaLink) && firstCtaLink[0])
-    || '';
+/** True if href is the apply CTA (mayura upgrade). */
+function isApplyCtaHref(href) {
+  return typeof href === 'string' && href.includes('mayura-upgrade');
+}
 
-  const linkParagraphs = [...ctaContent.querySelectorAll('p:has(a)')];
-  linkParagraphs.forEach((p, index) => {
-    if (index === 0) return;
+/** True if href is the fees/modal CTA. */
+function isFeesCtaHref(href) {
+  return typeof href === 'string' && (href.includes('fee-and-charges') || href.includes('/modals/'));
+}
+
+/** Find apply and fees link elements in row. */
+function findHeaderCtaLinks(row) {
+  const allLinkPs = [...row.querySelectorAll('p:has(a)')];
+  let applyLink = null;
+  let applyLinkP = null;
+  let feesLink = null;
+  let feesLinkP = null;
+  const toRemove = [];
+  allLinkPs.forEach((p) => {
     const a = p.querySelector('a');
-    if (a && isLinkTextUrl(a)) p.remove();
+    if (!a) return;
+    const href = a.href || '';
+    const isUrlOnly = isLinkTextUrl(a);
+    if (isApplyCtaHref(href)) {
+      if (!applyLink) {
+        applyLink = a;
+        applyLinkP = p;
+      } else if (isUrlOnly) toRemove.push(p);
+    } else if (isFeesCtaHref(href)) {
+      if (!feesLink) {
+        feesLink = a;
+        feesLinkP = p;
+      } else if (isUrlOnly) toRemove.push(p);
+    } else if (isUrlOnly) {
+      toRemove.push(p);
+    }
   });
+  return {
+    applyLink,
+    applyLinkP,
+    feesLink,
+    feesLinkP,
+    toRemove,
+  };
+}
 
-  const firstLinkWasUrlOnly = isLinkTextUrl(ctaLink);
-  ctaLink.textContent = (firstCtaLinkHref && firstLinkWasUrlOnly)
-    ? (textFromRichtext(config['header-cta-text']
-        ?? block.getAttribute('data-headercta-text')
-        ?? block.getAttribute('data-header-cta-text')) || btnTxt)
-    : btnTxt;
-  if (firstCtaLinkHref && firstLinkWasUrlOnly) ctaLink.href = firstCtaLinkHref.trim();
-  ctaLink.classList.add('hero-heritage-cc-header-cta-link', 'button', 'primary');
-  linkP.classList.add('button-container');
-  appendArrowIcon(ctaLink);
+/** Ensure row has a single inner div and return it. */
+function ensureHeaderCtaContainer(row) {
+  let inner = row.querySelector(':scope > div');
+  if (!inner) {
+    inner = document.createElement('div');
+    row.appendChild(inner);
+  }
+  return inner;
+}
 
-  if (textP) textP.remove();
-
-  decorateButtons(row);
-
-  const allLinkPs = ctaContent.querySelectorAll('p:has(a)');
-  const secondLinkP = allLinkPs[1];
-  const secondLink = secondLinkP?.querySelector('a');
-  const hasSecondInDom = secondLink && !isLinkTextUrl(secondLink);
-
-  if (hasSecondInDom) {
-    secondLink.classList.remove('button', 'primary');
-    secondLink.classList.add('hero-heritage-cc-header-cta-fees-link');
-    secondLink.title = secondLink.textContent?.trim() ?? secondLink.title ?? '';
-    secondLinkP.classList.remove('button-container');
-    if (!secondLink.querySelector('.icon')) appendArrowIcon(secondLink);
-    attachModalClickHandler(block, secondLink);
+function applyFirstCtaToContainer(container, applyLink, applyLinkP, firstCtaText, firstCtaHref) {
+  if (applyLink && applyLinkP) {
+    applyLink.textContent = firstCtaText;
+    applyLink.classList.add('hero-heritage-cc-header-cta-link', 'button', 'primary');
+    if (firstCtaHref) applyLink.href = firstCtaHref.trim();
+    applyLinkP.classList.add('button-container');
+    if (!applyLink.querySelector('.icon')) appendArrowIcon(applyLink);
+    if (applyLinkP.parentNode !== container) container.appendChild(applyLinkP);
     return;
   }
+  if (!firstCtaHref) return;
+  const firstP = document.createElement('p');
+  firstP.classList.add('button-container');
+  const firstA = document.createElement('a');
+  firstA.href = firstCtaHref.trim();
+  firstA.textContent = firstCtaText;
+  firstA.classList.add('hero-heritage-cc-header-cta-link', 'button', 'primary');
+  appendArrowIcon(firstA);
+  firstP.appendChild(firstA);
+  container.appendChild(firstP);
+}
 
+function applySecondCtaToContainer(block, container, feesLink, feesLinkP, ctaText2, secondCtaHref) {
+  if (feesLink && feesLinkP) {
+    feesLink.classList.remove('button', 'primary');
+    feesLink.classList.add('hero-heritage-cc-header-cta-fees-link');
+    feesLink.textContent = feesLink.textContent?.trim() || ctaText2 || 'Fees and charges';
+    feesLink.title = feesLink.textContent?.trim() || feesLink.title || '';
+    feesLinkP.classList.remove('button-container');
+    if (!feesLink.querySelector('.icon')) appendArrowIcon(feesLink);
+    attachModalClickHandler(block, feesLink);
+    if (feesLinkP.parentNode !== container) container.appendChild(feesLinkP);
+    return;
+  }
+  if (!ctaText2 || !secondCtaHref) return;
+  const secondP = document.createElement('p');
+  const secondA = document.createElement('a');
+  secondA.href = secondCtaHref.trim();
+  secondA.textContent = ctaText2;
+  secondA.title = ctaText2;
+  secondA.classList.add('hero-heritage-cc-header-cta-fees-link');
+  appendArrowIcon(secondA);
+  attachModalClickHandler(block, secondA);
+  secondP.appendChild(secondA);
+  container.appendChild(secondP);
+}
+
+/** Build header CTA (arrow + second CTA from DOM or config), then decorateButtons. */
+function buildHeaderCtaLinks(block, row, ctaContent, btnTxt) {
   const config = readBlockConfig(block);
+  const firstCtaText = textFromRichtext(
+    config['header-cta-text']
+    ?? block.getAttribute('data-headercta-text')
+    ?? block.getAttribute('data-header-cta-text'),
+  ) || btnTxt;
+  const firstCtaLinkRaw = config['header-cta-link']
+    ?? block.getAttribute('data-headercta-link')
+    ?? block.getAttribute('data-header-cta-link');
+  const firstCtaHref = (typeof firstCtaLinkRaw === 'string' && firstCtaLinkRaw.trim())
+    || (Array.isArray(firstCtaLinkRaw) && firstCtaLinkRaw[0])
+    || '';
   const ctaText2 = textFromRichtext(
     config['header-cta-text-2']
     ?? block.getAttribute('data-headercta-text2')
@@ -222,20 +291,29 @@ function buildHeaderCtaLinks(block, row, ctaContent, ctaLink, linkP, textP, btnT
   const ctaLink2Raw = config['header-cta-link-2']
     ?? block.getAttribute('data-headercta-link2')
     ?? block.getAttribute('data-header-cta-link2');
-  const ctaLink2 = (typeof ctaLink2Raw === 'string' && ctaLink2Raw.trim()) || (Array.isArray(ctaLink2Raw) && ctaLink2Raw[0]) || '';
+  const secondCtaHref = (typeof ctaLink2Raw === 'string' && ctaLink2Raw.trim())
+    || (Array.isArray(ctaLink2Raw) && ctaLink2Raw[0])
+    || '';
 
-  if (ctaText2 && ctaLink2) {
-    const secondLinkEl = document.createElement('a');
-    secondLinkEl.href = ctaLink2.trim();
-    secondLinkEl.textContent = ctaText2;
-    secondLinkEl.title = ctaText2;
-    secondLinkEl.classList.add('hero-heritage-cc-header-cta-fees-link');
-    appendArrowIcon(secondLinkEl);
-    attachModalClickHandler(block, secondLinkEl);
-    const secondP = document.createElement('p');
-    secondP.appendChild(secondLinkEl);
-    linkP.parentNode.appendChild(secondP);
-  }
+  const {
+    applyLink,
+    applyLinkP,
+    feesLink,
+    feesLinkP,
+    toRemove,
+  } = findHeaderCtaLinks(row);
+  toRemove.forEach((p) => {
+    p.remove();
+  });
+
+  const container = ensureHeaderCtaContainer(row);
+  applyFirstCtaToContainer(container, applyLink, applyLinkP, firstCtaText, firstCtaHref);
+  decorateButtons(row);
+  applySecondCtaToContainer(block, container, feesLink, feesLinkP, ctaText2, secondCtaHref);
+
+  row.querySelectorAll('p:not(:has(a))').forEach((p) => {
+    if (p.textContent?.trim() && !p.querySelector('picture, img')) p.remove();
+  });
 }
 
 /** Decorate Section 1: Header CTA (Apply Now button + fees link). */
@@ -246,11 +324,7 @@ function decorateHeaderCta(block, row) {
 
   const textParagraph = ctaContent.querySelector('p:not(:has(a))');
   const buttonText = textParagraph?.textContent?.trim() || 'Apply Now';
-  const linkParagraph = ctaContent.querySelector('p:has(a)');
-  const ctaLink = linkParagraph?.querySelector('a');
-
-  if (!ctaLink || !linkParagraph) return;
-  buildHeaderCtaLinks(block, row, ctaContent, ctaLink, linkParagraph, textParagraph, buttonText);
+  buildHeaderCtaLinks(block, row, ctaContent, buttonText);
 }
 
 /** Apply background image from first picture to section (or UE preview). */
