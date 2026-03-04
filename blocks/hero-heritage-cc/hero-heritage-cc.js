@@ -121,23 +121,82 @@ function setBlockModalTheme(block) {
   block.dataset.modalPageDecorationImage = '/credit-card/metal-credit-card/media_13f68aa7e19d4532ae6d8a784fb5c4e140fb55d3e.svg';
 }
 
-/** Build header CTA link with arrow and fees link; then run decorateButtons. */
+/** True if the link's text looks like a URL (bare link to remove as duplicate). */
+function isLinkTextUrl(link) {
+  const text = link.textContent?.trim() ?? '';
+  if (!text) return true;
+  const hasProtocol = text.indexOf('://') > 0 && (text.startsWith('https') || text.startsWith('http'));
+  return hasProtocol || link.href === text;
+}
+
+/** Add arrow icon span to an element. */
+function appendArrowIcon(el) {
+  const span = document.createElement('span');
+  span.className = 'icon icon-arrow-right-white';
+  const img = document.createElement('img');
+  img.setAttribute('data-icon-name', 'arrow-right-white');
+  img.src = '/icons/arrow-right-white.svg';
+  img.alt = '';
+  img.loading = 'lazy';
+  span.appendChild(img);
+  el.appendChild(span);
+}
+
+/** Attach modal open handler for /modals/ links. */
+function attachModalClickHandler(block, link) {
+  link.addEventListener('click', async (e) => {
+    if (!link.href.includes('/modals/')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const { openModal } = await import(`${window.hlx.codeBasePath}/blocks/modal/modal.js`);
+    await openModal(link.href, {
+      modalTheme: block.dataset.modalTheme,
+      textureImage: block.dataset.modalDialogBackgroundImageTexture,
+      pageBackgroundImage: block.dataset.modalPageBackgroundImage,
+      decorationImage: block.dataset.modalPageDecorationImage,
+    });
+    setTimeout(() => {
+      const modalDialog = document.querySelector('dialog.modal-mayura-blue[open]');
+      if (modalDialog) {
+        modalDialog.querySelectorAll('.section.table-container').forEach((section) => {
+          section.style.removeProperty('background');
+        });
+      }
+    }, 50);
+  });
+}
+
+/** Build header CTA (arrow + second CTA from DOM or config), then decorateButtons. */
 function buildHeaderCtaLinks(block, row, ctaContent, ctaLink, linkP, textP, btnTxt) {
+  const linkParagraphs = [...ctaContent.querySelectorAll('p:has(a)')];
+  linkParagraphs.forEach((p) => {
+    const a = p.querySelector('a');
+    if (a && isLinkTextUrl(a)) p.remove();
+  });
+
   ctaLink.textContent = btnTxt;
   ctaLink.classList.add('hero-heritage-cc-header-cta-link', 'button', 'primary');
   linkP.classList.add('button-container');
-
-  const ctaArrowSpan = document.createElement('span');
-  ctaArrowSpan.className = 'icon icon-arrow-right-white';
-  const ctaArrowImg = document.createElement('img');
-  ctaArrowImg.setAttribute('data-icon-name', 'arrow-right-white');
-  ctaArrowImg.src = '/icons/arrow-right-white.svg';
-  ctaArrowImg.alt = '';
-  ctaArrowImg.loading = 'lazy';
-  ctaArrowSpan.appendChild(ctaArrowImg);
-  ctaLink.appendChild(ctaArrowSpan);
+  appendArrowIcon(ctaLink);
 
   if (textP) textP.remove();
+
+  decorateButtons(row);
+
+  const allLinkPs = ctaContent.querySelectorAll('p:has(a)');
+  const secondLinkP = allLinkPs[1];
+  const secondLink = secondLinkP?.querySelector('a');
+  const hasSecondInDom = secondLink && !isLinkTextUrl(secondLink);
+
+  if (hasSecondInDom) {
+    secondLink.classList.remove('button', 'primary');
+    secondLink.classList.add('hero-heritage-cc-header-cta-fees-link');
+    secondLink.title = secondLink.textContent?.trim() ?? secondLink.title ?? '';
+    secondLinkP.classList.remove('button-container');
+    if (!secondLink.querySelector('.icon')) appendArrowIcon(secondLink);
+    attachModalClickHandler(block, secondLink);
+    return;
+  }
 
   const config = readBlockConfig(block);
   const ctaText2 = textFromRichtext(
@@ -151,48 +210,17 @@ function buildHeaderCtaLinks(block, row, ctaContent, ctaLink, linkP, textP, btnT
   const ctaLink2 = (typeof ctaLink2Raw === 'string' && ctaLink2Raw.trim()) || (Array.isArray(ctaLink2Raw) && ctaLink2Raw[0]) || '';
 
   if (ctaText2 && ctaLink2) {
-    const secondLink = document.createElement('a');
-    secondLink.href = ctaLink2.trim();
-    secondLink.textContent = ctaText2;
-    secondLink.title = ctaText2;
-    secondLink.classList.add('hero-heritage-cc-header-cta-fees-link');
-    secondLink.addEventListener('click', async (e) => {
-      if (!secondLink.href.includes('/modals/')) return;
-      e.preventDefault();
-      e.stopPropagation();
-      const { openModal } = await import(`${window.hlx.codeBasePath}/blocks/modal/modal.js`);
-      await openModal(secondLink.href, {
-        modalTheme: block.dataset.modalTheme,
-        textureImage: block.dataset.modalDialogBackgroundImageTexture,
-        pageBackgroundImage: block.dataset.modalPageBackgroundImage,
-        decorationImage: block.dataset.modalPageDecorationImage,
-      });
-      setTimeout(() => {
-        const modalDialog = document.querySelector('dialog.modal-mayura-blue[open]');
-        if (modalDialog) {
-          modalDialog.querySelectorAll('.section.table-container').forEach((section) => {
-            section.style.removeProperty('background');
-          });
-        }
-      }, 50);
-    });
-
-    const arrowSpan = document.createElement('span');
-    arrowSpan.className = 'icon icon-arrow-right-white';
-    const arrowImg = document.createElement('img');
-    arrowImg.setAttribute('data-icon-name', 'arrow-right-white');
-    arrowImg.src = '/icons/arrow-right-white.svg';
-    arrowImg.alt = '';
-    arrowImg.loading = 'lazy';
-    arrowSpan.appendChild(arrowImg);
-    secondLink.appendChild(arrowSpan);
-
+    const secondLinkEl = document.createElement('a');
+    secondLinkEl.href = ctaLink2.trim();
+    secondLinkEl.textContent = ctaText2;
+    secondLinkEl.title = ctaText2;
+    secondLinkEl.classList.add('hero-heritage-cc-header-cta-fees-link');
+    appendArrowIcon(secondLinkEl);
+    attachModalClickHandler(block, secondLinkEl);
     const secondP = document.createElement('p');
-    secondP.appendChild(secondLink);
+    secondP.appendChild(secondLinkEl);
     linkP.parentNode.appendChild(secondP);
   }
-
-  decorateButtons(row);
 }
 
 /** Decorate Section 1: Header CTA (Apply Now button + fees link). */
