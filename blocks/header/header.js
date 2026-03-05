@@ -265,7 +265,7 @@ function setupLoginDropdown(navToolsWrapper) {
   const login = createDropdown({
     className: 'login-dropdown',
     overlayClassName: 'login-dropdown-overlay',
-    fragmentPath: '/fragments/login',
+    fragmentPath: '/framework/login',
     closeDelay: 200,
   });
 

@@ -55,7 +55,8 @@
             { "name": "L", "value": "size-l" },
             { "name": "M", "value": "size-m" },
             { "name": "S", "value": "size-s" },
-            { "name": "XS", "value": "size-xs" }
+            { "name": "XS", "value": "size-xs" },
+            { "name": "XXS", "value": "size-xxs" }
           ]
         },
         {

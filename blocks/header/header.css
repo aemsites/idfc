@@ -1511,7 +1511,7 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
   bottom: 0;
   left: 0;
   width: 100vw;
-  background: linear-gradient(180deg, #511211 0%, #6b1a19 50%, #511211 100%);
+  background: var(--gradient-silver-red);
   z-index: 1001;
   visibility: hidden;
   overflow-y: auto;
@@ -1591,6 +1591,13 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
   &.has-bg-images .columns {
     display: none;
   }
+
+  .columns > div:last-child > div:last-child {
+    background: rgb(255 255 255 / 20%);
+    padding: 0 24px 10px;
+    margin-top: 16px;
+    border-radius: 12px;
+  }
 }
 
 .section.has-bg-images {
@@ -1603,14 +1610,14 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
 }
 
 /* Login dropdown cards - compact list layout */
-.cards .grid-cards {
+.cards-icon.image-left-arrow .cards-icon-grid {
   gap: var(--spacing-xs);
   padding-top: var(--spacing-s);
   display: grid;
   grid-template-columns: 1fr;
 }
 
-.cards .grid-cards .benefit-cards {
+.cards-icon.image-left-arrow .cards-icon-grid .cards-icon-card {
     display: grid;
     grid-template-columns: 20px 1fr;
     text-align: left;
@@ -1620,7 +1627,8 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
     padding-bottom: var(--spacing-xs);
     width: 100%; /* Override global 50% width from cards.css */
 
-    /* Remove default benefit-cards styling */
+    /* Remove default styling */
+    height: unset;
     box-shadow: none;
     border-radius: 0;
     background: transparent;
@@ -1630,15 +1638,12 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
       color: var(--color-gray-300);
       margin-top: 0;
     }
-
-    &:last-child {
-      border-bottom: none;
-    }
 }
 
-.cards .grid-cards .benefit-cards .cards-card-image {
+.cards-icon-card .cards-icon-image {
   text-align: center;
   padding-top: 4px;
+  align-self: start;
 
   img {
     width: 20px;
@@ -1646,17 +1651,21 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
   }
 }
 
-.cards .grid-cards .benefit-cards .cards-card-body {
+.cards-icon-card .cards-icon-body {
   margin: 0;
+  align-self: start;
 }
 
-.cards .benefit-cards .cards-card-body p {
-  font-size: var(--body-font-size-xs);
+.cards-icon-card .cards-icon-body p {
+  font-size: var(--body-font-size-xxs);
 }
 
-.cards .card-clickable:hover {
-  box-shadow: none;
-  transform: none;
+.cards-icon.image-left-arrow .cards-icon-card::after {
+  height: 24px;
+  width: 24px;
+  background-size: 18px 18px;
+  top: 12px;
+  right: 0;
 }
 
 .login-dropdown-close-btn {
@@ -2703,14 +2712,14 @@ minmax(auto, calc(1200px - 400px - var(--spacing-s)))   /* Left content area */
 400px                                        /* Right content area */
 1fr;   
 grid-template-rows: auto auto;
-gap: var(--spacing-s);
+gap: 0 var(--spacing-s);
 border-radius: 0;
 
   .section {
     width: unset;
     max-width: 1300px;
 
-    .columns {
+    &.has-bg-images .columns {
       display: unset;
     }
   }
@@ -2723,7 +2732,7 @@ border-radius: 0;
   display: none;
 }
 
-.section.cards-container {
+.section.cards-icon-container {
   grid-column: 3;
   grid-row: 1;
   max-width: 335px;
@@ -2737,7 +2746,7 @@ border-radius: 0;
   flex: 1;
 
   h4 {
-    font-size: var(--heading-font-size-s);
+    font-size: var(--heading-font-size-m);
     line-height: 34px;
     background: linear-gradient(93.81deg, #E9E9E9 0%, #838383 154.51%);
     background-clip: text;
