@@ -223,7 +223,7 @@ function setupCustomerServiceDropdown(navTools) {
   const cs = createDropdown({
     className: 'cs-dropdown',
     overlayClassName: 'cs-dropdown-overlay',
-    fragmentPath: '/fragments/customer-service-dropdown',
+    fragmentPath: '/framework/customer-service-dropdown',
     closeDelay: 100,
   });
 
@@ -449,7 +449,7 @@ function setupSearchDropdown(navToolsWrapper, navTools) {
   const search = createDropdown({
     className: 'search-dropdown',
     overlayClassName: 'search-dropdown-overlay',
-    fragmentPath: '/fragments/search-dropdown',
+    fragmentPath: '/framework/search-dropdown',
     closeDelay: 100,
   });
 
