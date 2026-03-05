@@ -1283,7 +1283,7 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
   display: none;
  }
 
- .section:has(.cards.related-search) .cards-wrapper {
+ .section:has(.cards-icon) .cards-icon-wrapper {
   padding: 0;
  }
 
@@ -1309,23 +1309,25 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
   }
 }
 
-  .cards.related-search .grid-cards {
+.cards-icon.image-left .cards-icon-card-link h3{
+  color: var(--text-color);
+  font-size: var(--body-font-size-xs);
+}
+
+  .cards-icon.image-left .cards-icon-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-xxs);
 
-    .benefit-cards {
+    .cards-icon-card {
      background: var(--color-white-200);
      box-shadow: none;
      transform: none;
      gap: 0;
-     margin-bottom: 0;
+     margin: 0;
      padding: 0 var(--spacing-xs);
      height: unset;
-
-     h6 {
-      font-size: var(--body-font-size-xs);
-      margin: 0;
-     }
+     border-radius: 12px;
+     flex-direction: row;
 
      p u {
       font-size: 11px;
@@ -1333,17 +1335,13 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
      }
     }
 
-    .benefit-cards::after {
-      display: none;
-    }
-
-   .benefit-cards .cards-card-image {
-      height: 40px;
-      width: 40px;
+  .cards-icon-card .cards-icon-body {
+    padding: var(--spacing-xs) 0 var(--spacing-xs) var(--spacing-xxs);
+    text-align: left;
   }
 
-  .benefit-cards .cards-card-body {
-    padding: var(--spacing-xs) 0 var(--spacing-xs) var(--spacing-xxs);
+  .cards-icon-card .cards-icon-image {
+    width: unset;
   }
  }
 } /* end search-dropdown.open */
@@ -1715,7 +1713,7 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
   max-width: 600px;
   margin: 0 auto;
 
-  .cards.related-search .grid-cards {
+  .cards-icon .cards-icon-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
@@ -2826,19 +2824,23 @@ border-radius: 0;
   }
 
   /* All cards-container sections except openaccount - will be overridden below */
-  .section.cards-container:not(#openaccount) {
+  .section.cards-icon-container:not(#openaccount) {
     grid-column: 2;
   }
 
   /* Top Products - first cards-container after columns-container */
-  .section.columns-container + .section.cards-container:not(#openaccount),
-  .section.search-results + .section.columns-container + .section.cards-container:not(#openaccount) {
+  .section.columns-container + .section.cards-icon-container:not(#openaccount),
+  .section.search-results + .section.columns-container + .section.cards-icon-container:not(#openaccount) {
     grid-row: 3 !important;
   }
 
   /* Accounts - second cards-container (comes after Top Products) */
-  .section.cards-container:not(#openaccount) + .section.cards-container:not(#openaccount) {
+  .section.cards-icon-container:not(#openaccount) + .section.cards-icon-container:not(#openaccount) {
     grid-row: 4 !important;
+  }
+  
+  .cards.blog-posts .blog-post-card {
+    min-height: unset;
   }
 
   /* Right sidebar - always in same place */
@@ -2851,10 +2853,6 @@ border-radius: 0;
 
   .columns > div > div {
     flex: unset;
-  }
-
-  .cards.related-search .grid-cards .benefit-cards h6 {
-    font-size: var(--body-font-size-xs);
   }
 }
 }
@@ -2910,6 +2908,7 @@ border-radius: 0;
   header nav .nav-sections .nav-discover-section .cards.blog-posts .blog-post-card .cards-card-image {
     aspect-ratio: 16/9;
     max-height: unset;
+    border-radius: 20px 20px 0 0;
   }
 
   header nav .nav-sections .nav-discover-section .cards.blog-posts .blog-post-card .cards-card-image img {
