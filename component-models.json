@@ -2222,6 +2222,10 @@
           {
             "name": "XS",
             "value": "size-xs"
+          },
+          {
+            "name": "XXS",
+            "value": "size-xxs"
           }
         ]
       },

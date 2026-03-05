@@ -192,7 +192,7 @@ body.modal-open {
   cursor: pointer;
 
   &:focus-visible {
-    outline: rgb(0 0 0 / 50%) auto 1px;
+    outline: rgb(0 0 0 / 50%) 1px;
   }
 }
 

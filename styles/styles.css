@@ -52,6 +52,7 @@
   --gradient-pink-red: linear-gradient(to bottom, #C5767D, #9E1E29);
   --gradient-earn-rewards: radial-gradient(231% 135.8% at 0.9% 2.98%, #FFF6 0%, #FFF0 100%);
   --gradient-red: linear-gradient(92deg, #5D2227 36.27%, #982B35 70.68%, #5D2227 85.89%);
+  --gradient-silver-red: radial-gradient(107.48% 419.43% at -9.67% 117.43%, rgb(0 0 0 / 0%) 46.13%, rgb(0 0 0 / 20%) 94.71%), linear-gradient(0deg, var(--color-red-800), var(--color-red-800)), var(--color-white-100);
   --gradient-light-red: linear-gradient(97.67deg, rgb(55 10 14 / 80%) 6.64%, rgb(157 29 39 / 80%) 90.39%);
   --gradient-blue: linear-gradient(137deg, #08133C 4.07%, #2E3E79 75.46%);
   --gradient-indigo: linear-gradient(308deg, #110140 4.16%, #1E2A8E 44.91%, #010740 88.8%);
@@ -251,6 +252,10 @@ main > h1:first-of-type {
 
 .center {
   text-align: center;
+
+  &.columns > div > div {
+    justify-content: center;
+  }
 }
 
 .hide-mobile {

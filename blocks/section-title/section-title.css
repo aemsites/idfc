@@ -37,6 +37,10 @@
   font-size: var(--heading-font-size-xs);
 }
 
+.section-title.size-xxs .title,
+.section-title.subtitle-size-xxs .subtitle {
+  font-size: var(--body-font-size-l);
+}
 /* Icon vertical alignment: center icons with text at any size */
 .section-title .title:has(.icon),
 .section-title .subtitle:has(.icon) {
