@@ -1003,32 +1003,33 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
 
 .cs-dropdown.open {
   visibility: visible;
-  padding: 40px var(--spacing-s) var(--spacing-s);
+  padding: 40px var(--spacing-xs) var(--spacing-xs);
   transform: translateY(0);
   display: grid;
 
   .section#helpcenter {
     border-top: 1px solid var(--color-gray-200);
     border-bottom: 1px solid var(--color-gray-200);
-    padding: var(--spacing-xs) 0;
+
+    .cards-icon-card {
+      background: none;
+      box-shadow: none;
+      padding: 0;
+    }
   }
 
   .grid-2 {
     display: grid;
     grid-template-columns: repeat(var(--grid-size), 1fr);
   }
-
-  .section#cscards {
-    padding: var(--spacing-xs) 0;
-  }
   
-  .section#cscards .cards .grid-cards {
+  .section#cscards .cards-icon .cards-icon-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-xxs);
   }
 
-  .section#cscards .cards .benefit-cards {
+  .section#cscards .cards-icon .cards-icon-card {
     width: 100%;
     box-shadow: none;
     padding: 12px;
@@ -1040,14 +1041,10 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
     flex-direction: column;
     align-items: center;
     text-align: center;
+    margin-top: 0;
   }
 
-  .section#cscards .cards .benefit-cards:hover {
-    background: #e0e0e0;
-    box-shadow: none;
-  }
-
-  .section#cscards .cards .benefit-cards .cards-card-image {
+  .section#cscards .cards-icon .cards-icon-card .cards-icon-image {
     flex-shrink: 0;
     width: 32px;
     height: 32px;
@@ -1058,7 +1055,7 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
     justify-content: center;
   }
 
-  .section#cscards .cards .benefit-cards .cards-card-image img {
+  .section#cscards .cards-icon .cards-icon-card .cards-icon-image img {
     width: 24px;
     height: 24px;
     max-width: 24px;
@@ -1066,52 +1063,29 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
     object-fit: contain;
   }
 
-  .section#cscards .cards .benefit-cards .cards-card-body {
+  .section#cscards .cards-icon .cards-icon-card .cards-icon-body {
     flex: 1;
     margin: 0;
     padding: 0;
     width: 100%;
   }
 
-  .section#cscards .cards .benefit-cards .cards-card-body h5,
-  .section#cscards .cards .benefit-cards .cards-card-body h6 {
+  .section#cscards .cards-icon .cards-icon-card .cards-icon-body h3 {
     font-size: var(--body-font-size-xs);
-    font-weight: 700;
     line-height: 1.2;
     margin: 0 0 4px;
     color: var(--text-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
   }
 
-  .section#cscards .cards .benefit-cards .cards-card-body h6 .icon {
-    margin-left: 0;
-    flex-shrink: 0;
-  }
-
-  .section#cscards .cards .benefit-cards .cards-card-body h6 .icon img {
-    width: 24px;
-    height: 24px;
-  }
-
-  .section#cscards .cards .benefit-cards .cards-card-body p {
+  .section#cscards .cards-icon .cards-icon-card .cards-icon-body p {
     font-size: var(--body-font-size-xxs);
     line-height: 1.3;
-    color: var(--gray-700);
+    color: var(--color-gray-500);
     margin: 0;
     text-align: center;
-  }
-
-  .section#cscards .cards .card-clickable:hover {
-    box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
-    transform: none;
-  }
-
-  .section#cscards .cards .cards-modal-content,
-  .section#helpcenter .cards .cards-modal-content {
-    display: none;
   }
 
   .section#helpcenter .cards .benefit-cards {
@@ -1139,17 +1113,6 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
     max-width: 58px;
     max-height: 58px;
     object-fit: contain;
-  }
-
-  .section#helpcenter .cards .benefit-cards .cards-card-body h5 {
-    font-size: var(--body-font-size-m);
-    font-weight: 700;
-    margin: 0 0 var(--spacing-xxs);
-  }
-
-  .section#helpcenter .cards .benefit-cards .cards-card-body h5 .icon img {
-    width: 24px;
-    height: 10px;
   }
 
   .section#helpcenter .cards .benefit-cards .cards-card-body p {
@@ -1191,7 +1154,7 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
   align-items: center;
   gap: var(--spacing-xxs);
   padding: var(--spacing-xxs);
-  margin: 0 var(--spacing-xs) var(--spacing-xs);
+  margin: 0 var(--spacing-xs) var(--spacing-s);
   background: white;
   border-radius: 25px;
   border: 1px solid var(--text-color);
@@ -1257,7 +1220,7 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
   border-radius: 25px 25px 0 0;
 
   > .section {
-        margin: var(--spacing-s) var(--spacing-xs);
+        margin: var(--spacing-xs);
   }
 
   .columns > div {
@@ -1575,7 +1538,7 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
 
   .section {
   max-width: 1440px;
-  margin: 50px auto 0;
+  margin: auto;
   width: 90%;
   border-radius: 24px;
   padding: var(--spacing-xs);
@@ -1638,6 +1601,11 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
     }
 }
 
+.cards-icon.image-left-arrow .cards-icon-grid > a:last-child > .cards-icon-card {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
 .cards-icon-card .cards-icon-image {
   text-align: center;
   padding-top: 4px;
@@ -1652,10 +1620,6 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
 .cards-icon-card .cards-icon-body {
   margin: 0;
   align-self: start;
-}
-
-.cards-icon-card .cards-icon-body p {
-  font-size: var(--body-font-size-xxs);
 }
 
 .cards-icon.image-left-arrow .cards-icon-card::after {
@@ -1711,7 +1675,6 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
 @media (width >= 600px) {
 .search-dropdown.open > .section {
   max-width: 600px;
-  margin: 0 auto;
 
   .cards-icon .cards-icon-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -2589,17 +2552,16 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
       align-self: start; /* Aligns to top */
     }
   
-    .section#cscards .cards .grid-cards {
+    .section#cscards .cards-icon.image-left .cards-icon-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: var(--spacing-s);
   }
 
-  .section#cscards .cards .benefit-cards {
+  .section#cscards .cards-icon .cards-icon-card {
     width: 100%;
     box-shadow: none;
-    padding: var(--spacing-xs);
-    background: var(--color-white-200);
+    padding: var(--spacing-s);
     border-radius: 8px;
     border: none;
     gap: 12px;
@@ -2609,12 +2571,7 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     display: flex;
   }
 
-  .section#cscards .cards .benefit-cards:hover {
-    background: #e0e0e0;
-    box-shadow: none;
-  }
-
-  .section#cscards .cards .benefit-cards .cards-card-image {
+  .section#cscards .cards-icon .cards-icon-card .cards-icon-image {
     flex-shrink: 0;
     width: 20px;
     height: 20px;
@@ -2622,7 +2579,7 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     margin: 0;
   }
 
-  .section#cscards .cards .benefit-cards .cards-card-image img {
+  .section#cscards .cards-icon .cards-icon-card .cards-icon-image img {
     width: 20px;
     height: 20px;
     max-width: 20px;
@@ -2630,16 +2587,13 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     object-fit: contain;
   }
 
-  .section#cscards .cards .benefit-cards .cards-card-body {
+  .section#cscards .cards-icon .cards-icon-card .cards-icon-body {
     flex: 1;
     margin: 0;
     padding: 0;
   }
 
-  .section#cscards .cards .benefit-cards .cards-card-body h6 {
-    font-size: var(--body-font-size-xs);
-    font-weight: 700;
-    line-height: 1.3;
+  .section#cscards .cards-icon .cards-icon-card .cards-icon-body h3 {
     margin: 0 0 2px;
     color: var(--text-color);
     display: flex;
@@ -2647,21 +2601,15 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     justify-content: space-between;
   }
 
-  .section#cscards .cards .benefit-cards .cards-card-body h6 .icon img {
-    width: 24px;
-    height: 24px;
-  }
-
-  .section#cscards .cards .benefit-cards .cards-card-body p {
+  .section#cscards .cards-icon .cards-icon-card .cards-icon-body p {
     font-size: var(--body-font-size-xxs);
     line-height: 1.3;
     text-align: left;
-    color: var(--gray-700);
     margin: 0;
     width: 100%;
   }
 
-  .section#helpcenter .cards .benefit-cards {
+  .section#helpcenter .cards-icon .cards-icon-card {
     padding: 16px;
     padding-left: 0;
     background: unset;
@@ -2670,28 +2618,14 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     box-shadow: none;
   }
 
-  .section#helpcenter .cards .benefit-cards:hover {
-    background: #e0e0e0;
-  }
-
-  .section#helpcenter .cards .benefit-cards .cards-card-body h5 {
-    font-size: var(--body-font-size-s);
+  .section#helpcenter .cards-icon .cards-icon-card .cards-icon-body h3 {
+    font-size: var(--body-font-size-xs);
     font-weight: 700;
     margin: 0 0 4px;
   }
 
-  .section#helpcenter .cards .benefit-cards .cards-card-body h5 .icon img {
-    width: 24px;
-    height: 10px;
-  }
-
-  .section#helpcenter .cards .benefit-cards .cards-card-body p {
+  .section#helpcenter .cards-icon .cards-icon-card .cards-icon-body p {
     font-size: var(--body-font-size-xxs);
-  }
-
-  .section#cscards .cards .cards-modal-content,
-  .section#helpcenter .cards .cards-modal-content {
-    display: none;
   }
 }
 
@@ -2820,7 +2754,6 @@ border-radius: 0;
   .section.columns-container {
     grid-column: 2;
     grid-row: 2;
-    width: 598px; /* match sections below for centered grid layout to work correctly */
   }
 
   /* All cards-container sections except openaccount - will be overridden below */
@@ -2937,14 +2870,6 @@ border-radius: 0;
 
   /* Search dropdown adjustments */
   .search-dropdown.open {
-    > .section {
-      max-width: unset;
-    }
-
-    .section#openaccount {
-      max-width: 400px;
-    }
-
     .cards.related-search .grid-cards {
       grid-template-columns: repeat(3, 1fr);
       gap: var(--spacing-xs);

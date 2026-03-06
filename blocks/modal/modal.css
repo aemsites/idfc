@@ -597,7 +597,7 @@ body.modal-open {
   .modal dialog .section.light-scheme,
   .modal dialog .section[class*="grid-"],
   .modal dialog .section[class*="-container"] {
-    padding: var(--spacing-xs);
+    padding: 0;
   }
 	
   .modal .modal-page-background .modal-decoration-top-right {
@@ -620,7 +620,7 @@ body.modal-open {
     border-radius: 25px 25px 0 0;
     overscroll-behavior: none;
     overflow: visible;
-    padding: 38px 26px 30px;
+    padding: 38px 26px 0;
     margin: 0;
     border: none;
     box-shadow: 0 8px 32px rgb(0 0 0 / 25%);
