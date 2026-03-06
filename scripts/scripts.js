@@ -1227,18 +1227,18 @@ async function loadGetAppBannerFragment() {
   }
 
   try {
-    const fragment = await loadFragment('/fragments/getappbanner');
+    const fragment = await loadFragment('/framework/getappbanner');
 
     if (!fragment) {
       // eslint-disable-next-line no-console
-      console.error('[Get App Banner] Failed to load fragment from: /fragments/getappbanner');
+      console.error('[Get App Banner] Failed to load fragment from: /framework/getappbanner');
       return;
     }
     const getAppBanner = fragment.querySelector('#grnt-app-mob');
 
     if (!getAppBanner) {
       // eslint-disable-next-line no-console
-      console.error('[Get App Banner] No #grnt-app-mob found in fragment');
+      console.error('[Get App Banner] No #grnt-app-mob found in framework');
       return;
     }
     header.firstChild.prepend(getAppBanner);
