@@ -114,8 +114,8 @@ body.modal-open {
   place-self: center;
   width: fit-content;
   max-width: 1060px;
-  height: 100%;
-  max-height: max-content;
+  height: max-content;
+  max-height: 80%;
   margin: 0 15px;
   padding: 0;
   border: none;
