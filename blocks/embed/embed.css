@@ -42,7 +42,7 @@
   width: 22px;
   height: 22px;
   border: 2px solid;
-  border-radius: 20px;
+  border-radius: var(--border-radius);
   padding: 0;
 }
 

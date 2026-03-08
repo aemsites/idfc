@@ -31,8 +31,8 @@
 }
 
 .banner-heading {
-  padding: var(--spacing-s) var(--spacing-xxl);
-  margin-top: var(--spacing-xxl);
+  padding: var(--spacing-s) var(--spacing-l);
+  margin-top: var(--spacing-xl);
 }
 
 .banner-heading h2 {

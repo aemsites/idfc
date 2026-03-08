@@ -20,7 +20,7 @@
 .cards-testimonial .grid-cards > .cards-card {
   max-width: 350px;
   background-color: var(--color-gray-300);
-  border-radius: 20px;
+  border-radius: var(--border-radius);
   box-shadow: 0 4px 8px 2px rgb(37 36 59 / 15%);
   padding: 25px 20px;
   box-sizing: border-box;
@@ -179,7 +179,7 @@
   height: auto;
   display: flex;
   background-color: var(--color-gray-300);
-  border-radius: 20px;
+  border-radius: var(--border-radius);
   box-shadow: 0 4px 8px 2px rgb(37 36 59 / 15%);
   padding: 20px;
   flex-direction: column;

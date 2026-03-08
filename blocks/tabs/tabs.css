@@ -3,11 +3,10 @@
   gap: var(--spacing-xs);
   max-width: 100%;
   overflow-x: auto;
-  padding: var(--spacing-xs) 0;
+  padding: var(--spacing-s) 0 var(--spacing-xxs);
 }
 
 .tabs .tabs-tab {
-  border: 1px solid #2E3E79;
   border-radius: 10px;
   padding: var(--spacing-xxs) 16px;
   line-height: 1.4;
@@ -18,8 +17,9 @@
 .tabs .tabs-list .tabs-tab {
   flex: 0 0 max-content;
   margin: 0;
-  background-color: var(--color-white-100);
-  color: #08133C;
+  border: 1px solid var(--tabs-border-color);
+  background: var(--tabs-background-color);
+  color: var(--tabs-text-color);
   font-size: var(--body-font-size-m);
   font-weight: 400;
   text-align: initial;
@@ -37,9 +37,9 @@
 }
 
 .tabs .tabs-list .tabs-tab[aria-selected='true'] {
-  border: 1px solid #2E3E79;
-  border-bottom: 1px solid var(--background-color);
-  background-color: var(--background-color);
+  border-color: var(--tabs-active-border-color);
+  background: var(--tabs-active-background-color);
+  color: var(--tabs-active-text-color);
   font-weight: 600;
   cursor: default;
 }
@@ -53,36 +53,17 @@
   display: none;
 }
 
-.tabs.blue-white-text .tabs-tab,
-.tabs-container.blue-white-text .tabs-tab {
-  background: var(--gradient-silver);
-}
-
+/* silver with dark text */
+.tabs.silver-blue-text .tabs-tab,
 .tabs-container.silver-blue-text .tabs-tab {
-  background: rgb(255 255 255 / 70%);
-}
-
-.tabs.silver-blue-text .tabs-list .tabs-tab p
-.tabs-container.silver-blue-text .tabs-list .tabs-tab p {
-  color: #08133C;
-}
-
-.tabs.blue-white-text .tabs-tab[aria-selected='true'],
-.tabs-container.blue-white-text .tabs-tab[aria-selected='true'] {
-  background: var(--gradient-blue);
-  color: var(--color-white);
-}
-
-.tabs.silver-blue-text .tabs-list,
-.tabs-container.silver-blue-text .tabs-list {
-  padding: 0;
-  margin-bottom: 0;
+background: var(--gradient-silver);
+opacity: 0.8;
 }
 
 .tabs.silver-blue-text .tabs-tab[aria-selected='true'],
 .tabs-container.silver-blue-text .tabs-tab[aria-selected='true'] {
-  background: linear-gradient(138deg, #999 -15.44%, #EFEFEF 0.15%, #CACACA 18.04%, #EFEFEF 37.09%, #CACACA 58.44%, #999 76.91%, #EFEFEF 87.3%);
-  color: #08133C;
+  color: var(--tabs-text-color);
+  background: var(--gradient-metal-silver);
 }
 
 /* new tab-section styles */

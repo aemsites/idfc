@@ -3,6 +3,64 @@
   --btn-tertiary-bg: var(--gradient-silver);
   --btn-tertiary-border: var(--color-transparent);
   --btn-tertiary-text: var(--text-color);
+  --border-radius: 20px;
+}
+
+body {
+  background: conic-gradient(from 90deg at 100% 28.29%, #999 0deg, #EFEFEF 48.600deg, #CACACA 104.3999deg, #EFEFEF 163.8000deg, #CACACA 230.3999deg, #999 288.0000deg, #EFEFEF 320.3999deg);
+}
+
+.mayura.blue {
+  /* mayura metal card */
+   --gradient-heritage-cc-intro: var(--gradient-indigo);
+   --text-color-hero-heritage-cc: var(--color-blue-800);
+   --benefit-cards-background: var(--gradient-blue);
+   --text-gradient-color: var(--gradient-metal-blue);
+   --tabs-background-color: var(--gradient-silver);
+   --tabs-active-background-color: var(--color-blue-700);
+   --tabs-border-color: var(--color-blue-700);
+   --tabs-active-border-color: var(--color-white);
+   --card-tag-text-color: var(--color-blue-700);
+   --modal-background-dark: var(--gradient-metal-blue);
+
+   .hero-heritage-cc-intro h2 {
+    color: var(--color-gray-300);
+    background: linear-gradient(270deg, #8B837D 50.14%, #7A766D 90.18%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+   }
+
+   .modal dialog.modal-mayura-silver p,
+   .modal dialog.modal-mayura-silver a {
+    color: var(--color-blue-900);
+   }
+}
+
+.mayura.red {
+   /* Ashva metal credit card */
+   --gradient-heritage-cc-intro: linear-gradient(307deg, #40010A 7.52%, #840114 31.28%, #40010A 56.14%);;
+   --text-color-hero-heritage-cc: var(--color-red-800);
+   --benefit-cards-background: var(--gradient-metal-red);
+   --text-gradient-color: var(--gradient-metal-red);
+   --tabs-active-background-color: var(--color-red-800);
+   --tabs-border-color: var(--color-red-800);
+   --tabs-active-border-color: var(--color-red-900);
+   --tabs-text-color: var(--color-red-900);
+   --card-tag-text-color: var(--color-red-900);
+   --modal-background-dark: var(--gradient-metal-red);
+   
+   .hero-heritage-cc-intro h2 {
+    background: linear-gradient(90deg, #BA9FA2 20%, #9E777D 110.8%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+   }
+
+   .modal dialog.modal-mayura-silver p,
+   .modal dialog.modal-mayura-silver a {
+    color: var(--color-red-900);
+   }
 }
 
 /*
@@ -81,26 +139,26 @@
   display: none;
 }
 
-.mayura .cards-container h2,
-.mayura .tabs-container h2,
-.mayura .cards-icon-container h2 {
-    text-align: center;
-    font-style: normal;
-    font-weight: 700;
-    line-height: normal;
-    background: var(--gradient-red);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: rgb(0 0 0 / 0%);
-}
-
 .mayura .columns-container h2 {
   margin: 0;
 }
 
-.mayura .cards-container .dark-scheme h2,
-.mayura .tabs-container .dark-scheme h2 {
-  background: var(--gradient-silver);
+.mayura main .cards-container h2, 
+.mayura main .cards-icon-container h2, 
+.mayura main .tabs-container h2,
+.modal dialog.modal-mayura-silver h2 {
+    text-align: center;
+    font-style: normal; 
+    font-weight: 700;
+    line-height: normal;
+    background: var(--gradient-metal-red);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: rgb(0 0 0 / 0%);
+ }
+
+.mayura .dark-scheme :not(.cc-hero-slider-content) > h2 {
+  background: var(--gradient-metal-silver);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: rgb(0 0 0 / 0%);
@@ -118,6 +176,10 @@
 .mayura .table-container .button-container:first-child {
   text-align: center;
   padding-top: 20px;
+}
+
+.mayura .modal-content .table-container .button-container:first-child {
+  text-align: unset;
 }
 
 .mayura .accordion .accordion-cta.button{

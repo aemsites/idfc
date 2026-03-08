@@ -88,7 +88,7 @@
 
 .hotspot-panel-item p {
   margin: 0;
-  background: var(--primary, linear-gradient(308.18deg, #110140 4.16%, #1E2A8E 44.91%, #010740 88.8%));
+  background: var(--text-gradient-color);
   background-clip: text;
   -webkit-text-fill-color: rgb(0 0 0 / 0%);
   font-size: 16px;

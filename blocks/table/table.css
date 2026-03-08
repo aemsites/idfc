@@ -33,6 +33,16 @@
   z-index: 1;
 }
 
+.table.block#reward-points {
+  border-collapse: separate;
+
+  td {
+    border: 1px solid var(--color-gray-300);
+    padding: var(--spacing-xs);
+    font-size: var(--body-font-size-xs);
+  }
+}
+
 .table.block table th,
 .table.block table td {
   padding: var(--spacing-s);
@@ -54,7 +64,7 @@
 
 /* Fees and Charges Table Specific Styles */
 .table.block#fees-and-charges .table-background-image {
-  border-radius: 20px;
+  border-radius: var(--border-radius);
   overflow: hidden;
 }
 
@@ -75,6 +85,7 @@
   overflow-wrap: break-word;
   color: var(--color-white);
   position: relative;
+  padding: var(--spacing-xs) var(--spacing-s);
 }
 
 .table.block#fees-and-charges table td:nth-child(2) {
@@ -110,60 +121,10 @@
   background-color: var(--color-white);
 }
 
-/* Reward Points Table Specific Styles */
-.table.block#reward-points {
-  margin: 0;
-  padding: 0;
-}
-
-.table.block#reward-points table {
-  border: 1px solid var(--color-white);
-  border-radius: 8px;
-  overflow: hidden;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.table.block#reward-points table td {
-  padding: 10px var(--spacing-xs);
-  border: 1px solid var(--color-white);
-  color: var(--color-white);
-}
-
-.table.block#reward-points table tbody td:first-child {
-  text-align: left;
-  border-left: none;
-}
-
-.table.block#reward-points table tbody td:nth-child(2) {
-  text-align: left;
-  border-right: none;
-}
-
-.table.block#reward-points table tbody tr:first-child td {
-  border-top: none;
-}
-
-.table.block#reward-points table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.table.block#reward-points table td p {
-  margin: 0;
-}
-
-.table.block#reward-points table td p + p {
-  margin-top: 0.15em;
-}
-
 /* Media Queries */
 @media (width >= 600px) {
   .table.block table {
     font-size: var(--body-font-size-s);
-  }
-
-  .table.block#reward-points table td {
-    padding: var(--spacing-xs) 14px;
   }
 }
 
@@ -188,17 +149,5 @@
   .table.block#fees-and-charges table tbody tr:not(:last-child)::after {
     left: 0;
     right: 0;
-  }
-
-  .table.block#reward-points {
-    width: 50%;
-  }
-
-  .table.block#reward-points table {
-    font-size: var(--body-font-size-m);
-  }
-
-  .table.block#reward-points table td {
-    padding: 14px 16px;
   }
 }
