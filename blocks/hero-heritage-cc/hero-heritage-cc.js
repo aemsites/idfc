@@ -412,7 +412,7 @@ function processIntroGradientParagraphs(block, introContent, hasAueResource) {
 
     const normalizedValue = normalizeCssColorValue(text);
     block.dataset.gradientColor = normalizedValue;
-    block.style.setProperty('--hero-heritage-cc-intro-gradient', normalizedValue);
+    block.style.setProperty('--hero-heritage-cc-intro-gradient', normalizedValue); // change to --gradient-heritage-cc-intro?
     if (hasAueResource) {
       p.classList.add('hero-heritage-cc-intro-gradient-preview');
     } else {

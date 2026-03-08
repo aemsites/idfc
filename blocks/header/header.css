@@ -1292,6 +1292,10 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
      border-radius: 12px;
      flex-direction: row;
 
+     &:hover {
+      background: var(--color-gray-200);
+     }
+
      p u {
       font-size: 11px;
       color: var(--btn-color-red);

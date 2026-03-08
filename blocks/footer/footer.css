@@ -495,7 +495,7 @@ footer .footer>div .section>div {
 
   .footer>div>div:nth-child(2)>div>ul>li:nth-child(2)>ul>li:nth-child(2) {
     display: inline-block;
-    border-radius: 25px;
+    border-radius: var(--border-radius);
     background: var(--color-white);
     color: var(--text-red-color);
     text-align: center;

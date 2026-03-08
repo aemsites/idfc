@@ -50,9 +50,13 @@
   display: none;
 }
 
-.accordion details[open] {
+.accordion details[open],
+.light-scheme .dark-scheme .accordion details[open] {
   border-bottom: 1px solid;
-  border-radius: 5px;
+  border-radius: var(--border-radius);
+  background: var(--gradient-pewter);
+  color: var(--color-gray-100);
+  transition: all 0.3s ease-in-out;
 
   a {
     color: var(--color-gray-100);
@@ -63,6 +67,8 @@
 .light-scheme .dark-scheme .accordion details[open] summary {
   font-weight: 700;
   border-bottom: 0;
+  color: var(--color-gray-100);
+  transition: all 0.3s ease-in-out;
 
   > p > strong {
     font-weight: 700;
@@ -118,15 +124,6 @@
 
 .accordion details p {
   margin: 0 0 0.8em;
-}
-
-.accordion details[open],
-.light-scheme .dark-scheme .accordion details[open],
-.accordion details[open] summary,
-.light-scheme .dark-scheme .accordion details[open] summary {
-  background: var(--gradient-pewter);
-  color: var(--color-gray-100);
-  transition: all 0.3s ease-in-out;
 }
 
 .accordion-cta,
