@@ -130,7 +130,6 @@ body.modal-open {
   overflow-x: hidden; /* stylelint-disable-line declaration-block-no-redundant-longhand-properties */
   overscroll-behavior: none;
   width: 100%;
-  height: fit-content;
   padding: 32px var(--spacing-s);
   position: relative;
   z-index: 2; /* Above decoration images */
@@ -589,11 +588,14 @@ body.modal-open {
   .modal .modal-page-background .modal-decoration-top-right {
 	bottom: 0;
 	top: unset;
+  filter: grayscale(1);
+  mix-blend-mode: luminosity;
 	}
 
   .modal .modal-page-background .modal-decoration-bottom-left {
     top: var(--modal-offset-height);
-	
+    filter: grayscale(1);
+    mix-blend-mode: luminosity;
   }
 
   .modal dialog[open]:has(.section[data-id="mayura-card-modal"]) {

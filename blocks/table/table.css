@@ -85,6 +85,7 @@
   overflow-wrap: break-word;
   color: var(--color-white);
   position: relative;
+  padding: var(--spacing-xs) var(--spacing-s);
 }
 
 .table.block#fees-and-charges table td:nth-child(2) {
