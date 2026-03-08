@@ -151,7 +151,7 @@ body {
     font-style: normal; 
     font-weight: 700;
     line-height: normal;
-    background: var(--text-gradient-color);
+    background: var(--gradient-metal-red);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: rgb(0 0 0 / 0%);
