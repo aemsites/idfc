@@ -102,31 +102,13 @@
   backdrop-filter: blur(21px);
 }
 
+.hero-heritage-cc-header-cta a {
+  color: var(--color-pewter);
+}
+
 .hero-heritage-cc-header-cta .button.primary {
   background: var(--text-red-color);
   padding: 14px 40px;
-}
-
-.hero-heritage-cc-header-cta-fees-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--text-color);
-  text-decoration: none;
-  font-size: var(--body-font-size-s);
-  white-space: nowrap;
-  min-height: 16px;
-}
-
-.hero-heritage-cc-header-cta .hero-heritage-cc-header-cta-fees-link {
-  color: rgb(136 128 122);
-  text-decoration: underline;
-  font-size: var(--body-font-size-m);
-  margin-left: 20px;
-  font-weight: 700;
-  line-height: normal;
-  white-space: nowrap;
-  min-height: 24px;
 }
 
 .hero-heritage-cc-header-cta > div {
@@ -136,10 +118,6 @@
   flex-flow: row wrap;
   align-items: center;
   gap: 16px;
-}
-
-.hero-heritage-cc-header-cta-fees-link:hover {
-  text-decoration: underline;
 }
 
 .hero-heritage-cc picture {
