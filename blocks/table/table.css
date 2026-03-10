@@ -63,6 +63,20 @@
 }
 
 /* Fees and Charges Table Specific Styles */
+.section:not(.grid) .table.block#fees-and-charges {
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  filter: contrast(120%) brightness(90%);
+  background: 
+	linear-gradient(173deg, rgb(17 1 64 / 82%), rgb(30 42 142 / 59%)),
+	linear-gradient(189deg, rgb(113 53 113 / 52%) 20%, rgb(139 0 255 / 21%) 25%),
+	url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.19' numOctaves='6' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+
+.table-background-image {
+  mix-blend-mode: color;
+}
+}
+
 .table.block#fees-and-charges .table-background-image {
   border-radius: var(--border-radius);
   overflow: hidden;
@@ -151,3 +165,8 @@
     right: 0;
   }
 }
+  
+  
+  
+  
+  
