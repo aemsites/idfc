@@ -1,5 +1,5 @@
 :root {
-  --modal-offset-height: calc(var(--nav-height) + var(--category-nav-height)); /* When category nav is present, 144px (80px nav + 64px category-nav), otherwise 80px */
+  --modal-offset-height: var(--nav-height);
 }
 
 .modal.block {

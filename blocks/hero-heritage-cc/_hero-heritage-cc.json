@@ -21,32 +21,11 @@
       "id": "hero-heritage-cc",
       "fields": [
         {
-          "component": "text",
-          "valueType": "string",
-          "name": "headerCta_text",
-          "label": "Header CTA Text",
-          "value": ""
-        },
-        {
-          "component": "aem-content",
-          "valueType": "string",
-          "name": "headerCta_link",
-          "label": "Header CTA Link",
-          "multi": false
-        },
-        {
           "component": "richtext",
           "valueType": "string",
           "name": "headerCta_text2",
-          "label": "Header CTA Text 2",
+          "label": "Header CTA Text",
           "value": ""
-        },
-        {
-          "component": "aem-content",
-          "valueType": "string",
-          "name": "headerCta_link2",
-          "label": "Header CTA Link 2",
-          "multi": false
         },
         {
           "component": "richtext",
