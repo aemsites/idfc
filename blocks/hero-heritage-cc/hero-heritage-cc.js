@@ -107,7 +107,7 @@ function decorateHeaderCta(block, row) {
   decorateButtons(row);
 }
 
-/** Apply background image from first picture to section (or UE preview). */
+/** Apply background image from first picture to section (or UE preview). Uses an img for LCP. */
 function applyIntroBackground(block, introContent, pictures) {
   const bgPicture = pictures[0];
   if (!bgPicture) return;
@@ -128,26 +128,36 @@ function applyIntroBackground(block, introContent, pictures) {
     bgUrl = bgUrl.replace('optimize=medium', 'optimize=large');
   }
 
-  if (bgUrl) {
-    const sectionContainer = block.closest('.section');
-    if (sectionContainer) {
-      sectionContainer.style.backgroundImage = `url(${bgUrl})`;
-      sectionContainer.style.backgroundSize = 'cover';
-      sectionContainer.style.backgroundRepeat = 'repeat';
-      sectionContainer.style.backgroundPosition = 'center center';
-      sectionContainer.style.backgroundAttachment = 'fixed';
-      const preloadLink = document.createElement('link');
-      preloadLink.rel = 'preload';
-      preloadLink.as = 'image';
-      preloadLink.href = bgUrl;
-      preloadLink.fetchPriority = 'high';
-      if (webpSource) preloadLink.type = 'image/webp';
-      document.head.appendChild(preloadLink);
-    }
+  const sectionContainer = block.closest('.section');
+  if (!sectionContainer || !bgUrl) {
+    bgPicture.remove();
+    if (bgPictureWrapper) bgPictureWrapper.remove();
+    return;
   }
 
-  bgPicture.remove();
-  if (bgPictureWrapper) bgPictureWrapper.remove();
+  /* Preload LCP image as early as possible: insert at start of head for higher priority */
+  const preloadLink = document.createElement('link');
+  preloadLink.rel = 'preload';
+  preloadLink.as = 'image';
+  preloadLink.href = bgUrl;
+  preloadLink.fetchPriority = 'high';
+  if (webpSource) preloadLink.type = 'image/webp';
+  document.head.insertBefore(preloadLink, document.head.firstChild);
+
+  /* Keep an img in the DOM as the LCP element (better than CSS background for PageSpeed) */
+  const layer = document.createElement('div');
+  layer.className = 'hero-heritage-cc-bg-layer';
+  layer.setAttribute('aria-hidden', 'true');
+  sectionContainer.insertBefore(layer, sectionContainer.firstChild);
+  if (bgPictureWrapper) {
+    layer.appendChild(bgPictureWrapper);
+  } else {
+    layer.appendChild(bgPicture);
+  }
+  if (bgImg) {
+    bgImg.setAttribute('fetchpriority', 'high');
+    bgImg.setAttribute('loading', 'eager');
+  }
 }
 
 /** Apply decoration images from pictures[1] and pictures[2] to section. */

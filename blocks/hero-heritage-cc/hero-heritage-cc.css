@@ -9,6 +9,31 @@
   overflow: hidden;
 }
 
+/* LCP background layer: real img for better load priority than CSS background-image */
+.hero-heritage-cc-bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  max-width: 100vw !important;
+}
+
+.hero-heritage-cc-bg-layer picture,
+.hero-heritage-cc-bg-layer p {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-heritage-cc-bg-layer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
 /* Decoration image - top right */
 .hero-heritage-cc-container::before {
   display: none;
