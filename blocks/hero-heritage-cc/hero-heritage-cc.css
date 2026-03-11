@@ -257,13 +257,13 @@
 .hero-heritage-cc-intro .hero-heritage-cc-intro-logo-english picture {
   width: auto;
   height: auto;
-  min-height: 80px;
+  min-height: 100px;
 }
 
 .hero-heritage-cc-intro .hero-heritage-cc-intro-logo-hindi img,
 .hero-heritage-cc-intro .hero-heritage-cc-intro-logo-english img {
   width: auto;
-  height: auto;
+  min-height: 128px;
 }
 
 /* Banner section - positioned behind intro, centered content */
