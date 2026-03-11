@@ -48,20 +48,12 @@
                 "value": ""
               },
               {
-                "name": "Silver with Blue Text",
+                "name": "Silver with dark text",
                 "value": "silver-blue-text"
               },
               {
-                "name": "Silver with Red Text",
-                "value": "silver-red-text"
-              },
-              {
-                "name": "Blue with White Text",
+                "name": "Dark with white text (default)",
                 "value": "blue-white-text"
-              },
-              {
-                "name": "Red with White Text",
-                "value": "red-white-text"
               }
             ]
           }

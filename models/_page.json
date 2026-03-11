@@ -18,13 +18,13 @@
           "component": "boolean",
           "name": "analytics-disable",
           "label": "Remove analytics",
-          "description": "Toggle on to remove analytics"
+          "description": "(placeholder for future use)"
         },
         {
           "component": "boolean",
           "name": "vwo-disable",
           "label": "Remove VWO",
-          "description": "Toggle on to remove Visual Web Optimizer"
+          "description": "(placeholder for future use)"
         },
         {
           "component": "text",
@@ -77,11 +77,10 @@
           "label": "Canonical URL"
         },
         {
-          "component": "aem-tag",
+          "component": "text",
           "name": "tags",
           "valueType": "string",
-          "label": "Keywords/Tags",
-          "rootPath": "content/cq:tags"
+          "label": "Keywords/Tags comma separated"
         },
         {
           "component": "text",
