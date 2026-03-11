@@ -185,6 +185,16 @@ header {
   body.expect-app-banner header {
     height: calc(var(--get-app-banner-height) + var(--nav-height));
   }
+
+  /* Position fixed nav below the reserved banner space so it doesn’t jump when the banner injects */
+  body.expect-app-banner:not(.app-banner-closed) header .nav-wrapper {
+    top: var(--get-app-banner-height);
+  }
+
+  /* When nav menu is expanded, show it from the very top (over the banner) */
+  body.expect-app-banner:not(.app-banner-closed) header .nav-wrapper:has(nav[aria-expanded="true"]) {
+    top: 0;
+  }
 }
 
 /* When user has closed the app banner, use nav-height only (class set in loadEager or when they click close) */
@@ -649,11 +659,13 @@ main>.section:first-of-type {
 
 /* grnt-app-mob is the mobile app banner */
 &#grnt-app-mob {
+  position: fixed;
   z-index: 4;
   top: 0;
   left: 0;
   padding: var(--spacing-xxs) 0;
   width: 100%;
+  background-color: var(--background-color);
   border-bottom: 1px solid var(--color-gray-200);
 
   .button-container {
