@@ -274,6 +274,7 @@ pre {
 }
 
 main > h1:first-of-type {
+  height: 0;
   display: none;
 }
 
