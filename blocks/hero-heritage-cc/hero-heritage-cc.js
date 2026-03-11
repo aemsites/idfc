@@ -135,14 +135,17 @@ function applyIntroBackground(block, introContent, pictures) {
     return;
   }
 
-  /* Preload LCP image as early as possible: insert at start of head for higher priority */
-  const preloadLink = document.createElement('link');
-  preloadLink.rel = 'preload';
-  preloadLink.as = 'image';
-  preloadLink.href = bgUrl;
-  preloadLink.fetchPriority = 'high';
-  if (webpSource) preloadLink.type = 'image/webp';
-  document.head.insertBefore(preloadLink, document.head.firstChild);
+  /* Preload only if not already added by scripts.js (early LCP preload) */
+  const existingPreload = document.querySelector(`head > link[rel="preload"][as="image"][href="${bgUrl}"]`);
+  if (!existingPreload) {
+    const preloadLink = document.createElement('link');
+    preloadLink.rel = 'preload';
+    preloadLink.as = 'image';
+    preloadLink.href = bgUrl;
+    preloadLink.fetchPriority = 'high';
+    if (webpSource) preloadLink.type = 'image/webp';
+    document.head.insertBefore(preloadLink, document.head.firstChild);
+  }
 
   /* Keep an img in the DOM as the LCP element (better than CSS background for PageSpeed) */
   const layer = document.createElement('div');
