@@ -11,3 +11,4 @@ helix-importer-ui
 .vscode
 .cursor
 Trace*.json
+*.gz
