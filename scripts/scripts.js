@@ -1617,7 +1617,6 @@ function injectBreadcrumbsInto(breadcrumbs, main) {
  * Load and inject breadcrumbs into the first section of main
  * @param {Element} main The main element
  */
-/*
 async function loadBreadcrumbs(main) {
   if (getMetadata('breadcrumbs')?.toLowerCase() !== 'true') return;
 
@@ -1628,7 +1627,6 @@ async function loadBreadcrumbs(main) {
     // Silently fail - breadcrumbs are optional enhancement
   }
 }
-  */
 
 /** End Breadcrumbs */
 
@@ -1757,7 +1755,7 @@ async function loadLazy(doc) {
   await loadGetAppBannerFragment();
 
   // Load breadcrumbs after header is available and insert as first element in main
- // await loadBreadcrumbs(main);
+  await loadBreadcrumbs(main);
 
   // Load category-nav fragment from page metadata BEFORE decorating main
   // This ensures the fragment sections are present when decorateMain runs

@@ -365,7 +365,7 @@ export async function createModal(contentNodes, options = {}) {
   }
 
   // Store decoration image for later application to page background
-  const { decorationImage } = options;
+  // const { decorationImage } = options;
 
   const dialogContent = document.createElement('div');
   dialogContent.classList.add('modal-content');
@@ -449,25 +449,22 @@ export async function createModal(contentNodes, options = {}) {
 
     // Add decoration images as DOM elements (top-right and bottom-left)
     // These go INSIDE the dialog to be in the top layer, but use fixed positioning
-    if (decorationImage) {
-      const decorWrapper = document.createElement('div');
-      decorWrapper.classList.add('modal-decoration');
-
-      const decorTopRight = document.createElement('img');
-      decorTopRight.src = decorationImage;
-      decorTopRight.alt = '';
-      decorTopRight.classList.add('modal-decoration-top-right');
-
-      const decorBottomLeft = document.createElement('img');
-      decorBottomLeft.src = decorationImage;
-      decorBottomLeft.alt = '';
-      decorBottomLeft.classList.add('modal-decoration-bottom-left');
-
-      decorWrapper.append(decorTopRight, decorBottomLeft);
-
-      // Store decoration wrapper to append inside dialog later
-      pageBackground.decorationWrapper = decorWrapper;
-    }
+    // if (decorationImage) {
+    //   const decorWrapper = document.createElement('div');
+    //   decorWrapper.classList.add('modal-decoration');
+    /* eslint-disable-next-line */
+    //   const decorTopRight = document.createElement('img');
+    //   decorTopRight.src = decorationImage;
+    //   decorTopRight.alt = '';
+    //   decorTopRight.classList.add('modal-decoration-top-right');
+    //   const decorBottomLeft = document.createElement('img');
+    //   decorBottomLeft.src = decorationImage;
+    //   decorBottomLeft.alt = '';
+    //   decorBottomLeft.classList.add('modal-decoration-bottom-left');
+    //   decorWrapper.append(decorTopRight, decorBottomLeft);
+    //   // Store decoration wrapper to append inside dialog later
+    //   pageBackground.decorationWrapper = decorWrapper;
+    // }
   }
 
   dialog.addEventListener('close', () => {

@@ -327,9 +327,12 @@ main ul {
   padding-left: 1em;
 }
 
-b,
-strong {
+b, strong, strong sup, strong sub {
   font-weight: 700;
+}
+
+sub, sup {
+  line-height: 1.1;
 }
 
 .button-container {
