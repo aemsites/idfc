@@ -365,7 +365,7 @@ export async function createModal(contentNodes, options = {}) {
   }
 
   // Store decoration image for later application to page background
-  // const { decorationImage } = options;
+  const { decorationImage } = options;
 
   const dialogContent = document.createElement('div');
   dialogContent.classList.add('modal-content');
@@ -449,22 +449,25 @@ export async function createModal(contentNodes, options = {}) {
 
     // Add decoration images as DOM elements (top-right and bottom-left)
     // These go INSIDE the dialog to be in the top layer, but use fixed positioning
-    // if (decorationImage) {
-    //   const decorWrapper = document.createElement('div');
-    //   decorWrapper.classList.add('modal-decoration');
-    /* eslint-disable-next-line */
-    //   const decorTopRight = document.createElement('img');
-    //   decorTopRight.src = decorationImage;
-    //   decorTopRight.alt = '';
-    //   decorTopRight.classList.add('modal-decoration-top-right');
-    //   const decorBottomLeft = document.createElement('img');
-    //   decorBottomLeft.src = decorationImage;
-    //   decorBottomLeft.alt = '';
-    //   decorBottomLeft.classList.add('modal-decoration-bottom-left');
-    //   decorWrapper.append(decorTopRight, decorBottomLeft);
-    //   // Store decoration wrapper to append inside dialog later
-    //   pageBackground.decorationWrapper = decorWrapper;
-    // }
+    if (decorationImage) {
+      const decorWrapper = document.createElement('div');
+      decorWrapper.classList.add('modal-decoration');
+
+      const decorTopRight = document.createElement('img');
+      decorTopRight.src = decorationImage;
+      decorTopRight.alt = '';
+      decorTopRight.classList.add('modal-decoration-top-right');
+
+      const decorBottomLeft = document.createElement('img');
+      decorBottomLeft.src = decorationImage;
+      decorBottomLeft.alt = '';
+      decorBottomLeft.classList.add('modal-decoration-bottom-left');
+
+      decorWrapper.append(decorTopRight, decorBottomLeft);
+
+      // Store decoration wrapper to append inside dialog later
+      pageBackground.decorationWrapper = decorWrapper;
+    }
   }
 
   dialog.addEventListener('close', () => {
@@ -510,7 +513,6 @@ export async function openModal(fragmentUrl, options = {}) {
     modalTheme: 'modal-mayura-blue',
     textureImage: '/credit-card/metal-credit-card/media_15a8f844f87bf985cbf4471803bc87278ff6daa36.png',
     pageBackgroundImage: '/credit-card/metal-credit-card/media_1aa917044ef2aa165adb54e6ecc718b1cd83e80a4.png',
-    decorationImage: '/credit-card/metal-credit-card/media_13f68aa7e19d4532ae6d8a784fb5c4e140fb55d3e.svg',
   } : options;
   const fragment = await loadFragment(path);
   const { showModal } = await createModal(fragment.childNodes, modalOptions);
