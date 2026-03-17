@@ -32,9 +32,18 @@ body {
    }
 
    .modal dialog.modal-mayura-silver p,
-   .modal dialog.modal-mayura-silver a {
+   .modal dialog.modal-mayura-silver a,
+   .modal dialog.modal-mayura-silver h2 {
     color: var(--color-blue-900);
+    background: var(--gradient-blue);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: rgb(0 0 0 / 0%);
    }
+
+   .modal dialog.modal-mayura-silver li{
+    color: var(--color-blue-900);
+}
 }
 
 .mayura.red {
@@ -58,10 +67,23 @@ body {
    }
 
    .modal dialog.modal-mayura-silver p,
-   .modal dialog.modal-mayura-silver a {
+   .modal dialog.modal-mayura-silver a,
+   .modal dialog.modal-mayura-silver h2 {
     color: var(--color-red-900);
+    background: var(--gradient-metal-red);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: rgb(0 0 0 / 0%);
    }
+
+   .modal dialog.modal-mayura-silver li{
+    color: var(--color-red-900);
 }
+  }
+
+  .mayura .modal dialog h2 {
+    font-weight: 700;
+  }
 
 /*
  * Scrollbar with custom handle (mayura template only).
@@ -145,8 +167,7 @@ body {
 
 .mayura main .cards-container h2, 
 .mayura main .cards-icon-container h2, 
-.mayura main .tabs-container h2,
-.modal dialog.modal-mayura-silver h2 {
+.mayura main .tabs-container h2 {
     text-align: center;
     font-style: normal; 
     font-weight: 700;

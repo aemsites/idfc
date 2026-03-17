@@ -115,7 +115,7 @@ body.modal-open {
   width: fit-content;
   max-width: 1060px;
   height: max-content;
-  max-height: 80%;
+  max-height: 75%;
   margin: 0 15px;
   padding: 0;
   border: none;
@@ -590,12 +590,14 @@ body.modal-open {
 	top: unset;
   filter: grayscale(1);
   mix-blend-mode: luminosity;
+  height: 120px;
 	}
 
   .modal .modal-page-background .modal-decoration-bottom-left {
     top: var(--modal-offset-height);
     filter: grayscale(1);
     mix-blend-mode: luminosity;
+    height: 120px;
   }
 
   .modal dialog[open]:has(.section[data-id="mayura-card-modal"]) {
