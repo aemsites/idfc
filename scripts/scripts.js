@@ -280,14 +280,18 @@ function decorateButtonGroups(element) {
 }
 
 /**
- * Preload hero-heritage-cc LCP background image as soon as the DOM is ready,
- * before the block JS loads, to reduce resource load delay (e.g. in Chrome Performance).
- * Runs synchronously after decorateMain so the image request starts before loadSection.
+ * Preload hero-heritage-cc LCP background image before block JS and before template work,
+ * matching URL/row logic in blocks/hero-heritage-cc/hero-heritage-cc.js (intro = 2nd DIV row).
+ * Also sets fetchpriority/loading on the intro img so the request competes earlier than loadBlock.
  */
 function preloadHeroHeritageCcLcpImage(main) {
-  const block = main?.querySelector('.hero-heritage-cc');
+  if (!main || document.querySelector('main[data-aue-resource]')) {
+    return;
+  }
+  const block = main.querySelector('.hero-heritage-cc');
   if (!block) return;
-  const introRow = block.children[1];
+  const rows = [...block.children].filter((c) => c.tagName === 'DIV');
+  const introRow = rows[1];
   if (!introRow) return;
   const introContent = introRow.querySelector(':scope > div');
   const firstPicture = introContent?.querySelector('picture');
@@ -297,13 +301,22 @@ function preloadHeroHeritageCcLcpImage(main) {
   let url = webpSource?.srcset?.split(',')[0]?.trim()?.split(' ')[0] || img?.src;
   if (!url) return;
   if (url.includes('optimize=medium')) url = url.replace('optimize=medium', 'optimize=large');
-  const link = document.createElement('link');
-  link.rel = 'preload';
-  link.as = 'image';
-  link.href = url;
-  link.fetchPriority = 'high';
-  if (webpSource) link.type = 'image/webp';
-  document.head.insertBefore(link, document.head.firstChild);
+
+  const existingPreload = document.querySelector(`head > link[rel="preload"][as="image"][href="${url}"]`);
+  if (!existingPreload) {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = url;
+    link.fetchPriority = 'high';
+    if (webpSource) link.type = 'image/webp';
+    document.head.insertBefore(link, document.head.firstChild);
+  }
+
+  if (img) {
+    img.setAttribute('fetchpriority', 'high');
+    img.setAttribute('loading', 'eager');
+  }
 }
 
 function prepareHeroForCLS(main) {
@@ -1168,11 +1181,16 @@ async function loadEager(doc) {
     }
   }
 
+  const main = doc.querySelector('main');
+  /* Start LCP image fetch before template CSS/JS; decorateMain runs a second pass below. */
+  if (main) {
+    preloadHeroHeritageCcLcpImage(main);
+  }
+
   const templateName = getMetadata('template');
   if (templateName) {
     await loadTemplate(doc, templateName);
   }
-  const main = doc.querySelector('main');
   if (main) {
     decorateMain(main);
     preloadHeroHeritageCcLcpImage(main);
