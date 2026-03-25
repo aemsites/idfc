@@ -269,7 +269,6 @@
 /* Banner section - positioned behind intro, centered content */
 .hero-heritage-cc-banner {
   position: absolute;
-  top: 0;
   left: 0;
   width: 100%;
   height: calc(100% - var(--spacing-xxl));

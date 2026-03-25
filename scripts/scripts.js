@@ -300,6 +300,7 @@ function preloadHeroHeritageCcLcpImage(main) {
   const img = firstPicture.querySelector('img');
   let url = webpSource?.srcset?.split(',')[0]?.trim()?.split(' ')[0] || img?.src;
   if (!url) return;
+  /* Match hero-heritage-cc.js: preload href must match the upgraded LCP URL. */
   if (url.includes('optimize=medium')) url = url.replace('optimize=medium', 'optimize=large');
 
   const existingPreload = document.querySelector(`head > link[rel="preload"][as="image"][href="${url}"]`);
@@ -308,7 +309,9 @@ function preloadHeroHeritageCcLcpImage(main) {
     link.rel = 'preload';
     link.as = 'image';
     link.href = url;
+    /* Property + attribute: Lighthouse reads the DOM attribute on the preload hint. */
     link.fetchPriority = 'high';
+    link.setAttribute('fetchpriority', 'high');
     if (webpSource) link.type = 'image/webp';
     document.head.insertBefore(link, document.head.firstChild);
   }
@@ -1182,17 +1185,13 @@ async function loadEager(doc) {
   }
 
   const main = doc.querySelector('main');
-  /* Start LCP image fetch before template CSS/JS; decorateMain runs a second pass below. */
-  if (main) {
-    preloadHeroHeritageCcLcpImage(main);
-  }
-
   const templateName = getMetadata('template');
   if (templateName) {
     await loadTemplate(doc, templateName);
   }
   if (main) {
     decorateMain(main);
+    /* Second pass if hero was missing at module init. Idempotent via preload dedupe. */
     preloadHeroHeritageCcLcpImage(main);
     const h1Title = getMetadata('h1-title');
     if (h1Title) {
@@ -1829,5 +1828,8 @@ async function loadPage() {
   document.body.classList.add('page-loaded');
   loadDelayed();
 }
+
+/* Earliest point in this module: before loadEager (fonts, template, decorateMain). */
+preloadHeroHeritageCcLcpImage(document.querySelector('main'));
 
 loadPage();

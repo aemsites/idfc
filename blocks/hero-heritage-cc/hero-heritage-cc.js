@@ -124,6 +124,7 @@ function applyIntroBackground(block, introContent, pictures) {
 
   const webpSource = bgPicture.querySelector('source[type="image/webp"]');
   let bgUrl = webpSource?.srcset?.split(',')[0]?.trim()?.split(' ')[0] || bgImg?.src;
+
   if (bgUrl?.includes('optimize=medium')) {
     bgUrl = bgUrl.replace('optimize=medium', 'optimize=large');
   }
