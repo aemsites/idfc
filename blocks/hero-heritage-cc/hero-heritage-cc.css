@@ -515,6 +515,11 @@ color: var(--color-pewter);
   .hero-heritage-cc p {
     font-size: var(--body-font-size-m);
   }
+  
+  .hero-heritage-cc-intro .hero-heritage-cc-intro-logo-hindi,
+  .hero-heritage-cc-intro .hero-heritage-cc-intro-logo-english {
+  min-height: 133px;
+  }
 }
 
 /* Desktop: 900px and up */
