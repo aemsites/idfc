@@ -68,41 +68,6 @@ function normalizeCssColorValue(value) {
   return trimmed;
 }
 
-/**
- * HTML width/height on imgs prevent "unsized image" CLS; CSS min-height alone is not enough for DevTools.
- */
-function ensureMissingImgDimensions(img, defaultW, defaultH) {
-  if (!img) return;
-  if (img.hasAttribute('width') && img.hasAttribute('height')) return;
-  let w = parseInt(img.getAttribute('width'), 10);
-  let h = parseInt(img.getAttribute('height'), 10);
-  const hasW = Number.isFinite(w) && w > 0;
-  const hasH = Number.isFinite(h) && h > 0;
-  if (hasW && hasH) return;
-  if (hasW && !hasH) {
-    img.setAttribute('height', String(Math.round((w * defaultH) / defaultW)));
-    return;
-  }
-  if (hasH && !hasW) {
-    img.setAttribute('width', String(Math.round((h * defaultW) / defaultH)));
-    return;
-  }
-  img.setAttribute('width', String(defaultW));
-  img.setAttribute('height', String(defaultH));
-}
-
-/** Set explicit dimensions on hero images that often ship without width/height in markup. */
-function ensureHeroImagesHaveDimensions(block) {
-  block
-    .querySelectorAll('.hero-heritage-cc-intro-logo-hindi img, .hero-heritage-cc-intro-logo-english img')
-    .forEach((img) => ensureMissingImgDimensions(img, 400, 252));
-  block.querySelectorAll('.hero-heritage-cc-banner-top-logo img').forEach((img) => {
-    ensureMissingImgDimensions(img, 135, 84);
-  });
-  const bannerImg = block.querySelector('.hero-heritage-cc-banner-image img');
-  ensureMissingImgDimensions(bannerImg, 600, 391);
-}
-
 /** Collapse hero and show first hotspot block (when "The Concept" is clicked). */
 function showConceptHotspotBlock() {
   const hero = document.querySelector('.hero-heritage-cc');
@@ -405,5 +370,4 @@ export default function decorate(block) {
   if (rows[0]) decorateHeaderCta(block, rows[0]);
   if (rows[1]) decorateIntro(block, rows[1], hasAueResource);
   if (rows[2]) decorateBanner(block, rows[2]);
-  ensureHeroImagesHaveDimensions(block);
 }

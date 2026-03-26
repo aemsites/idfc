@@ -646,35 +646,6 @@ function setupConnectorLine(container, currentBlockId = null) {
  * @param {HTMLElement[]} rows - Block row elements
  * @returns {{ imageElement: HTMLPictureElement|null, blockId: string, hotspotText: string }}
  */
-/**
- * Set width/height on img when missing so Chrome does not treat it as "unsized" (CLS).
- * Uses 16:10 to match .hotspot-image-wrapper { aspect-ratio: 16 / 10 }.
- * Preserves or completes attrs when only one of width/height is authored.
- */
-function ensureHotspotMainImageDimensions(picture) {
-  const img = picture.querySelector('img');
-  if (!img) return;
-  const aw = 16;
-  const ah = 10;
-  const defW = 600;
-  const defH = 375;
-  let w = parseInt(img.getAttribute('width'), 10);
-  let h = parseInt(img.getAttribute('height'), 10);
-  const hasW = Number.isFinite(w) && w > 0;
-  const hasH = Number.isFinite(h) && h > 0;
-  if (hasW && hasH) return;
-  if (hasW && !hasH) {
-    img.setAttribute('height', String(Math.round((w * ah) / aw)));
-    return;
-  }
-  if (hasH && !hasW) {
-    img.setAttribute('width', String(Math.round((h * aw) / ah)));
-    return;
-  }
-  img.setAttribute('width', String(defW));
-  img.setAttribute('height', String(defH));
-}
-
 function parseBlockMetadata(rows) {
   let imageElement = null;
   let blockId = '';
@@ -775,9 +746,7 @@ export default async function decorate(block) {
 
   // Add the image
   if (imageElement) {
-    const picClone = imageElement.cloneNode(true);
-    ensureHotspotMainImageDimensions(picClone);
-    imageWrapper.appendChild(picClone);
+    imageWrapper.appendChild(imageElement.cloneNode(true));
   }
 
   imageSection.appendChild(imageWrapper);
