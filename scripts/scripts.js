@@ -16,6 +16,7 @@ import {
   getMetadata,
   DOMPURIFY,
   // readBlockConfig,
+  pickPicturePreloadUrl,
   toCamelCase,
 } from './aem.js';
 
@@ -296,13 +297,10 @@ function preloadHeroHeritageCcLcpImage(main) {
   const introContent = introRow.querySelector(':scope > div');
   const firstPicture = introContent?.querySelector('picture');
   if (!firstPicture) return;
-  const webpSource = firstPicture.querySelector('source[type="image/webp"]');
   const img = firstPicture.querySelector('img');
-  let url = webpSource?.srcset?.split(',')[0]?.trim()?.split(' ')[0] || img?.src;
+  const { url: urlRaw, source: matchedWebpSource } = pickPicturePreloadUrl(firstPicture, 'image/webp');
+  const url = urlRaw || img?.src || '';
   if (!url) return;
-  /* Match hero-heritage-cc.js: preload href must match the upgraded LCP URL. */
-  if (url.includes('optimize=medium')) url = url.replace('optimize=medium', 'optimize=large');
-
   const existingPreload = document.querySelector(`head > link[rel="preload"][as="image"][href="${url}"]`);
   if (!existingPreload) {
     const link = document.createElement('link');
@@ -312,7 +310,7 @@ function preloadHeroHeritageCcLcpImage(main) {
     /* Property + attribute: Lighthouse reads the DOM attribute on the preload hint. */
     link.fetchPriority = 'high';
     link.setAttribute('fetchpriority', 'high');
-    if (webpSource) link.type = 'image/webp';
+    if (matchedWebpSource || url.includes('format=webply')) link.type = 'image/webp';
     document.head.insertBefore(link, document.head.firstChild);
   }
 

@@ -357,6 +357,34 @@ function createOptimizedPicture(
 }
 
 /**
+ * First matching <source> URL for type + media (document order), else <img> src.
+ * Matches browser <picture> behavior so preloads use the same URL as the chosen art direction
+ * (e.g. width=750 on mobile vs width=2000 for (min-width: 600px)).
+ * @param {HTMLPictureElement} picture
+ * @param {string} [typePrefix] e.g. image/webp
+ * @returns {{ url: string, source: Element|null, img: HTMLImageElement|null }}
+ */
+function pickPicturePreloadUrl(picture, typePrefix = 'image/webp') {
+  const needle = typePrefix.toLowerCase();
+  const img = picture?.querySelector('img') ?? null;
+  if (!picture) {
+    return { url: '', source: null, img };
+  }
+  for (const source of picture.querySelectorAll('source')) {
+    const t = (source.getAttribute('type') || '').toLowerCase();
+    if (!t.startsWith(needle)) continue;
+    const media = source.getAttribute('media');
+    if (media && !window.matchMedia(media).matches) continue;
+    const srcset = source.getAttribute('srcset');
+    if (!srcset) continue;
+    const url = srcset.split(',')[0].trim().split(/\s+/)[0];
+    if (url) return { url, source, img };
+  }
+  const fallback = img?.getAttribute('src') || img?.src || '';
+  return { url: fallback, source: null, img };
+}
+
+/**
  * Set template (page structure) and theme (page styles).
  */
 function decorateTemplateAndTheme() {
@@ -787,6 +815,7 @@ export {
   loadScript,
   loadSection,
   loadSections,
+  pickPicturePreloadUrl,
   readBlockConfig,
   sampleRUM,
   setup,

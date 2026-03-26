@@ -1,4 +1,4 @@
-import { decorateButtons } from '../../scripts/aem.js';
+import { decorateButtons, pickPicturePreloadUrl } from '../../scripts/aem.js';
 import { loadFragment } from '../../scripts/scripts.js';
 
 /* eslint-disable secure-coding/no-hardcoded-credentials -- CSS classes/style props only */
@@ -107,6 +107,18 @@ function decorateHeaderCta(block, row) {
   decorateButtons(row);
 }
 
+/** Insert hero intro image preload if missing (href must match viewport-selected picture). */
+function appendHeroIntroImagePreload(href, matchedWebpSource) {
+  if (document.querySelector(`head > link[rel="preload"][as="image"][href="${href}"]`)) return;
+  const preloadLink = document.createElement('link');
+  preloadLink.rel = 'preload';
+  preloadLink.as = 'image';
+  preloadLink.href = href;
+  preloadLink.fetchPriority = 'high';
+  if (matchedWebpSource || href.includes('format=webply')) preloadLink.type = 'image/webp';
+  document.head.insertBefore(preloadLink, document.head.firstChild);
+}
+
 /** Apply background image from first picture to section (or UE preview). Uses an img for LCP. */
 function applyIntroBackground(block, introContent, pictures) {
   const bgPicture = pictures[0];
@@ -122,12 +134,8 @@ function applyIntroBackground(block, introContent, pictures) {
     return;
   }
 
-  const webpSource = bgPicture.querySelector('source[type="image/webp"]');
-  let bgUrl = webpSource?.srcset?.split(',')[0]?.trim()?.split(' ')[0] || bgImg?.src;
-
-  if (bgUrl?.includes('optimize=medium')) {
-    bgUrl = bgUrl.replace('optimize=medium', 'optimize=large');
-  }
+  const { url: bgUrlRaw, source: matchedWebpSource } = pickPicturePreloadUrl(bgPicture, 'image/webp');
+  const bgUrl = bgUrlRaw || bgImg?.src || '';
 
   const sectionContainer = block.closest('.section');
   if (!sectionContainer || !bgUrl) {
@@ -136,17 +144,7 @@ function applyIntroBackground(block, introContent, pictures) {
     return;
   }
 
-  /* Preload only if not already added by scripts.js (early LCP preload) */
-  const existingPreload = document.querySelector(`head > link[rel="preload"][as="image"][href="${bgUrl}"]`);
-  if (!existingPreload) {
-    const preloadLink = document.createElement('link');
-    preloadLink.rel = 'preload';
-    preloadLink.as = 'image';
-    preloadLink.href = bgUrl;
-    preloadLink.fetchPriority = 'high';
-    if (webpSource) preloadLink.type = 'image/webp';
-    document.head.insertBefore(preloadLink, document.head.firstChild);
-  }
+  appendHeroIntroImagePreload(bgUrl, matchedWebpSource);
 
   /* Keep an img in the DOM as the LCP element (better than CSS background for PageSpeed) */
   const layer = document.createElement('div');
