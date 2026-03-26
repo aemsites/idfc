@@ -1,10 +1,6 @@
 /* Section container - fixed height to prevent CLS */
 .hero-heritage-cc-container {
   position: relative;
-  min-height: calc(100vh - var(--spacing-xl)); /* fallback for older browsers */
-  min-height: calc(100dvh - var(--spacing-xl));
-  height: calc(100vh - var(--spacing-xl));
-  height: calc(100dvh - var(--spacing-xl));
   contain: strict;
   overflow: hidden;
 }
@@ -492,6 +488,7 @@ color: var(--color-pewter);
 .hero-heritage-cc p.hero-heritage-cc-banner-image {
   margin: 10px 0 0;
   transition: opacity 0.35s ease-out, transform 0.35s ease-out;
+  min-height: 226px;
 }
 
 .hero-heritage-cc .hero-heritage-cc-banner {
@@ -536,12 +533,28 @@ color: var(--color-pewter);
     display: flex;
   }
 
+  /* Logo images at native size with reserved space to prevent CLS */
+.hero-heritage-cc-intro .hero-heritage-cc-intro-logo-hindi picture,
+.hero-heritage-cc-intro .hero-heritage-cc-intro-logo-english picture {
+  min-height: 252px;
+}
+
+.hero-heritage-cc-intro .hero-heritage-cc-intro-logo-hindi img,
+.hero-heritage-cc-intro .hero-heritage-cc-intro-logo-english img {
+  width: auto;
+  min-height: 252px;
+}
+
   .hero-heritage-cc .hero-heritage-cc-banner-cta-group {
     margin-top: var(--spacing-l);
   }
 
   .hero-heritage-cc-header-cta .hero-heritage-cc-header-cta-fees-link {
     font-size: var(--body-font-size-s);
+  }
+
+  .hero-heritage-cc p.hero-heritage-cc-banner-image {
+    min-height: 291px;
   }
 
   .hero-heritage-cc-banner-cta .button {
@@ -558,10 +571,8 @@ color: var(--color-pewter);
   }
 
   .hero-heritage-cc-container {
-    min-height: calc(100vh - 120px);
-    min-height: calc(100dvh - 120px);
-    height: calc(100vh - 120px);
-    height: calc(100dvh - 120px);
+    height: 100%;
+    width: 100%;
   }
 
 /* Decoration image - top right */

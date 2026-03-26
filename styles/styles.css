@@ -531,6 +531,15 @@ main>.section>div {
   padding: 0 var(--grid-gutter-width);
 }
 
+main > .section.hero-heritage-cc-container {
+  width: 100%;
+  height: 100vh;
+
+  > div.hero-heritage-cc-wrapper {
+  max-width: 100%;
+  }
+}
+
 main>.section:first-of-type {
   margin-top: 0;
 }
