@@ -8,7 +8,6 @@
 /* Prevent CLS: hide until fully decorated, reserve space */
 .hotspot:not([data-block-status="loaded"]) {
   visibility: hidden;
-  min-height: 400px;
 }
 
 /* Two-column layout */
@@ -17,7 +16,6 @@
   align-items: stretch;
   justify-self: start;
   margin: 0 auto;
-  min-height: 400px;
   position: relative;
   transition: opacity 0.1s ease;
 }
@@ -227,38 +225,9 @@
   opacity: 1;
 }
 
-/* Responsive adjustments */
-@media (width <= 1024px) {
-  .hotspot:not([data-block-status="loaded"]) {
-    min-height: 350px;
-  }
-
-  .hotspot-container {
-    min-height: 350px;
-  }
-
-  .hotspot-tooltip-panel {
-    flex: 0 0 35%;
-    padding: 30px;
-  }
-
-  .hotspot-tooltip-content {
-    font-size: 16px;
-  }
-
-  .hotspot-image-section {
-    flex: 0 0 65%;
-  }
-}
-
 @media (width <= 768px) {
-  .hotspot:not([data-block-status="loaded"]) {
-    min-height: 350px;
-  }
-
   .hotspot-container {
     flex-direction: column;
-    min-height: 350px;
   }
 
   .hotspot-tooltip-panel {
@@ -282,6 +251,22 @@
 
   .hotspot-image-wrapper {
     max-width: 100%;
+  }
+}
+
+/* Responsive adjustments */
+@media (width <= 1024px) {
+  .hotspot-tooltip-panel {
+    flex: 0 0 35%;
+    padding: 30px;
+  }
+
+  .hotspot-tooltip-content {
+    font-size: 16px;
+  }
+
+  .hotspot-image-section {
+    flex: 0 0 65%;
   }
 }
 

@@ -16,6 +16,7 @@ import {
   getMetadata,
   DOMPURIFY,
   // readBlockConfig,
+  pickPicturePreloadUrl,
   toCamelCase,
 } from './aem.js';
 
@@ -280,30 +281,43 @@ function decorateButtonGroups(element) {
 }
 
 /**
- * Preload hero-heritage-cc LCP background image as soon as the DOM is ready,
- * before the block JS loads, to reduce resource load delay (e.g. in Chrome Performance).
- * Runs synchronously after decorateMain so the image request starts before loadSection.
+ * Preload hero-heritage-cc LCP background image before block JS and before template work,
+ * matching URL/row logic in blocks/hero-heritage-cc/hero-heritage-cc.js (intro = 2nd DIV row).
+ * Also sets fetchpriority/loading on the intro img so the request competes earlier than loadBlock.
  */
 function preloadHeroHeritageCcLcpImage(main) {
-  const block = main?.querySelector('.hero-heritage-cc');
+  if (!main || document.querySelector('main[data-aue-resource]')) {
+    return;
+  }
+  const block = main.querySelector('.hero-heritage-cc');
   if (!block) return;
-  const introRow = block.children[1];
+  const rows = [...block.children].filter((c) => c.tagName === 'DIV');
+  const introRow = rows[1];
   if (!introRow) return;
   const introContent = introRow.querySelector(':scope > div');
   const firstPicture = introContent?.querySelector('picture');
   if (!firstPicture) return;
-  const webpSource = firstPicture.querySelector('source[type="image/webp"]');
   const img = firstPicture.querySelector('img');
-  let url = webpSource?.srcset?.split(',')[0]?.trim()?.split(' ')[0] || img?.src;
+  const { url: urlRaw, source: matchedWebpSource } = pickPicturePreloadUrl(firstPicture, 'image/webp');
+  const url = urlRaw || img?.src || '';
   if (!url) return;
-  if (url.includes('optimize=medium')) url = url.replace('optimize=medium', 'optimize=large');
-  const link = document.createElement('link');
-  link.rel = 'preload';
-  link.as = 'image';
-  link.href = url;
-  link.fetchPriority = 'high';
-  if (webpSource) link.type = 'image/webp';
-  document.head.insertBefore(link, document.head.firstChild);
+  const existingPreload = document.querySelector(`head > link[rel="preload"][as="image"][href="${url}"]`);
+  if (!existingPreload) {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = url;
+    /* Property + attribute: Lighthouse reads the DOM attribute on the preload hint. */
+    link.fetchPriority = 'high';
+    link.setAttribute('fetchpriority', 'high');
+    if (matchedWebpSource || url.includes('format=webply')) link.type = 'image/webp';
+    document.head.insertBefore(link, document.head.firstChild);
+  }
+
+  if (img) {
+    img.setAttribute('fetchpriority', 'high');
+    img.setAttribute('loading', 'eager');
+  }
 }
 
 function prepareHeroForCLS(main) {
@@ -1168,13 +1182,14 @@ async function loadEager(doc) {
     }
   }
 
+  const main = doc.querySelector('main');
   const templateName = getMetadata('template');
   if (templateName) {
     await loadTemplate(doc, templateName);
   }
-  const main = doc.querySelector('main');
   if (main) {
     decorateMain(main);
+    /* Second pass if hero was missing at module init. Idempotent via preload dedupe. */
     preloadHeroHeritageCcLcpImage(main);
     const h1Title = getMetadata('h1-title');
     if (h1Title) {
@@ -1811,5 +1826,8 @@ async function loadPage() {
   document.body.classList.add('page-loaded');
   loadDelayed();
 }
+
+/* Earliest point in this module: before loadEager (fonts, template, decorateMain). */
+preloadHeroHeritageCcLcpImage(document.querySelector('main'));
 
 loadPage();

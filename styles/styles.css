@@ -162,8 +162,15 @@
 
 html {
  /* -webkit-font-smoothing: antialiased; */
+  scroll-behavior: smooth;
   text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgb(0 0 0 / 0%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
@@ -529,6 +536,15 @@ main>.section>div {
   max-width: var(--grid-container-width);
   margin: 0 auto;
   padding: 0 var(--grid-gutter-width);
+}
+
+main > .section.hero-heritage-cc-container {
+  width: 100%;
+  height: 100vh;
+
+  > div.hero-heritage-cc-wrapper {
+  max-width: 100%;
+  }
 }
 
 main>.section:first-of-type {

@@ -1,7 +1,6 @@
 footer {
   font-size: var(--body-font-size-xs);
   box-sizing: border-box;
-  -webkit-font-smoothing: antialiased;
 }
 
 .footer a {
@@ -188,7 +187,6 @@ footer .footer>div .section>div {
 .footer>div>div .accordion-wrapper .accordion .accordion-item-body ul li {
   margin-top: var(--spacing-xs);
   list-style: none;
-  line-height: 1;
 }
 
 .footer>div>div .accordion-wrapper .accordion>div>div:nth-child(2) ul li a,
