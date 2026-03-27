@@ -162,8 +162,15 @@
 
 html {
  /* -webkit-font-smoothing: antialiased; */
+  scroll-behavior: smooth;
   text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgb(0 0 0 / 0%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
