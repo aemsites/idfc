@@ -356,6 +356,9 @@ function createOptimizedPicture(
   return picture;
 }
 
+/** Cap <source> scans (legitimate pictures use few sources; limits loop work for CWE-400). */
+const MAX_PICTURE_SOURCES_PRELOAD = 64;
+
 /**
  * First matching <source> URL for type + media (document order), else <img> src.
  * Matches browser <picture> behavior so preloads use the same URL as the chosen art direction
@@ -370,15 +373,21 @@ function pickPicturePreloadUrl(picture, typePrefix = 'image/webp') {
   if (!picture) {
     return { url: '', source: null, img };
   }
-  for (const source of picture.querySelectorAll('source')) {
+  const sources = picture.querySelectorAll('source');
+  const n = Math.min(sources.length, MAX_PICTURE_SOURCES_PRELOAD);
+  for (let i = 0; i < n; i += 1) {
+    const source = sources[i];
     const t = (source.getAttribute('type') || '').toLowerCase();
-    if (!t.startsWith(needle)) continue;
-    const media = source.getAttribute('media');
-    if (media && !window.matchMedia(media).matches) continue;
-    const srcset = source.getAttribute('srcset');
-    if (!srcset) continue;
-    const url = srcset.split(',')[0].trim().split(/\s+/)[0];
-    if (url) return { url, source, img };
+    if (t.startsWith(needle)) {
+      const media = source.getAttribute('media');
+      if (!media || window.matchMedia(media).matches) {
+        const srcset = source.getAttribute('srcset');
+        if (srcset) {
+          const url = srcset.split(',')[0].trim().split(/\s+/)[0];
+          if (url) return { url, source, img };
+        }
+      }
+    }
   }
   const fallback = img?.getAttribute('src') || img?.src || '';
   return { url: fallback, source: null, img };
