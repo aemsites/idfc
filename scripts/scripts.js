@@ -1169,6 +1169,12 @@ async function loadEager(doc) {
   decorateTemplateAndTheme();
   loadThemeSpreadSheetConfig();
 
+  /* Swiper: defer from head; load in eager phase so carousel blocks have CSS + global. */
+  const swiperBundlePromise = Promise.all([
+    loadCSS('/scripts/swiperjs/swiper-bundle.min.css'),
+    loadScript('/scripts/swiperjs/swiper-bundle.min.js'),
+  ]);
+
   const getAppBanner = sessionStorage.getItem('getAppBanner');
   const header = doc.querySelector('header');
   if (header && !MEDIA_QUERIES.desktop.matches) {
@@ -1213,6 +1219,7 @@ async function loadEager(doc) {
     }
 
     document.body.classList.add('appear');
+    await swiperBundlePromise;
     await loadSection(main.querySelector('.section'), waitForFirstImage);
   }
 
