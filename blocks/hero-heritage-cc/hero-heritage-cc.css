@@ -1,8 +1,13 @@
 /* Section container - fixed height to prevent CLS */
-.hero-heritage-cc-container {
+
+.section.hero-heritage-cc-container {
   position: relative;
   contain: strict;
   overflow: hidden;
+}
+
+div.hero-heritage-cc-wrapper {
+  padding-top: 0 !important;
 }
 
 /* LCP background layer: real img for better load priority than CSS background-image */

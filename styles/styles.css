@@ -302,6 +302,18 @@ main > h1:first-of-type {
   display: none;
 }
 
+/* this needs to be here for CLS prevention */
+main > .section.hero-heritage-cc-container {
+  width: 100%;
+  height: calc(100vh - var(--spacing-xl));
+
+  > div.hero-heritage-cc-wrapper {
+  max-width: 100%;
+  padding-top: 24px;
+
+  }
+}
+
 main>div {
   margin: 40px 16px;
 }
@@ -526,6 +538,7 @@ main:not([data-aue-resource]) .cards:not([data-block-status="loaded"]) {
 }
 
 /* sections */
+
 main>.section {
   margin: 0;
   position: relative;
@@ -536,15 +549,6 @@ main>.section>div {
   max-width: var(--grid-container-width);
   margin: 0 auto;
   padding: 0 var(--grid-gutter-width);
-}
-
-main > .section.hero-heritage-cc-container {
-  width: 100%;
-  height: 100vh;
-
-  > div.hero-heritage-cc-wrapper {
-  max-width: 100%;
-  }
 }
 
 main>.section:first-of-type {
