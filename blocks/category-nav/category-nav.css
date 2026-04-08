@@ -552,7 +552,8 @@ header nav .nav-sections .nav-fragment-section-content .category-nav-explore-lin
 .nav-fragment-content .category-nav-card .category-nav-card-image {
   margin: 10px 0 0;
   display: inline-block;
-  width: 23%;
+  width: min-content;
+  max-width: 23%;
   height: auto;
 }
 
