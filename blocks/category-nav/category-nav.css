@@ -407,7 +407,6 @@ body.is-framework-page .section#bell-outline {
   gap: 6px;
   flex-wrap: wrap;
   position: relative;
-  z-index: 2;
   align-items: flex-start;
   justify-content: flex-start;
   top: -12px;
@@ -446,7 +445,7 @@ body.is-framework-page .section#bell-outline {
 .category-nav-card .category-nav-tag.tg-clr-pale-yellow { background-color: #fffbe6; }
 .category-nav-card .category-nav-tag.tg-clr-pale-cyan { background-color: #ebffff; }
 .category-nav-card .category-nav-tag.tg-clr-pale-lavender { background-color: #ffeffd; }
-.category-nav-card .category-nav-tag.tg-clr-pale-rose { background-color: #ffcece; }
+.category-nav-card .category-nav-tag.tg-clr-pale-rose { background-color: #fae1e1; }
 .category-nav-card .category-nav-tag.tg-clr-pale-pink { background-color: #ffe1ec; }
 .category-nav-card .category-nav-tag.tg-clr-pale-purple { background-color: #f2e5ff; }
 .category-nav-card .category-nav-tag.tg-clr-pale-mint { background-color: #eefff2; }
@@ -463,7 +462,6 @@ body.is-framework-page .section#bell-outline {
   font-weight: 700;
   line-height: 1.4;
   position: relative;
-  z-index: 1;
 }
 
 /* Icon Right Arrow */
@@ -544,7 +542,7 @@ header nav .nav-sections .nav-fragment-section-content .category-nav-explore-lin
 .nav-fragment-content .category-nav-card .category-nav-tags {
   position: relative;
   display: flex;
-  width: fit-content;
+  width: 75%;
   margin-left: 11px;
   top: unset;
   left: unset;
