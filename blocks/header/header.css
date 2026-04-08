@@ -57,7 +57,7 @@ header nav .nav-sections .default-content-wrapper>ul>li {
 header nav .nav-sections .default-content-wrapper>ul>li p {
   display: block;
   min-width: 70px;
-  min-height: 52px;
+  min-height: 46px;
   padding: 16px 40px 16px 20px;
   margin: 0;
   font-size: var(--body-font-size-l);
@@ -2490,8 +2490,7 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     box-shadow: none;
     border-bottom: 1px solid var(--color-gray-100);
     z-index: 2;
-
-    /* height: 518px; */
+    height: 566px;
     max-height: 100%;
     overflow-y: auto;
   }

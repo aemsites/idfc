@@ -542,7 +542,7 @@ header nav .nav-sections .nav-fragment-section-content .category-nav-explore-lin
 .nav-fragment-content .category-nav-card .category-nav-tags {
   position: relative;
   display: flex;
-  width: 75%;
+  width: 71%;
   margin-left: 11px;
   top: unset;
   left: unset;
@@ -552,7 +552,7 @@ header nav .nav-sections .nav-fragment-section-content .category-nav-explore-lin
 .nav-fragment-content .category-nav-card .category-nav-card-image {
   margin: 10px 0 0;
   display: inline-block;
-  width: fit-content;
+  width: 23%;
   height: auto;
 }
 
