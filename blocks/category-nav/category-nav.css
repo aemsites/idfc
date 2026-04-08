@@ -424,12 +424,15 @@ body.is-framework-page .section#bell-outline {
 .category-nav-card .category-nav-tag {
   padding: 4px 10px;
   border-radius: 8px;
-  font-size: 11px;
-  line-height: 1.5;
+  font-size: 9px;
+  line-height: 11px;
+  font-weight: 600;
   letter-spacing: 0;
   white-space: nowrap;
-  box-shadow: 0 2px 4px rgb(0 0 0 / 12%);
+  border: 1px solid rgb(0 0 0 / 12%);
   display: inline-block;
+  text-transform: uppercase;
+  color: var(--text-color);
 }
 
 /* Remove the red arrow pseudo-element from tags (override nav-pane.css) */
@@ -531,7 +534,7 @@ header nav .nav-sections .nav-fragment-section-content .category-nav-explore-lin
 }
 
 .nav-fragment-content .category-nav-card-link > .category-nav-card-title{
-  color: var(--text-red-color);
+  color: var(--color-red-800);
   font-weight: 600;
   font-size: 13px;
   line-height: 17px;

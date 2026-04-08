@@ -72,6 +72,18 @@ header nav .nav-sections .default-content-wrapper>ul>li p a {
   text-decoration: none;
 }
 
+header nav .new-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #9B1E26 0%, #56070C 98.08%);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: 700;
+  margin-left: 8px;
+}
+
 /* Accordion chevron icon */
 header nav .nav-sections .default-content-wrapper>ul>li::after {
   content: '';
@@ -1671,6 +1683,11 @@ header nav .nav-sections .default-content-wrapper>ul>li .nav-h4-section-content 
   cursor: pointer;
 }
 
+header nav li.nav-link-only,
+header nav .category-nav-eyebrow-title {
+  display: none !important;
+}
+
 /* Mobile: Search input in expanded nav */
 header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
   flex: 1;
@@ -2027,7 +2044,7 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     background: var(--color-white-200);
     box-shadow: none;
     border-radius: 0;
-    height: 520px; /* Fixed default height */
+    height: 565px;
     max-height: calc(100vh - 150px); /* Constrain on smaller viewports */
     overflow: visible; /* Parent doesn't scroll, only children */
   }
@@ -2044,7 +2061,8 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     padding-right: 236px; /* Reserve space for discover card: 220px width + 16px gap */
     background: var(--color-white-200);
     border-radius: 8px;
-    height: 520px; /* Fixed default height - matches parent */
+
+    /* height: 520px; Fixed default height - matches parent */
     max-height: calc(100vh - 150px); /* Constrain on smaller viewports */
     overflow-y: auto; /* Scroll the entire content area */
     display: grid;
@@ -2263,6 +2281,25 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     display: none;
   }
 
+  header nav li.nav-link-only {
+  padding: var(--spacing-xs) 20px;
+        transition: color 0.2s ease;
+        border-left: 3px solid transparent;
+        border-bottom: none !important;
+        display: block !important;
+
+        a.category-nav-explore-link {
+          font-size: var(--body-font-size-xs);
+          font-weight: 600;
+          color: var(--color-red-600);
+          text-decoration: none;
+        }
+          }
+
+  header nav .category-nav-eyebrow-title {
+    display: block !important;
+  }
+
   /* =================================================================
      DESKTOP: COLUMN 2 CONTENT STYLING
      ================================================================= */
@@ -2276,7 +2313,6 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     height: auto;
     border-bottom: none;
     font-size: var(--body-font-size-xs);
-    font-weight: 400;
     line-height: 1.3;
     display: block;
     white-space: normal;
