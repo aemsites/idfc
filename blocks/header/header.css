@@ -2201,7 +2201,7 @@ header nav[aria-expanded='true'] .nav-tools #search-box .search-input {
     padding-top: var(--spacing-xs);
   }
 
-  header nav .nav-sections .nav-discover-section .cards-card-image {
+  header nav .nav-sections .nav-discover-section .cards.blog-posts .blog-post-card .cards-card-image {
     width: 100%;
     overflow: hidden;
     max-height: 110px;
