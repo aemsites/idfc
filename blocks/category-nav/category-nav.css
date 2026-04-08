@@ -407,7 +407,6 @@ body.is-framework-page .section#bell-outline {
   gap: 6px;
   flex-wrap: wrap;
   position: relative;
-  z-index: 2;
   align-items: flex-start;
   justify-content: flex-start;
   top: -12px;
@@ -424,12 +423,15 @@ body.is-framework-page .section#bell-outline {
 .category-nav-card .category-nav-tag {
   padding: 4px 10px;
   border-radius: 8px;
-  font-size: 11px;
-  line-height: 1.5;
+  font-size: 9px;
+  line-height: 11px;
+  font-weight: 600;
   letter-spacing: 0;
   white-space: nowrap;
-  box-shadow: 0 2px 4px rgb(0 0 0 / 12%);
+  border: 1px solid rgb(0 0 0 / 12%);
   display: inline-block;
+  text-transform: uppercase;
+  color: var(--text-color);
 }
 
 /* Remove the red arrow pseudo-element from tags (override nav-pane.css) */
@@ -443,7 +445,7 @@ body.is-framework-page .section#bell-outline {
 .category-nav-card .category-nav-tag.tg-clr-pale-yellow { background-color: #fffbe6; }
 .category-nav-card .category-nav-tag.tg-clr-pale-cyan { background-color: #ebffff; }
 .category-nav-card .category-nav-tag.tg-clr-pale-lavender { background-color: #ffeffd; }
-.category-nav-card .category-nav-tag.tg-clr-pale-rose { background-color: #ffcece; }
+.category-nav-card .category-nav-tag.tg-clr-pale-rose { background-color: #fae1e1; }
 .category-nav-card .category-nav-tag.tg-clr-pale-pink { background-color: #ffe1ec; }
 .category-nav-card .category-nav-tag.tg-clr-pale-purple { background-color: #f2e5ff; }
 .category-nav-card .category-nav-tag.tg-clr-pale-mint { background-color: #eefff2; }
@@ -460,7 +462,6 @@ body.is-framework-page .section#bell-outline {
   font-weight: 700;
   line-height: 1.4;
   position: relative;
-  z-index: 1;
 }
 
 /* Icon Right Arrow */
@@ -531,7 +532,7 @@ header nav .nav-sections .nav-fragment-section-content .category-nav-explore-lin
 }
 
 .nav-fragment-content .category-nav-card-link > .category-nav-card-title{
-  color: var(--text-red-color);
+  color: var(--color-red-800);
   font-weight: 600;
   font-size: 13px;
   line-height: 17px;
@@ -541,7 +542,7 @@ header nav .nav-sections .nav-fragment-section-content .category-nav-explore-lin
 .nav-fragment-content .category-nav-card .category-nav-tags {
   position: relative;
   display: flex;
-  width: fit-content;
+  width: 71%;
   margin-left: 11px;
   top: unset;
   left: unset;
@@ -551,7 +552,7 @@ header nav .nav-sections .nav-fragment-section-content .category-nav-explore-lin
 .nav-fragment-content .category-nav-card .category-nav-card-image {
   margin: 10px 0 0;
   display: inline-block;
-  width: fit-content;
+  width: 23%;
   height: auto;
 }
 

@@ -1291,6 +1291,30 @@ export default async function decorate(block) {
   }
 
   /**
+   * Wrap literal "NEW" in nav fragment section titles so it can be styled (e.g. badge).
+   * @param {Element} ul Root ul.nav-fragment-content
+   */
+  function wrapNavFragmentNewBadgeInTitles(ul) {
+    ul.querySelectorAll(
+      ':scope > li.nav-fragment-section > p:first-child',
+    ).forEach((p) => {
+      const text = p.textContent;
+      if (!text.includes('NEW') || p.querySelector('span.new-tag')) return;
+      const parts = text.split('NEW');
+      p.textContent = '';
+      parts.forEach((part, i) => {
+        p.append(document.createTextNode(part));
+        if (i < parts.length - 1) {
+          const badge = document.createElement('span');
+          badge.className = 'new-tag';
+          badge.textContent = 'NEW';
+          p.append(badge);
+        }
+      });
+    });
+  }
+
+  /**
    * Load fragment content and build structure based on viewport.
    * Both Desktop and Mobile: use nested accordion structure.
    */
@@ -1312,12 +1336,24 @@ export default async function decorate(block) {
         return false;
       }
 
+      if (fragmentPath === '/framework/ccnav1') {
+        const allCardsLi = document.createElement('li');
+        allCardsLi.classList.add('nav-link-only');
+        const allCardsLink = document.createElement('a');
+        allCardsLink.href = '/credit-card';
+        allCardsLink.className = 'category-nav-explore-link';
+        allCardsLink.textContent = 'All Credit Cards';
+        allCardsLi.appendChild(allCardsLink);
+        ul.prepend(allCardsLi);
+      }
+
       navSection.appendChild(ul);
       navSection.setAttribute('data-fragment-loaded', 'true');
       navSection.removeAttribute('data-fragment-loading');
       navSection.classList.add('nav-drop');
       decorateCategoryNavBlocks(ul);
       await decorateFragmentBlocks(ul);
+      wrapNavFragmentNewBadgeInTitles(ul);
       if (isMobile) setupMobileAccordionBehavior(ul);
       else setupDesktopAccordionBehavior(ul);
       return true;
@@ -1356,8 +1392,8 @@ export default async function decorate(block) {
         toggleAllNavSections(navSections);
         navSection.setAttribute('aria-expanded', 'true');
 
-        // Auto-expand first section in the dropdown
-        const firstSection = navSection.querySelector('.nav-fragment-section:first-child');
+        // First accordion row (skip leading all-cards li)
+        const firstSection = navSection.querySelector('.nav-fragment-content > .nav-fragment-section');
         if (firstSection) {
           firstSection.setAttribute('aria-expanded', 'true');
         }
@@ -1375,8 +1411,8 @@ export default async function decorate(block) {
       toggleAllNavSections(navSections);
       navSection.setAttribute('aria-expanded', 'true');
 
-      // Auto-expand first section in the dropdown
-      const firstSection = navSection.querySelector('.nav-fragment-section:first-child');
+      // First accordion row (skip leading all-cards li)
+      const firstSection = navSection.querySelector('.nav-fragment-content > .nav-fragment-section');
       if (firstSection) {
         firstSection.setAttribute('aria-expanded', 'true');
       }
