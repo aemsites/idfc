@@ -1,3 +1,9 @@
+const WORD_LIMIT = 34;
+
+function splitWords(text) {
+  return text.trim().split(/\s+/).filter(Boolean);
+}
+
 export default function decorate(block) {
   block.id = 'overview';
   const heading = block.querySelector('h2');
@@ -7,8 +13,53 @@ export default function decorate(block) {
   if (heading) heading.classList.add('overview-title');
   if (paragraphs[0]) paragraphs[0].classList.add('overview-para');
 
-  // If there's more than one paragraph, create hidden container and button
-  if (paragraphs.length > 1) {
+  // Single paragraph: truncate to first WORD_LIMIT words with inline Read more / Read less
+  if (paragraphs.length === 1 && paragraphs[0]) {
+    const p = paragraphs[0];
+    const words = splitWords(p.textContent);
+    if (words.length > WORD_LIMIT) {
+      const fullText = words.join(' ');
+      const truncatedText = words.slice(0, WORD_LIMIT).join(' ');
+      p.textContent = '';
+
+      const textSpan = document.createElement('span');
+      textSpan.className = 'overview-paraText';
+
+      const ellipsisSpan = document.createElement('span');
+      ellipsisSpan.className = 'overview-ellipsis';
+      ellipsisSpan.textContent = '... ';
+
+      const readMoreBtn = document.createElement('span');
+      readMoreBtn.className = 'overview-readMore';
+      readMoreBtn.setAttribute('role', 'button');
+      readMoreBtn.tabIndex = 0;
+      readMoreBtn.textContent = 'Read more';
+
+      let expanded = false;
+      const sync = () => {
+        textSpan.textContent = expanded ? fullText : truncatedText;
+        ellipsisSpan.hidden = expanded;
+        readMoreBtn.textContent = expanded ? 'Read less' : 'Read more';
+        p.classList.toggle('overview-para--expanded', expanded);
+      };
+
+      const toggle = () => {
+        expanded = !expanded;
+        sync();
+      };
+
+      readMoreBtn.addEventListener('click', toggle);
+      readMoreBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle();
+        }
+      });
+
+      p.append(textSpan, ellipsisSpan, readMoreBtn);
+      sync();
+    }
+  } else if (paragraphs.length > 1) {
     // Create the hidden container
     const hiddenWrapper = document.createElement('div');
     hiddenWrapper.classList.add('overview-hiddenPara');

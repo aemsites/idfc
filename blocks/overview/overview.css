@@ -4,35 +4,29 @@
 }
 
 .overview .overview-title {
-  color: var(--text-color);
-  font-size: 21px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: 30px;
-  letter-spacing: -0.6px;
   margin-bottom: var(--spacing-xs);
 }
 
 .overview .overview-para,
 .overview .overview-hiddenPara {
-  color: var(--text-color);
-  font-size: var(--body-font-size-s);
-  font-weight: 400;
-  line-height: 24px;
-  letter-spacing: -0.5px;
-}
-
-.overview .overview-hiddenPara {
-  margin-top: 1rem;
+  font-size: var(--body-font-size-m);
+  line-height: 1.4;
 }
 
 .overview .overview-readMore {
-  margin-top: 1rem;
-  font-size: var(--body-font-size-s);
-  font-weight: 600;
-  color: #54565b;
+  font-size: var(--body-font-size-m);
+  color: var(--text-red-color);
+  font-weight: 500;
   cursor: pointer;
-  background-color: transparent !important;
-  padding: 0;
-  width: max-content;
+}
+
+/* Inline read more inside single truncated paragraph */
+.overview .overview-para .overview-readMore {
+  display: inline;
+  margin-left: 0;
+  user-select: none;
+}
+
+.overview .overview-para--expanded .overview-readMore {
+  margin-left: 0.25em;
 }
