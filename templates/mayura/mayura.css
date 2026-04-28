@@ -167,7 +167,8 @@ body {
 
 .mayura main .cards-container h2, 
 .mayura main .cards-icon-container h2, 
-.mayura main .tabs-container h2 {
+.mayura main .tabs-container h2,
+.mayura main .overview-container h2 {
     text-align: center;
     font-style: normal; 
     font-weight: 700;
