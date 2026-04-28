@@ -1,8 +1,4 @@
-const WORD_LIMIT = 34;
-
-function splitWords(text) {
-  return text.trim().split(/\s+/).filter(Boolean);
-}
+const CHARACTER_LIMIT = 249;
 
 export default function decorate(block) {
   block.id = 'overview';
@@ -13,13 +9,12 @@ export default function decorate(block) {
   if (heading) heading.classList.add('overview-title');
   if (paragraphs[0]) paragraphs[0].classList.add('overview-para');
 
-  // Single paragraph: truncate to first WORD_LIMIT words with inline Read more / Read less
+  // Single paragraph: truncate after CHARACTER_LIMIT chars with inline Read more / Read less
   if (paragraphs.length === 1 && paragraphs[0]) {
     const p = paragraphs[0];
-    const words = splitWords(p.textContent);
-    if (words.length > WORD_LIMIT) {
-      const fullText = words.join(' ');
-      const truncatedText = words.slice(0, WORD_LIMIT).join(' ');
+    const fullText = p.textContent.trim();
+    if (fullText.length > CHARACTER_LIMIT) {
+      const truncatedText = fullText.slice(0, CHARACTER_LIMIT);
       p.textContent = '';
 
       const textSpan = document.createElement('span');
