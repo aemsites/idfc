@@ -1,7 +1,7 @@
 import {
   buildBlock, decorateBlock, loadBlock, loadCSS,
 } from '../../scripts/aem.js';
-import { loadFragment, DOMPURIFY } from '../../scripts/scripts.js';
+import { loadFragment, DOMPURIFY, decorateButtons } from '../../scripts/scripts.js';
 
 /*
   This is not a traditional block, so there is no decorate function.
@@ -417,6 +417,7 @@ export async function createModal(contentNodes, options = {}) {
   const block = buildBlock('modal', '');
   document.querySelector('main').append(block);
   decorateBlock(block);
+  decorateButtons(block);
   await loadBlock(block);
 
   // close on click outside the dialog

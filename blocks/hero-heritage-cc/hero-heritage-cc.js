@@ -1,5 +1,5 @@
-import { decorateButtons, pickPicturePreloadUrl } from '../../scripts/aem.js';
-import { loadFragment } from '../../scripts/scripts.js';
+import { pickPicturePreloadUrl } from '../../scripts/aem.js';
+import { decorateButtons, loadFragment } from '../../scripts/scripts.js';
 
 /* eslint-disable secure-coding/no-hardcoded-credentials -- CSS classes/style props only */
 

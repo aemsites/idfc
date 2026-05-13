@@ -1,7 +1,6 @@
 import {
   decorateBlock,
   decorateBlocks,
-  decorateButtons,
   decorateIcons,
   loadBlock,
   loadSections,
@@ -13,6 +12,7 @@ import { decorateRichtext } from './editor-support-rte.js';
 import {
   decorateSections,
   decorateMain,
+  decorateButtons,
   loadFragment,
   moveAllAttributes,
 } from './scripts.js';
