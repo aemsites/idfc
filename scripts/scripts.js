@@ -3,7 +3,6 @@ import {
   loadFooter,
   buildBlock,
   decorateBlock,
-  decorateButtons,
   decorateIcons,
   decorateBlocks,
   decorateTemplateAndTheme,
@@ -21,6 +20,72 @@ import {
 } from './aem.js';
 
 export { DOMPURIFY };
+
+/**
+ * Decorates paragraphs containing a single link as buttons.
+ * @param {Element} element container element
+ */
+
+/* eslint-disable sonarjs/cognitive-complexity */
+export function decorateButtons(element) {
+  element.querySelectorAll('a').forEach((a) => {
+    a.title = a.title || a.textContent;
+    const shouldSkip = a.href === a.textContent && a.textContent.trim().length > 0
+      && !a.closest('.button-container') && !a.classList.contains('button');
+    if (!shouldSkip) {
+      const up = a.parentElement;
+      const twoup = a.parentElement.parentElement;
+      const threeup = a.parentElement.parentElement.parentElement;
+      const child = a.querySelector(':scope > *:first-child');
+      if (!a.querySelector('img')) {
+        if (up.childNodes.length === 1 && (up.tagName === 'P' || up.tagName === 'DIV')) {
+          a.className = 'button'; // default
+          up.classList.add('button-container');
+        }
+        if (
+          up.childNodes.length === 1
+          && up.tagName === 'STRONG'
+          && twoup.childNodes.length === 1
+          && twoup.tagName === 'P'
+        ) {
+          a.className = 'button primary';
+          twoup.classList.add('button-container');
+        }
+        if (
+          up.childNodes.length === 1
+          && up.tagName === 'EM'
+          && twoup.childNodes.length === 1
+          && twoup.tagName === 'P'
+        ) {
+          a.className = 'button secondary';
+          twoup.classList.add('button-container');
+        }
+        if (
+          up.childNodes.length === 1
+          && up.tagName === 'STRONG'
+          && twoup.childNodes.length === 1
+          && (twoup.tagName === 'EM' || child?.tagName === 'EM')
+          && threeup.childNodes.length === 1
+          && threeup.tagName === 'P'
+        ) {
+          a.className = 'button tertiary';
+          threeup.classList.add('button-container');
+        }
+        if (
+          up.childNodes.length === 1
+          && up.tagName === 'EM'
+          && twoup.childNodes.length === 1
+          && twoup.tagName === 'STRONG'
+          && threeup.childNodes.length === 1
+          && threeup.tagName === 'P'
+        ) {
+          a.className = 'button tertiary';
+          threeup.classList.add('button-container');
+        }
+      }
+    }
+  });
+}
 
 // Max collection size before iteration to prevent DoS from excessive loops (CWE-400)
 const MAX_ITERATION_LIMIT = 500;
@@ -473,6 +538,7 @@ export function buildEmbedBlocks(main) {
       const embedBlock = buildBlock('embed', a.cloneNode(true));
       a.replaceWith(embedBlock);
       decorateBlock(embedBlock);
+      decorateButtons(embedBlock);
     }
   });
 }
@@ -1025,6 +1091,7 @@ export function buildMultiSection(main) {
     appendMultiSectionBlock(section, items, blockClass, true);
     // Decorate blocks inside nested sections so they get .block and are loaded by loadSection
     decorateBlocks(section);
+    section.querySelectorAll('div.block').forEach((block) => decorateButtons(block));
   });
 }
 
@@ -1073,6 +1140,7 @@ export function decorateMain(main) {
   buildAutoBlocks(main);
   initEntranceAnimationObserver(main);
   decorateBlocks(main);
+  main.querySelectorAll('div.block').forEach((block) => decorateButtons(block));
   decorateButtonGroups(main);
   buildEmbedBlocks(main);
   decorateLinkedPictures(main);
@@ -1764,7 +1832,9 @@ async function loadLazy(doc) {
   const main = doc.querySelector('main');
 
   // Load header first so nav-wrapper is available for category navbar
-  await loadHeader(doc.querySelector('header'));
+  const headerEl = doc.querySelector('header');
+  await loadHeader(headerEl);
+  if (headerEl) decorateButtons(headerEl);
 
   // Load get app banner fragment and append to header
   await loadGetAppBannerFragment();
@@ -1788,7 +1858,9 @@ async function loadLazy(doc) {
   const element = hash ? doc.getElementById(hash.substring(1)) : false;
   if (hash && element) element.scrollIntoView();
 
-  loadFooter(doc.querySelector('footer'));
+  const footerEl = doc.querySelector('footer');
+  loadFooter(footerEl);
+  if (footerEl) decorateButtons(footerEl);
 
   // Rewrite relative links to prod origin (avoid ww2 links)
   doc.querySelectorAll('a[href]').forEach((a) => {

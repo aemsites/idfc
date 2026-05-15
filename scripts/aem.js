@@ -463,70 +463,6 @@ function wrapTextNodes(block) {
 }
 
 /**
- * Decorates paragraphs containing a single link as buttons.
- * @param {Element} element container element
- */
-function decorateButtons(element) {
-  element.querySelectorAll('a').forEach((a) => {
-    a.title = a.title || a.textContent;
-    const shouldSkip = a.href === a.textContent && a.textContent.trim().length > 0
-      && !a.closest('.button-container') && !a.classList.contains('button');
-    if (!shouldSkip) {
-      const up = a.parentElement;
-      const twoup = a.parentElement.parentElement;
-      const threeup = a.parentElement.parentElement.parentElement;
-      const child = a.querySelector(':scope > *:first-child');
-      if (!a.querySelector('img')) {
-        if (up.childNodes.length === 1 && (up.tagName === 'P' || up.tagName === 'DIV')) {
-          a.className = 'button'; // default
-          up.classList.add('button-container');
-        }
-        if (
-          up.childNodes.length === 1
-          && up.tagName === 'STRONG'
-          && twoup.childNodes.length === 1
-          && twoup.tagName === 'P'
-        ) {
-          a.className = 'button primary';
-          twoup.classList.add('button-container');
-        }
-        if (
-          up.childNodes.length === 1
-          && up.tagName === 'EM'
-          && twoup.childNodes.length === 1
-          && twoup.tagName === 'P'
-        ) {
-          a.className = 'button secondary';
-          twoup.classList.add('button-container');
-        }
-        if (
-          up.childNodes.length === 1
-          && up.tagName === 'STRONG'
-          && twoup.childNodes.length === 1
-          && (twoup.tagName === 'EM' || child?.tagName === 'EM')
-          && threeup.childNodes.length === 1
-          && threeup.tagName === 'P'
-        ) {
-          a.className = 'button tertiary';
-          threeup.classList.add('button-container');
-        }
-        if (
-          up.childNodes.length === 1
-          && up.tagName === 'EM'
-          && twoup.childNodes.length === 1
-          && twoup.tagName === 'STRONG'
-          && threeup.childNodes.length === 1
-          && threeup.tagName === 'P'
-        ) {
-          a.className = 'button tertiary';
-          threeup.classList.add('button-container');
-        }
-      }
-    }
-  });
-}
-
-/**
  * Add <img> for icon, prefixed with codeBasePath and optional prefix.
  * @param {Element} [span] span element with icon classes
  * @param {string} [prefix] prefix to be added to icon src
@@ -705,8 +641,6 @@ function decorateBlock(block) {
     blockWrapper.classList.add(`${shortBlockName}-wrapper`);
     const section = block.closest('.section');
     if (section) section.classList.add(`${shortBlockName}-container`);
-    // eslint-disable-next-line no-use-before-define
-    decorateButtons(block);
   }
 }
 
@@ -812,7 +746,6 @@ export {
   createOptimizedPicture,
   decorateBlock,
   decorateBlocks,
-  decorateButtons,
   decorateIcons,
   decorateTemplateAndTheme,
   fetchPlaceholders,
