@@ -25,6 +25,8 @@ export { DOMPURIFY };
  * Decorates paragraphs containing a single link as buttons.
  * @param {Element} element container element
  */
+
+/* eslint-disable sonarjs/cognitive-complexity */
 export function decorateButtons(element) {
   element.querySelectorAll('a').forEach((a) => {
     a.title = a.title || a.textContent;
